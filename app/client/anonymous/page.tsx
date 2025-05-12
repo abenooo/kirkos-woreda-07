@@ -6,26 +6,27 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form" // Added FormDescription
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { AlertTriangle, CheckCircle2, Shield } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Shield, Send } from "lucide-react" // Added Send
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 // Form schema for anonymous complaint
 const anonymousFormSchema = z.object({
   complaintType: z.string().min(1, { message: "Please select a complaint type" }),
-  description: z.string().min(10, { message: "Description must be at least 10 characters" }),
-  location: z.string().min(1, { message: "Please provide the location" }),
-  date: z.string().min(1, { message: "Please provide the date" }),
-  verificationCode: z.string().min(4, { message: "Please provide a verification code" }),
+  description: z.string().min(20, { message: "Description must be at least 20 characters" }), // Increased min length
+  location: z.string().min(3, { message: "Please provide a more specific location" }), // Increased min length
+  date: z.string().min(1, { message: "Please provide the date of the incident" }), // More specific message
+  verificationCode: z.string().min(4, { message: "Verification code must be at least 4 characters" }).max(10, {message: "Verification code must be at most 10 characters"}),
 })
 
 export default function AnonymousComplaintPage() {
   const [submitted, setSubmitted] = useState(false)
+  const [submissionRef, setSubmissionRef] = useState<string>("")
 
-  // Anonymous complaint form
+
   const form = useForm<z.infer<typeof anonymousFormSchema>>({
     resolver: zodResolver(anonymousFormSchema),
     defaultValues: {
@@ -37,124 +38,117 @@ export default function AnonymousComplaintPage() {
     },
   })
 
-  // Handle anonymous complaint submission
   function onSubmit(values: z.infer<typeof anonymousFormSchema>) {
-    console.log(values)
+    console.log("Anonymous Complaint Submitted:", values)
+    const refNumber = `ANO-${Math.floor(1000 + Math.random() * 9000)}-${values.verificationCode.slice(0,2).toUpperCase()}`;
+    setSubmissionRef(refNumber);
     setSubmitted(true)
-    // In a real app, you would send this data to your backend
     setTimeout(() => {
-      setSubmitted(false)
-      form.reset()
-    }, 3000)
+      // In a real app, you might want to keep the user on the success page or redirect them.
+      // For this example, we allow submitting another.
+      // setSubmitted(false); 
+      // form.reset(); 
+    }, 30000) // Longer timeout for success message
   }
+  
+  const primaryButtonClasses = "bg-sky-600 hover:bg-sky-700 text-white rounded-md shadow-sm hover:shadow-lg transition-all duration-300 text-base px-6 py-3 font-semibold";
+  const inputClasses = "bg-white border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/50 rounded-md shadow-sm placeholder:text-slate-400 text-slate-800";
+  const labelClasses = "text-slate-700 font-medium text-sm";
+
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="bg-green-50 rounded-full p-4 mb-4">
-          <CheckCircle2 className="h-16 w-16 text-green-500" />
-        </div>
-        <h2 className="text-2xl font-bold mb-2">Thank You!</h2>
-        <p className="text-gray-600 mb-6 text-center">
-          Your anonymous complaint has been submitted successfully. We take all complaints seriously and will
-          investigate this matter.
-        </p>
-        <div className="bg-blue-50 p-4 rounded-lg mb-6 max-w-md">
-          <p className="text-sm text-blue-800">
-            Your complaint reference number: <strong>ANO-{Math.floor(Math.random() * 10000)}</strong>
+      <div className="container mx-auto flex flex-col items-center justify-center py-12 px-4 min-h-[calc(100vh-200px)]"> {/* Adjusted min-height */}
+        <Card className="w-full max-w-lg bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8 text-center">
+          <div className="bg-green-100 rounded-full p-3 inline-block mb-5 ring-4 ring-green-200">
+            <CheckCircle2 className="h-12 w-12 text-green-600" />
+          </div>
+          <h2 className="text-3xl font-bold mb-3 text-slate-800">Thank You!</h2>
+          <p className="text-slate-600 mb-6">
+            Your anonymous complaint has been submitted successfully. We take all complaints seriously and will
+            investigate this matter.
           </p>
-          <p className="text-sm text-blue-800 mt-2">
-            You can use this reference number along with your verification code to check the status of your complaint.
-          </p>
-        </div>
-        <Button onClick={() => setSubmitted(false)}>Submit Another Complaint</Button>
+          <div className="bg-sky-50 border border-sky-200 p-4 rounded-lg mb-6 text-left">
+            <p className="text-sm text-sky-700">
+              Your complaint reference number is: <strong className="block text-lg mt-1">{submissionRef}</strong>
+            </p>
+            <p className="text-xs text-sky-600 mt-2">
+              Please keep this reference number and your verification code safe. You can use them to check the status of your complaint later (feature coming soon).
+            </p>
+          </div>
+          <Button 
+            onClick={() => {
+              setSubmitted(false);
+              form.reset();
+              setSubmissionRef("");
+            }} 
+            className={primaryButtonClasses}
+          >
+            Submit Another Complaint
+          </Button>
+        </Card>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Anonymous Complaint</h1>
-        <p className="text-gray-600">Submit a complaint without revealing your identity. Your privacy is protected.</p>
+    <>
+      {/* Page Header */}
+      <div className="bg-gradient-to-r from-sky-700 to-sky-900 -mx-4 px-4 py-10 text-white shadow-lg mb-8">
+        <div className="container mx-auto">
+          <h1 className="text-4xl font-bold mb-2 text-white">Anonymous Complaint</h1>
+          <p className="text-sky-100/90 max-w-3xl">
+            Submit a complaint without revealing your identity. Your privacy is protected.
+          </p>
+        </div>
       </div>
 
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Your identity is protected</AlertTitle>
-        <AlertDescription>
-          We do not collect any personal information when you submit an anonymous complaint. Your IP address and browser
-          information are not stored.
-        </AlertDescription>
-      </Alert>
+      <div className="container mx-auto space-y-8 px-4 pb-12">
+        <Alert variant="default" className="bg-yellow-50 border-yellow-200 text-yellow-800 rounded-xl shadow-sm p-5">
+          <AlertTriangle className="h-5 w-5 text-yellow-500" />
+          <AlertTitle className="font-semibold text-yellow-800">Your Identity is Protected</AlertTitle>
+          <AlertDescription className="text-yellow-700 text-sm">
+            We do not collect any personal information when you submit an anonymous complaint. Your IP address and browser
+            information are not stored or logged with your submission.
+          </AlertDescription>
+        </Alert>
 
-      <Card className="bg-[hsl(var(--form-background))] border-[hsl(var(--form-border))]">
-        <CardHeader className="text-[hsl(var(--form-foreground))]">
-          <CardTitle className="flex items-center">
-            <Shield className="h-5 w-5 mr-2 text-blue-600" />
-            Submit Anonymous Complaint
-          </CardTitle>
-          <CardDescription>
-            Report issues with services, staff behavior, or other concerns without revealing your identity.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="complaintType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Complaint Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="bg-[hsl(var(--form-input))] border-[hsl(var(--form-border))]">
-                          <SelectValue placeholder="Select complaint type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="corruption">Corruption/Bribery</SelectItem>
-                        <SelectItem value="misconduct">Staff Misconduct</SelectItem>
-                        <SelectItem value="harassment">Harassment</SelectItem>
-                        <SelectItem value="discrimination">Discrimination</SelectItem>
-                        <SelectItem value="fraud">Fraud</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Please describe your complaint in detail. Include names of individuals involved if applicable."
-                        className="min-h-[150px] bg-[hsl(var(--form-input))] border-[hsl(var(--form-border))]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="bg-white rounded-xl shadow-xl border border-slate-200">
+          <CardHeader className="border-b border-slate-200 pb-4 pt-5 px-6">
+            <CardTitle className="flex items-center text-2xl text-slate-800">
+              <Shield className="h-6 w-6 mr-2.5 text-sky-600" />
+              Submit Anonymous Complaint Form
+            </CardTitle>
+            <CardDescription className="text-slate-500 pt-1 pl-9"> {/* Aligned with title text */}
+              Report issues with services, staff behavior, or other concerns without revealing your identity. All fields marked with * are required.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6 px-6 pb-8">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="location"
+                  name="complaintType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Where did this occur?" {...field} />
-                      </FormControl>
+                      <FormLabel className={labelClasses}>Complaint Type *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className={inputClasses}>
+                            <SelectValue placeholder="Select complaint type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-gray-500 border-slate-200 shadow-lg rounded-md">
+                          <SelectItem value="corruption">Corruption / Bribery</SelectItem>
+                          <SelectItem value="misconduct">Staff Misconduct / Negligence</SelectItem>
+                          <SelectItem value="harassment">Harassment (Any Form)</SelectItem>
+                          <SelectItem value="discrimination">Discrimination (Any Form)</SelectItem>
+                          <SelectItem value="fraud">Fraud / Financial Mismanagement</SelectItem>
+                           <SelectItem value="safety-security">Safety or Security Concern</SelectItem>
+                          <SelectItem value="service-delivery">Poor Service Delivery</SelectItem>
+                          <SelectItem value="other">Other (Please specify in description)</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -162,37 +156,14 @@ export default function AnonymousComplaintPage() {
 
                 <FormField
                   control={form.control}
-                  name="date"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date of Incident</FormLabel>
+                      <FormLabel className={labelClasses}>Detailed Description of Complaint *</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-medium mb-4">Verification</h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  Create a verification code that you can use to check the status of your complaint later. Do not use
-                  personal information in your code.
-                </p>
-
-                <FormField
-                  control={form.control}
-                  name="verificationCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Verification Code</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="bg-[hsl(var(--form-input))] border-[hsl(var(--form-border))] focus-visible:ring-[hsl(var(--form-ring))]"
-                          placeholder="Create a code (at least 4 characters)"
-                          maxLength={10}
+                        <Textarea
+                          placeholder="Please describe your complaint in detail. Include names of individuals involved (if known and comfortable sharing), specific incidents, dates, times, and any evidence if possible. The more detail, the better we can investigate."
+                          className={`${inputClasses} min-h-[150px]`}
                           {...field}
                         />
                       </FormControl>
@@ -200,15 +171,72 @@ export default function AnonymousComplaintPage() {
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-                Submit Anonymous Complaint
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={labelClasses}>Location of Incident *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Wereda 07 Main Office, specific department" className={inputClasses} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={labelClasses}>Approximate Date of Incident *</FormLabel>
+                        <FormControl>
+                          <Input type="date" className={inputClasses} {...field} max={new Date().toISOString().split("T")[0]} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="border-t border-slate-200 pt-6 mt-4">
+                  <h3 className="text-xl font-semibold mb-2 text-slate-700">Create Your Verification Code</h3>
+                  <p className="text-sm text-slate-500 mb-4">
+                    Create a unique and memorable verification code (4-10 characters). <strong className="text-slate-600">Do not use personal information.</strong> You'll use this code along with your reference number (provided after submission) to check the status of your complaint in the future. Keep this code safe.
+                  </p>
+
+                  <FormField
+                    control={form.control}
+                    name="verificationCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={labelClasses}>Verification Code * <span className="text-xs font-normal text-slate-400">(4-10 characters)</span></FormLabel>
+                        <FormControl>
+                          <Input
+                            className={inputClasses}
+                            placeholder="e.g., SunFlower24"
+                            maxLength={10}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button type="submit" className={`${primaryButtonClasses} w-full md:w-auto group`}>
+                  <Send className="mr-2 h-5 w-5 group-hover:animate-pulse" /> {/* Added Send icon and hover animation */}
+                  Submit Anonymous Complaint
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   )
 }

@@ -454,7 +454,7 @@ export default function ServiceDetailPage() {
               <CardDescription>Documents you need to prepare for this service</CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
+              <ul className="space-y-3 text-gray-400">
                 {service.requirements.map((requirement, index) => (
                   <li key={index} className="flex items-start">
                     <CheckCircle className="h-5 w-5 mr-2 text-emerald-600 mt-0.5 flex-shrink-0" />
