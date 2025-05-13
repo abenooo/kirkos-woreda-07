@@ -315,15 +315,15 @@ import {
 
 // Mock data for services (assuming this data remains the same)
 const services = [
-  { id: "1", title: "ID Card Issuance", description: "Apply for a new ID card or renew an existing one", category: "personal", processingTime: "3-5 days", fee: "100 Birr", icon: FileText },
-  { id: "2", title: "Birth Certificate", description: "Request a birth certificate for a newborn or replacement", category: "personal", processingTime: "1-2 days", fee: "50 Birr", icon: FileText },
-  { id: "3", title: "Marriage Certificate", description: "Apply for a marriage certificate", category: "personal", processingTime: "2-3 days", fee: "200 Birr", icon: Users },
-  { id: "4", title: "Business License", description: "Apply for a new business license or renew an existing one", category: "business", processingTime: "7-10 days", fee: "500-2000 Birr", icon: Briefcase },
-  { id: "5", title: "Building Permit", description: "Apply for a permit to construct or renovate a building", category: "property", processingTime: "14-21 days", fee: "Based on project size", icon: Building2 },
-  { id: "6", title: "Land Title Transfer", description: "Transfer land ownership from one person to another", category: "property", processingTime: "30 days", fee: "Based on property value", icon: Home },
-  { id: "7", title: "Vehicle Registration", description: "Register a new vehicle or transfer ownership", category: "transport", processingTime: "3-5 days", fee: "300-1000 Birr", icon: Car },
-  { id: "8", title: "Tax Clearance Certificate", description: "Obtain a tax clearance certificate", category: "business", processingTime: "1-2 days", fee: "100 Birr", icon: Landmark },
-  { id: "9", title: "Environmental Permit", description: "Apply for environmental clearance for projects", category: "property", processingTime: "14-21 days", fee: "Based on project type", icon: Leaf },
+  { id: "1", title: "የህዝብ አገልግሎት ", description: "Apply for a new ID card or renew an existing one", category: "personal", processingTime: "3-5 days", fee: "100 Birr", icon: FileText },
+  { id: "2", title: "የወረዳ_07_ህብረት_ሥራ_ጽ/ቤት", description: "Request a birth certificate for a newborn or replacement", category: "personal", processingTime: "1-2 days", fee: "50 Birr", icon: FileText },
+  { id: "3", title: "የአርሶ_አደርና_ከተማ_ግብርና_ልማት_ጽ/ቤት", description: "Apply for a marriage certificate", category: "personal", processingTime: "2-3 days", fee: "200 Birr", icon: Users },
+  { id: "4", title: "የሰው ኃይል ስታንዳርድ የወጣላቸው", description: "Apply for a new business license or renew an existing one", category: "business", processingTime: "7-10 days", fee: "500-2000 Birr", icon: Briefcase },
+  { id: "5", title: "አዲስ የዜጎች ቻርተር", description: "Apply for a permit to construct or renovate a building", category: "property", processingTime: "14-21 days", fee: "Based on project size", icon: Building2 },
+  { id: "6", title: "ንግድ ጽ/ቤት", description: "Transfer land ownership from one person to another", category: "property", processingTime: "30 days", fee: "Based on property value", icon: Home },
+  { id: "7", title: "የከተማ ውበት", description: "Register a new vehicle or transfer ownership", category: "transport", processingTime: "3-5 days", fee: "300-1000 Birr", icon: Car },
+  // { id: "8", title: "2017_በጀት_አመት_የዜጎች_የስምምነት_ሰነድ", description: "Obtain a tax clearance certificate", category: "business", processingTime: "1-2 days", fee: "100 Birr", icon: Landmark },
+  { id: "9", title: "የወጣቶችና ስፖርት አዲስ መስፈርት", description: "Apply for environmental clearance for projects", category: "property", processingTime: "14-21 days", fee: "Based on project type", icon: Leaf },
   { id: "10", title: "School Registration", description: "Register a child for public school", category: "education", processingTime: "1-3 days", fee: "Free", icon: School },
   { id: "11", title: "Police Clearance", description: "Obtain a police clearance certificate", category: "personal", processingTime: "7-10 days", fee: "150 Birr", icon: ShieldCheck },
 ];
