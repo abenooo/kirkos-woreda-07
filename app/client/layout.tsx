@@ -1,7 +1,5 @@
 "use client"
-
 import type React from "react"
-
 import { useState, Suspense } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -43,7 +41,6 @@ const translations = {
     oromo: "Oromo",
     search: "Search",
     login: "Login",
-    register: "Register",
     help: "Help & Support",
     contact: "Contact Us",
     about: "About",
@@ -64,7 +61,6 @@ const translations = {
     oromo: "ኦሮምኛ",
     search: "ፈልግ",
     login: "ግባ",
-    register: "ተመዝገብ",
     help: "እገዛ እና ድጋፍ",
     contact: "አግኙን",
     about: "ስለ እኛ",
@@ -85,7 +81,6 @@ const translations = {
     oromo: "Afaan Oromoo",
     search: "Barbaadi",
     login: "Seeni",
-    register: "Galmaa'i",
     help: "Gargaarsa fi Deeggarsa",
     contact: "Nu Quunnamaa",
     about: "Waa'ee Keenya",
@@ -199,9 +194,6 @@ export default function ClientLayout({
                 >
                   {t.login}
                 </Button>
-                <Button size="sm" className="bg-[#0F2557] hover:bg-[#1a3672] text-white">
-                  {t.register}
-                </Button>
               </div>
 
               {/* Mobile menu button */}
@@ -286,9 +278,6 @@ export default function ClientLayout({
               <div className="flex p-4 space-x-2 border-b border-gray-200">
                 <Button variant="outline" size="sm" className="flex-1 border-[#0F2557] text-[#0F2557]">
                   {t.login}
-                </Button>
-                <Button size="sm" className="flex-1 bg-[#0F2557] text-white">
-                  {t.register}
                 </Button>
               </div>
 
