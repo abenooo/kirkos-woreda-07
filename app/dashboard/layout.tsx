@@ -122,13 +122,13 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black to-slate-900 text-slate-100">
+    <div className="min-h-screen bg-slate-100 text-slate-900">
       <div className="flex min-h-screen">
         {/* Sidebar */}
         <div className="hidden md:flex md:w-64 md:flex-col">
-          <div className="flex flex-col bg-slate-900/50 border-r border-slate-700/50 backdrop-blur-sm h-full">
+          <div className="flex flex-col bg-white border-r border-slate-200 h-full">
             {/* Sidebar Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/50">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
               <div className="flex items-center space-x-2">
                 <Hexagon className="h-8 w-8 text-cyan-500" />
                 <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -159,7 +159,7 @@ export default function DashboardLayout({
                 ))}
               </nav>
 
-              <div className="mt-8 pt-6 border-t border-slate-700/50 px-4">
+              <div className="mt-8 pt-6 border-t border-slate-200 px-4">
                 <div className="text-xs text-slate-500 mb-2 font-mono px-2">SYSTEM STATUS</div>
                 <div className="space-y-3">
                   <StatusItem label="Core Systems" value={85} color="cyan" />
@@ -170,7 +170,7 @@ export default function DashboardLayout({
             </div>
 
             {/* Sidebar Footer */}
-            <div className="border-t border-slate-700/50 p-4">
+            <div className="border-t border-slate-200 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <Avatar>
@@ -198,7 +198,7 @@ export default function DashboardLayout({
         {/* Main Content */}
         <div className="flex-1">
           {/* Header */}
-          <header className="border-b border-slate-700/50">
+          <header className="border-b border-slate-200">
             <div className="flex h-16 items-center px-4 md:px-6">
               <div className="md:hidden">
                 <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-100">
@@ -207,7 +207,7 @@ export default function DashboardLayout({
               </div>
 
               <div className="hidden md:flex md:flex-1 md:items-center md:space-x-2 md:ml-4">
-                <div className="bg-slate-800/50 rounded-full px-3 py-1.5 border border-slate-700/50 backdrop-blur-sm">
+                <div className="bg-slate-800/50 rounded-full px-3 py-1.5 border border-slate-200 backdrop-blur-sm">
                   <div className="flex items-center">
                     <Search className="h-4 w-4 text-slate-400 mr-2" />
                     <Input
@@ -234,9 +234,9 @@ export default function DashboardLayout({
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-slate-800 border-slate-700 text-slate-100">
+                  <DropdownMenuContent align="end" className="w-56 bg-slate-800 border-slate-200 text-slate-100">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-slate-700" />
+                    <DropdownMenuSeparator className="bg-slate-200" />
                     <DropdownMenuItem className="hover:bg-slate-700">
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
@@ -245,7 +245,7 @@ export default function DashboardLayout({
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-slate-700" />
+                    <DropdownMenuSeparator className="bg-slate-200" />
                     <DropdownMenuItem onClick={handleLogout} className="hover:bg-slate-700">
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
@@ -272,7 +272,7 @@ function NavItem({ href, icon: Icon, label, active }: { href: string; icon: any;
     <Link href={href}>
       <Button
         variant="ghost"
-        className={`w-full justify-start ${active ? "bg-slate-800/70 text-cyan-400" : "text-slate-400 hover:text-slate-100"}`}
+        className={`w-full justify-start ${active ? "bg-slate-800 text-cyan-400" : "text-slate-400 hover:text-slate-100"}`}
       >
         <Icon className="mr-2 h-4 w-4" />
         {label}
