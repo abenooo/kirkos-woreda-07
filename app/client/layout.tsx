@@ -40,7 +40,6 @@ const translations = {
     amharic: "Amharic",
     oromo: "Oromo",
     search: "Search",
-    login: "Login",
     help: "Help & Support",
     contact: "Contact Us",
     about: "About",
@@ -186,15 +185,7 @@ export default function ClientLayout({
               </div>
 
               {/* User Actions */}
-              <div className="hidden md:flex items-center space-x-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-[#0F2557] text-[#0F2557] hover:bg-[#0F2557] hover:text-white"
-                >
-                  {t.login}
-                </Button>
-              </div>
+        
 
               {/* Mobile menu button */}
               <Button
@@ -275,11 +266,7 @@ export default function ClientLayout({
               </div>
 
               {/* Mobile Auth Buttons */}
-              <div className="flex p-4 space-x-2 border-b border-gray-200">
-                <Button variant="outline" size="sm" className="flex-1 border-[#0F2557] text-[#0F2557]">
-                  {t.login}
-                </Button>
-              </div>
+             
 
               {/* Mobile Menu Items */}
               <nav className="py-2">
