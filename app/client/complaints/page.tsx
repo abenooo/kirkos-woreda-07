@@ -93,7 +93,6 @@ export default function ComplaintsPage() {
                           <SelectItem value="id-card">ID Card Issuance</SelectItem>
                           <SelectItem value="birth-certificate">Birth Certificate</SelectItem>
                           <SelectItem value="business-license">Business License</SelectItem>
-                          <SelectItem value="building-permit">Building Permit</SelectItem>
                           <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
