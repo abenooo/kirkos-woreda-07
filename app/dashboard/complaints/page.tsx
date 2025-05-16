@@ -1,11 +1,9 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import { MoreHorizontal, Plus, Search } from "lucide-react"
-
+import { createClient } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,44 +18,89 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import { mockComplaints } from "@/lib/mock-data"
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+const PAGE_SIZE = 10
 
 export default function ComplaintsPage() {
-  const [complaints, setComplaints] = useState(mockComplaints)
+  const [complaints, setComplaints] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [departmentFilter, setDepartmentFilter] = useState("all")
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc")
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [departments, setDepartments] = useState<string[]>(["all"])
 
-  // Get unique departments for filter
-  const departments = ["all", ...new Set(complaints.map((c) => c.department))]
+  // Fetch departments for filter dropdown
+  useEffect(() => {
+    async function fetchDepartments() {
+      const { data } = await supabase.from("departments").select("name")
+      if (data) {
+        setDepartments(["all", ...data.map((d: any) => d.name)])
+      }
+    }
+    fetchDepartments()
+  }, [])
 
-  // Filter complaints based on search query and filters
-  const filteredComplaints = complaints.filter((complaint) => {
-    const matchesSearch =
-      complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      complaint.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      complaint.id.toLowerCase().includes(searchQuery.toLowerCase())
+  // Fetch complaints from Supabase
+  useEffect(() => {
+    async function fetchComplaints() {
+      setLoading(true)
+      let query = supabase
+        .from("complaints")
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: sortOrder === "asc" })
+        .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
 
-    const matchesStatus = statusFilter === "all" || complaint.status === statusFilter
-    const matchesDepartment = departmentFilter === "all" || complaint.department === departmentFilter
+      if (statusFilter !== "all") query = query.eq("status", statusFilter)
+      if (departmentFilter !== "all") query = query.eq("department", departmentFilter)
+      if (searchQuery) {
+        // For search, fetch all and filter client-side (Supabase doesn't support full-text search on multiple fields by default)
+        const { data, count } = await supabase
+          .from("complaints")
+          .select("*", { count: "exact" })
+          .order("created_at", { ascending: sortOrder === "asc" })
+        const filtered = (data || []).filter(
+          (complaint: any) =>
+            complaint.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            complaint.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            complaint.id?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        setComplaints(filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE))
+        setTotal(filtered.length)
+        setLoading(false)
+        return
+      }
 
-    return matchesSearch && matchesStatus && matchesDepartment
-  })
+      const { data, count } = await query
+      setComplaints(data || [])
+      setTotal(count || 0)
+      setLoading(false)
+    }
+    fetchComplaints()
+  }, [searchQuery, statusFilter, departmentFilter, sortOrder, page])
 
-  // Handle status change
+  // Handle status change (client-side only, for demo)
   const handleStatusChange = (complaintId: string, newStatus: string) => {
     setComplaints((prev) =>
-      prev.map((complaint) => (complaint.id === complaintId ? { ...complaint, status: newStatus } : complaint)),
+      prev.map((complaint) => (complaint.id === complaintId ? { ...complaint, status: newStatus } : complaint))
     )
+    // TODO: Update in Supabase if you want to persist
   }
 
-  // Handle department assignment
+  // Handle department assignment (client-side only, for demo)
   const handleDepartmentAssign = (complaintId: string, department: string) => {
     setComplaints((prev) =>
       prev.map((complaint) =>
-        complaint.id === complaintId ? { ...complaint, department, status: "in-progress" } : complaint,
-      ),
+        complaint.id === complaintId ? { ...complaint, department, status: "in-progress" } : complaint
+      )
     )
+    // TODO: Update in Supabase if you want to persist
   }
 
   return (
@@ -88,7 +131,10 @@ export default function ComplaintsPage() {
                     placeholder="Search by ID, title, or description..."
                     className="pl-8"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setPage(1)
+                      setSearchQuery(e.target.value)
+                    }}
                   />
                 </div>
               </div>
@@ -96,7 +142,7 @@ export default function ComplaintsPage() {
               <div className="flex gap-2">
                 <div className="grid gap-1.5">
                   <Label htmlFor="status">Status</Label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <Select value={statusFilter} onValueChange={(v) => { setPage(1); setStatusFilter(v) }}>
                     <SelectTrigger id="status" className="w-[180px]">
                       <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
@@ -111,7 +157,7 @@ export default function ComplaintsPage() {
 
                 <div className="grid gap-1.5">
                   <Label htmlFor="department">Department</Label>
-                  <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                  <Select value={departmentFilter} onValueChange={(v) => { setPage(1); setDepartmentFilter(v) }}>
                     <SelectTrigger id="department" className="w-[180px]">
                       <SelectValue placeholder="Filter by department" />
                     </SelectTrigger>
@@ -121,6 +167,18 @@ export default function ComplaintsPage() {
                           {dept === "all" ? "All Departments" : dept}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="sort">Sort</Label>
+                  <Select value={sortOrder} onValueChange={(v) => { setPage(1); setSortOrder(v as "asc" | "desc") }}>
+                    <SelectTrigger id="sort" className="w-[120px]">
+                      <SelectValue placeholder="Sort" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="desc">Newest</SelectItem>
+                      <SelectItem value="asc">Oldest</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -140,14 +198,20 @@ export default function ComplaintsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredComplaints.length === 0 ? (
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="h-24 text-center">
+                        Loading...
+                      </TableCell>
+                    </TableRow>
+                  ) : complaints.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="h-24 text-center">
                         No complaints found.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredComplaints.map((complaint) => (
+                    complaints.map((complaint) => (
                       <TableRow key={complaint.id}>
                         <TableCell className="font-medium">#{complaint.id.slice(0, 8)}</TableCell>
                         <TableCell>
@@ -163,12 +227,13 @@ export default function ComplaintsPage() {
                               <SelectValue placeholder="Assign" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Water & Sewage">Water & Sewage</SelectItem>
-                              <SelectItem value="Roads & Infrastructure">Roads & Infrastructure</SelectItem>
-                              <SelectItem value="Waste Management">Waste Management</SelectItem>
-                              <SelectItem value="Public Safety">Public Safety</SelectItem>
-                              <SelectItem value="Housing">Housing</SelectItem>
-                              <SelectItem value="Health Services">Health Services</SelectItem>
+                              {departments
+                                .filter((d) => d !== "all")
+                                .map((dept) => (
+                                  <SelectItem key={dept} value={dept}>
+                                    {dept}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                         </TableCell>
@@ -187,7 +252,11 @@ export default function ComplaintsPage() {
                             </SelectContent>
                           </Select>
                         </TableCell>
-                        <TableCell>{new Date(complaint.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          {complaint.created_at
+                            ? new Date(complaint.created_at).toLocaleDateString()
+                            : ""}
+                        </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -219,10 +288,23 @@ export default function ComplaintsPage() {
             </div>
 
             <div className="flex items-center justify-end space-x-2">
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
                 Previous
               </Button>
-              <Button variant="outline" size="sm">
+              <span className="text-sm px-2">
+                Page {page} of {Math.ceil(total / PAGE_SIZE) || 1}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page * PAGE_SIZE >= total}
+                onClick={() => setPage((p) => p + 1)}
+              >
                 Next
               </Button>
             </div>
