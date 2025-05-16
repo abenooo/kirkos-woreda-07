@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DialogFooter,Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent } from "@/components/ui/dialog"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,6 +36,8 @@ export default function ComplaintsPage() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [departments, setDepartments] = useState<string[]>(["all"])
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false)
+  const [selectedComplaint, setSelectedComplaint] = useState<any>(null)
 
   // Fetch departments for filter dropdown
   useEffect(() => {
@@ -107,10 +110,6 @@ export default function ComplaintsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Complaints Management</h1>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Complaint
-        </Button>
       </div>
 
       <Card>
@@ -186,100 +185,155 @@ export default function ComplaintsPage() {
             </div>
 
             <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Complaint Type</TableHead>
-                    <TableHead>Complaint Details</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead>Updated At</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={10} className="h-24 text-center">
-                        Loading...
-                      </TableCell>
-                    </TableRow>
-                  ) : complaints.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={10} className="h-24 text-center">
-                        No complaints found.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    complaints.map((complaint) => (
-                      <TableRow key={complaint.id}>
-                        <TableCell className="font-medium">{complaint.name}</TableCell>
-                        <TableCell>{complaint.phone}</TableCell>
-                        <TableCell>{complaint.email}</TableCell>
-                        <TableCell>{complaint.service}</TableCell>
-                        <TableCell>{complaint.complaint_type}</TableCell>
-                        <TableCell>
-                          <div className="text-sm text-muted-foreground line-clamp-2">
-                            {complaint.complaint_details}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            defaultValue={complaint.status}
-                            onValueChange={(value) => handleStatusChange(complaint.id, value)}
-                          >
-                            <SelectTrigger className="h-8 w-[130px]">
-                              <SelectValue placeholder="Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="in-progress">In Progress</SelectItem>
-                              <SelectItem value="resolved">Resolved</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          {complaint.created_at
-                            ? new Date(complaint.created_at).toLocaleDateString()
-                            : ""}
-                        </TableCell>
-                        <TableCell>
-                          {complaint.updated_at
-                            ? new Date(complaint.updated_at).toLocaleDateString()
-                            : ""}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>
-                                <Link href={`/dashboard/complaints/${complaint.id}`} className="w-full">
-                                  View details
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem>Assign to staff</DropdownMenuItem>
-                              <DropdownMenuItem>Add comment</DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive">Delete complaint</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+            <Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Name</TableHead>
+      <TableHead>Phone</TableHead>
+      <TableHead>Email</TableHead>
+      <TableHead>Service</TableHead>
+      <TableHead>Complaint Type</TableHead>
+      <TableHead>Complaint Details</TableHead>
+      <TableHead>Status</TableHead>
+      <TableHead>Created At</TableHead>
+      <TableHead>Updated At</TableHead>
+      <TableHead className="text-right">Actions</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {loading ? (
+      <TableRow>
+        <TableCell colSpan={10} className="h-24 text-center">
+          Loading...
+        </TableCell>
+      </TableRow>
+    ) : complaints.length === 0 ? (
+      <TableRow>
+        <TableCell colSpan={10} className="h-24 text-center">
+          No complaints found.
+        </TableCell>
+      </TableRow>
+    ) : (
+      complaints.map((complaint) => (
+        <TableRow key={complaint.id}>
+          <TableCell className="font-medium">{complaint.name}</TableCell>
+          <TableCell>{complaint.phone}</TableCell>
+          <TableCell>{complaint.email}</TableCell>
+          <TableCell>{complaint.service}</TableCell>
+          <TableCell>{complaint.complaint_type}</TableCell>
+          <TableCell>
+            <div className="text-sm text-muted-foreground">
+              <div>
+                {complaint.complaint_details?.slice(0, 50)}
+                {complaint.complaint_details?.length > 50 ? '...' : ''}
+              </div>
+              {complaint.complaint_details?.length > 50 && (
+                <button 
+                  className="text-primary hover:underline text-xs mt-1"
+                  onClick={() => {
+                    setSelectedComplaint(complaint);
+                    setShowDetailsDialog(true);
+                  }}
+                >
+                  See more
+                </button>
+              )}
+            </div>
+          </TableCell>
+          <TableCell>
+            <Select
+              defaultValue={complaint.status}
+              onValueChange={(value) => handleStatusChange(complaint.id, value)}
+            >
+              <SelectTrigger className="h-8 w-[130px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="resolved">Resolved</SelectItem>
+              </SelectContent>
+            </Select>
+          </TableCell>
+          <TableCell>
+            {complaint.created_at
+              ? new Date(complaint.created_at).toLocaleDateString()
+              : ""}
+          </TableCell>
+          <TableCell>
+            {complaint.updated_at
+              ? new Date(complaint.updated_at).toLocaleDateString()
+              : ""}
+          </TableCell>
+          <TableCell className="text-right">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem>
+                  <Link href={`/dashboard/complaints/${complaint.id}`} className="w-full">
+                    View details
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Assign to staff</DropdownMenuItem>
+                <DropdownMenuItem>Add comment</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive">Delete complaint</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </TableCell>
+        </TableRow>
+      ))
+    )}
+  </TableBody>
+</Table>
+
+{/* Add this dialog component at the bottom of your page component */}
+<Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+  <DialogContent className="max-w-2xl">
+    <DialogHeader>
+      <DialogTitle>Complaint Details</DialogTitle>
+      <DialogDescription>
+        Submitted by {selectedComplaint?.name} on {selectedComplaint?.created_at ? new Date(selectedComplaint.created_at).toLocaleDateString() : ""}
+      </DialogDescription>
+    </DialogHeader>
+    <div className="space-y-4">
+      <div>
+        <h4 className="font-medium mb-2">Complaint Details</h4>
+        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+          {selectedComplaint?.complaint_details}
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-medium mb-2">Contact Information</h4>
+          <p className="text-sm text-muted-foreground">
+            Phone: {selectedComplaint?.phone}<br />
+            Email: {selectedComplaint?.email}
+          </p>
+        </div>
+        <div>
+          <h4 className="font-medium mb-2">Service Information</h4>
+          <p className="text-sm text-muted-foreground">
+            Service: {selectedComplaint?.service}<br />
+            Type: {selectedComplaint?.complaint_type}
+          </p>
+        </div>
+      </div>
+    </div>
+    <DialogFooter>
+      <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
+        Close
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
             </div>
 
             <div className="flex items-center justify-end space-x-2">
