@@ -111,10 +111,16 @@ export default function DashboardLayout({
       icon: MessageSquare,
     },
     {
-      name: "Services",
-      href: "/dashboard/services",
+      name: "Feedback",
+      href: "/dashboard/feedbacks",
       icon: ClipboardList,
     },
+    {
+      name: "Anonymous Complaints",
+      href: "/dashboard/anonymous_complaints",
+      icon: ClipboardList,
+    },
+    
     {
       name: "Departments",
       href: "/dashboard/departments",
