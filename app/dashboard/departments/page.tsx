@@ -55,6 +55,7 @@ export default function DepartmentsPage() {
   })
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
+  const [users, setUsers] = useState<any[]>([])
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -67,6 +68,14 @@ export default function DepartmentsPage() {
       }
     }
     fetchDepartments()
+  }, [])
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const { data } = await supabase.from("users").select("*")
+      setUsers(data || [])
+    }
+    fetchUsers()
   }, [])
 
   // Filter departments based on search query
@@ -159,6 +168,14 @@ export default function DepartmentsPage() {
       setLoading(false)
     }
   }
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.department_id + "").toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   return (
     <div className="space-y-6">
