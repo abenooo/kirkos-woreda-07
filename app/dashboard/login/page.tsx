@@ -128,16 +128,18 @@ export default function LoginPage() {
       router.push("/dashboard")
 
       const { data: { user } } = await supabase.auth.getUser();
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('uuid', user.id)
-        .single();
+      if (user) {
+        const { data: userProfile } = await supabase
+          .from('users')
+          .select('*')
+          .eq('uuid', user.id)
+          .single();
 
-      if (userProfile.role === 'admin') {
-        // Show admin dashboard
-      } else if (userProfile.role === 'department_head') {
-        // Show department head dashboard
+        if (userProfile.role === 'admin') {
+          // Show admin dashboard
+        } else if (userProfile.role === 'department_head') {
+          // Show department head dashboard
+        }
       }
     } catch (error: any) {
       toast({
