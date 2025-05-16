@@ -47,7 +47,7 @@ export default function UsersPage() {
     name: "",
     email: "",
     role: "staff",
-    department: "",
+    department_id: "",
     password: "",
     confirmPassword: "",
     status: "active",
@@ -85,17 +85,16 @@ export default function UsersPage() {
 
   // Handle adding a new user
   const handleAddUser = async () => {
-    // Validate form
+    // Validate form as needed
     if (
       !newUser.name ||
       !newUser.email ||
       !newUser.role ||
-      !newUser.department ||
-      !newUser.password ||
-      newUser.password !== newUser.confirmPassword
+      !newUser.department_id ||
+      !newUser.status
     ) {
-      alert("Please fill all fields correctly. Passwords must match.")
-      return
+      alert("Please fill all required fields.");
+      return;
     }
 
     const { data, error } = await supabase
@@ -105,21 +104,33 @@ export default function UsersPage() {
           name: newUser.name,
           email: newUser.email,
           role: newUser.role,
-          department_id: newUser.department,
-          status: newUser.status,
+          department_id: newUser.department_id,
         }
       ])
-      .select()
-    if (!error) {
-      setUsers((prev) => [...prev, ...(data || [])])
-      setIsAddDialogOpen(false)
-      // reset newUser state
+      .select();
+
+    if (error) {
+      alert("Failed to add user: " + error.message);
+      return;
     }
-  }
+
+    setUsers((prev) => [...prev, ...(data || [])]);
+    setIsAddDialogOpen(false);
+    setNewUser({
+      name: "",
+      email: "",
+      role: "staff",
+      department_id: "",
+      password: "",
+      confirmPassword: "",
+      status: "active",
+    });
+  };
 
   // Handle editing a user
   const handleEditUser = async () => {
-    if (!currentUser) return
+    if (!currentUser) return;
+
     const { data, error } = await supabase
       .from("users")
       .update({
@@ -127,30 +138,38 @@ export default function UsersPage() {
         email: currentUser.email,
         role: currentUser.role,
         department_id: currentUser.department_id,
-        status: currentUser.status,
       })
       .eq("id", currentUser.id)
-      .select()
-    if (!error) {
-      setUsers((prev) =>
-        prev.map((user) => (user.id === currentUser.id ? (data ? data[0] : currentUser) : user))
-      )
-      setIsEditDialogOpen(false)
+      .select();
+
+    if (error) {
+      alert("Failed to update user: " + error.message);
+      return;
     }
-  }
+
+    setUsers((prev) =>
+      prev.map((user) => (user.id === currentUser.id ? (data ? data[0] : currentUser) : user))
+    );
+    setIsEditDialogOpen(false);
+  };
 
   // Handle deleting a user
   const handleDeleteUser = async () => {
-    if (!currentUser) return
+    if (!currentUser) return;
+
     const { error } = await supabase
       .from("users")
       .delete()
-      .eq("id", currentUser.id)
-    if (!error) {
-      setUsers((prev) => prev.filter((user) => user.id !== currentUser.id))
-      setIsDeleteDialogOpen(false)
+      .eq("id", currentUser.id);
+
+    if (error) {
+      alert("Failed to delete user: " + error.message);
+      return;
     }
-  }
+
+    setUsers((prev) => prev.filter((user) => user.id !== currentUser.id));
+    setIsDeleteDialogOpen(false);
+  };
 
   // Get role badge variant
   const getRoleBadgeVariant = (role: string) => {
@@ -229,8 +248,8 @@ export default function UsersPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="department">Department</Label>
                   <Select
-                    value={newUser.department}
-                    onValueChange={(value) => setNewUser({ ...newUser, department: value })}
+                    value={newUser.department_id}
+                    onValueChange={(value) => setNewUser({ ...newUser, department_id: value })}
                   >
                     <SelectTrigger id="department">
                       <SelectValue placeholder="Select department" />
@@ -318,6 +337,7 @@ export default function UsersPage() {
                     <TableHead>Department ID</TableHead>
                     <TableHead>Created At</TableHead>
                     <TableHead>Updated At</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -338,6 +358,39 @@ export default function UsersPage() {
                         <TableCell>{user.department_id}</TableCell>
                         <TableCell>{user.created_at ? new Date(user.created_at).toLocaleDateString() : ""}</TableCell>
                         <TableCell>{user.updated_at ? new Date(user.updated_at).toLocaleDateString() : ""}</TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setCurrentUser(user);
+                                  setIsEditDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => {
+                                  setCurrentUser(user);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -416,8 +469,8 @@ export default function UsersPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="edit-department">Department</Label>
                   <Select
-                    value={currentUser.department}
-                    onValueChange={(value) => setCurrentUser({ ...currentUser, department: value })}
+                    value={currentUser.department_id}
+                    onValueChange={(value) => setCurrentUser({ ...currentUser, department_id: value })}
                   >
                     <SelectTrigger id="edit-department">
                       <SelectValue placeholder="Select department" />
