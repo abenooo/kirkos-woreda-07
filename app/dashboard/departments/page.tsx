@@ -51,7 +51,10 @@ export default function DepartmentsPage() {
     phone: "",
     status: "active",
     employeeCount: 0,
+    code: "",
   })
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -74,43 +77,87 @@ export default function DepartmentsPage() {
       department.head.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  // Handle adding a new department
-  const handleAddDepartment = () => {
-    const department = {
-      id: `d${Date.now()}`,
-      ...newDepartment,
-      createdAt: new Date().toISOString(),
-    }
+  const paginatedDepartments = filteredDepartments.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
 
-    setDepartments((prev) => [...prev, department])
-    setNewDepartment({
-      name: "",
-      description: "",
-      head: "",
-      email: "",
-      phone: "",
-      status: "active",
-      employeeCount: 0,
-    })
-    setIsAddDialogOpen(false)
+  // Handle adding a new department
+  const handleAddDepartment = async () => {
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from("departments")
+        .insert([
+          {
+            name: newDepartment.name,
+            description: newDepartment.description,
+            code: newDepartment.code,
+          }
+        ])
+        .select()
+      if (error) throw error
+      // Optionally, fetch all departments again or just append the new one:
+      setDepartments((prev) => [...prev, ...(data || [])])
+      setIsAddDialogOpen(false)
+      setNewDepartment({ name: "", description: "", head: "", email: "", phone: "", status: "active", employeeCount: 0, code: "" })
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Handle editing a department
-  const handleEditDepartment = () => {
+  const handleEditDepartment = async () => {
     if (!currentDepartment) return
-
-    setDepartments((prev) => prev.map((dept) => (dept.id === currentDepartment.id ? currentDepartment : dept)))
-
-    setIsEditDialogOpen(false)
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from("departments")
+        .update({
+          name: currentDepartment.name,
+          description: currentDepartment.description,
+          code: currentDepartment.code,
+        })
+        .eq("id", currentDepartment.id)
+        .select()
+      if (error) throw error
+      setDepartments((prev) =>
+        prev.map((dept) => (dept.id === currentDepartment.id ? (data ? data[0] : currentDepartment) : dept))
+      )
+      setIsEditDialogOpen(false)
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Handle deleting a department
-  const handleDeleteDepartment = () => {
+  const handleDeleteDepartment = async () => {
     if (!currentDepartment) return
+    setLoading(true)
+    try {
+      const { data: users } = await supabase
+        .from('users')
+        .select('id, name')
+        .eq('department_id', currentDepartment.id);
 
-    setDepartments((prev) => prev.filter((dept) => dept.id !== currentDepartment.id))
+      if (users && users.length > 0) {
+        alert(
+          `Cannot delete department while users are assigned to it. Users: ${users.map(u => u.name).join(', ')}`
+        );
+        setIsDeleteDialogOpen(false);
+        return;
+      }
 
-    setIsDeleteDialogOpen(false)
+      const { error } = await supabase
+        .from("departments")
+        .delete()
+        .eq("id", currentDepartment.id)
+      if (error) throw error
+      setDepartments((prev) => prev.filter((dept) => dept.id !== currentDepartment.id))
+      setIsDeleteDialogOpen(false)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -222,6 +269,17 @@ export default function DepartmentsPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="code" className="text-slate-300">
+                  Department Code
+                </Label>
+                <Input
+                  id="code"
+                  value={newDepartment.code}
+                  onChange={(e) => setNewDepartment({ ...newDepartment, code: e.target.value })}
+                  className="bg-slate-800 border-slate-700 text-slate-100"
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button
@@ -266,95 +324,51 @@ export default function DepartmentsPage() {
 
             <div className="rounded-md border border-slate-700">
               <Table>
-                <TableHeader className="bg-slate-800/50">
-                  <TableRow className="border-slate-700 hover:bg-slate-800/50">
-                    <TableHead className="text-slate-300">Department Name</TableHead>
-                    <TableHead className="text-slate-300">Head</TableHead>
-                    <TableHead className="text-slate-300">Contact</TableHead>
-                    <TableHead className="text-slate-300">Employees</TableHead>
-                    <TableHead className="text-slate-300">Status</TableHead>
-                    <TableHead className="text-right text-slate-300">Actions</TableHead>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Code</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow className="border-slate-700 hover:bg-slate-800/50">
-                      <TableCell colSpan={6} className="h-24 text-center text-slate-400">
-                        Loading...
-                      </TableCell>
+                    <TableRow>
+                      <TableCell colSpan={4}>Loading...</TableCell>
                     </TableRow>
-                  ) : filteredDepartments.length === 0 ? (
-                    <TableRow className="border-slate-700 hover:bg-slate-800/50">
-                      <TableCell colSpan={6} className="h-24 text-center text-slate-400">
-                        No departments found.
-                      </TableCell>
+                  ) : paginatedDepartments.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4}>No departments found.</TableCell>
                     </TableRow>
                   ) : (
-                    filteredDepartments.map((department) => (
-                      <TableRow key={department.id} className="border-slate-700 hover:bg-slate-800/50">
-                        <TableCell className="font-medium text-slate-100">
-                          <div>{department.name}</div>
-                          <div className="text-xs text-slate-400 mt-1 max-w-xs truncate">{department.description}</div>
-                        </TableCell>
-                        <TableCell className="text-slate-300">{department.head}</TableCell>
-                        <TableCell className="text-slate-300">
-                          <div className="text-sm">{department.email}</div>
-                          <div className="text-xs text-slate-400">{department.phone}</div>
-                        </TableCell>
-                        <TableCell className="text-slate-300">{department.employeeCount}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              department.status === "active"
-                                ? "default"
-                                : department.status === "maintenance"
-                                  ? "secondary"
-                                  : "outline"
-                            }
-                            className={
-                              department.status === "active"
-                                ? "bg-green-500/20 text-green-400 border-green-500/30"
-                                : department.status === "maintenance"
-                                  ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
-                                  : "bg-slate-500/20 text-slate-400 border-slate-500/30"
-                            }
-                          >
-                            {department.status}
-                          </Badge>
-                        </TableCell>
+                    paginatedDepartments.map((department) => (
+                      <TableRow key={department.id}>
+                        <TableCell>{department.name}</TableCell>
+                        <TableCell>{department.description}</TableCell>
+                        <TableCell>{department.code}</TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0 text-slate-400 hover:text-slate-100">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700 text-slate-100">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setCurrentDepartment(department)
-                                  setIsEditDialogOpen(true)
-                                }}
-                                className="hover:bg-slate-700"
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-slate-700" />
-                              <DropdownMenuItem
-                                className="text-red-400 hover:bg-slate-700 hover:text-red-400"
-                                onClick={() => {
-                                  setCurrentDepartment(department)
-                                  setIsDeleteDialogOpen(true)
-                                }}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setCurrentDepartment(department);
+                              setIsEditDialogOpen(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              setCurrentDepartment(department);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                            className="ml-2"
+                          >
+                            Delete
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))
@@ -363,18 +377,23 @@ export default function DepartmentsPage() {
               </Table>
             </div>
 
-            <div className="flex items-center justify-end space-x-2">
+            <div className="flex items-center justify-end space-x-2 mt-4">
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
               >
                 Previous
               </Button>
+              <span className="text-sm px-2">
+                Page {page} of {Math.ceil(filteredDepartments.length / PAGE_SIZE) || 1}
+              </span>
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                disabled={page * PAGE_SIZE >= filteredDepartments.length}
+                onClick={() => setPage((p) => p + 1)}
               >
                 Next
               </Button>
@@ -433,7 +452,7 @@ export default function DepartmentsPage() {
                   <Input
                     id="edit-employeeCount"
                     type="number"
-                    value={currentDepartment.employeeCount.toString()}
+                    value={currentDepartment?.employeeCount != null ? currentDepartment.employeeCount.toString() : ""}
                     onChange={(e) =>
                       setCurrentDepartment({
                         ...currentDepartment,
