@@ -1,31 +1,52 @@
 "use client"
 
-import { useState } from "react"
+import type React from "react"
+
+import { useState, useRef, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form" // Added FormDescription
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { AlertTriangle, CheckCircle2, Shield, Send } from "lucide-react" // Added Send
+import { AlertTriangle, CheckCircle2, Shield, Send, Paperclip } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { submitAnonymousComplaint } from "@/app/actions/anonymous-actions"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 // Form schema for anonymous complaint
 const anonymousFormSchema = z.object({
   complaintType: z.string().min(1, { message: "Please select a complaint type" }),
-  description: z.string().min(20, { message: "Description must be at least 20 characters" }), // Increased min length
-  location: z.string().min(3, { message: "Please provide a more specific location" }), // Increased min length
-  date: z.string().min(1, { message: "Please provide the date of the incident" }), // More specific message
-  verificationCode: z.string().min(4, { message: "Verification code must be at least 4 characters" }).max(10, {message: "Verification code must be at most 10 characters"}),
+  description: z.string().min(20, { message: "Description must be at least 20 characters" }),
+  location: z.string().min(3, { message: "Please provide a more specific location" }),
+  date: z.string().min(1, { message: "Please provide the date of the incident" }),
+  verificationCode: z
+    .string()
+    .min(4, { message: "Verification code must be at least 4 characters" })
+    .max(10, { message: "Verification code must be at most 10 characters" }),
+  departmentId: z.string().min(1, { message: "Please select a department" }),
 })
+
+// Define department type
+type Department = {
+  id: number
+  name: string
+  code: string
+  description: string | null
+}
 
 export default function AnonymousComplaintPage() {
   const [submitted, setSubmitted] = useState(false)
   const [submissionRef, setSubmissionRef] = useState<string>("")
-
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [isLoadingDepartments, setIsLoadingDepartments] = useState(true)
 
   const form = useForm<z.infer<typeof anonymousFormSchema>>({
     resolver: zodResolver(anonymousFormSchema),
@@ -35,30 +56,80 @@ export default function AnonymousComplaintPage() {
       location: "",
       date: "",
       verificationCode: "",
+      departmentId: "",
     },
   })
 
-  function onSubmit(values: z.infer<typeof anonymousFormSchema>) {
-    console.log("Anonymous Complaint Submitted:", values)
-    const refNumber = `ANO-${Math.floor(1000 + Math.random() * 9000)}-${values.verificationCode.slice(0,2).toUpperCase()}`;
-    setSubmissionRef(refNumber);
-    setSubmitted(true)
-    setTimeout(() => {
-      // In a real app, you might want to keep the user on the success page or redirect them.
-      // For this example, we allow submitting another.
-      // setSubmitted(false); 
-      // form.reset(); 
-    }, 30000) // Longer timeout for success message
-  }
-  
-  const primaryButtonClasses = "bg-sky-600 hover:bg-sky-700 text-white rounded-md shadow-sm hover:shadow-lg transition-all duration-300 text-base px-6 py-3 font-semibold";
-  const inputClasses = "bg-white border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/50 rounded-md shadow-sm placeholder:text-slate-400 text-slate-800";
-  const labelClasses = "text-slate-700 font-medium text-sm";
+  // Fetch departments on component mount
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const supabase = createClientComponentClient()
+        const { data, error } = await supabase.from("departments").select("*").order("name")
 
+        if (error) {
+          console.error("Error fetching departments:", error)
+        } else {
+          setDepartments(data || [])
+        }
+      } catch (error) {
+        console.error("Error in fetchDepartments:", error)
+      } finally {
+        setIsLoadingDepartments(false)
+      }
+    }
+
+    fetchDepartments()
+  }, [])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0])
+    }
+  }
+
+  async function onSubmit(values: z.infer<typeof anonymousFormSchema>) {
+    setIsSubmitting(true)
+    setErrorMessage(null)
+
+    try {
+      const formData = new FormData()
+      formData.append("complaintType", values.complaintType)
+      formData.append("description", values.description)
+      formData.append("location", values.location)
+      formData.append("date", values.date)
+      formData.append("verificationCode", values.verificationCode)
+      formData.append("departmentId", values.departmentId)
+
+      if (file) {
+        formData.append("file", file)
+      }
+
+      const response = await submitAnonymousComplaint(formData)
+
+      if (response.success) {
+        setSubmissionRef(response.referenceNumber || "")
+        setSubmitted(true)
+      } else {
+        setErrorMessage(response.message || "Failed to submit complaint. Please try again.")
+      }
+    } catch (error) {
+      console.error("Error submitting anonymous complaint:", error)
+      setErrorMessage("An unexpected error occurred. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const primaryButtonClasses =
+    "bg-sky-600 hover:bg-sky-700 text-white rounded-md shadow-sm hover:shadow-lg transition-all duration-300 text-base px-6 py-3 font-semibold"
+  const inputClasses =
+    "bg-white border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/50 rounded-md shadow-sm placeholder:text-slate-400 text-slate-800"
+  const labelClasses = "text-slate-700 font-medium text-sm"
 
   if (submitted) {
     return (
-      <div className="container mx-auto flex flex-col items-center justify-center py-12 px-4 min-h-[calc(100vh-200px)]"> {/* Adjusted min-height */}
+      <div className="container mx-auto flex flex-col items-center justify-center py-12 px-4 min-h-[calc(100vh-200px)]">
         <Card className="w-full max-w-lg bg-white rounded-xl shadow-xl border border-slate-200 p-6 md:p-8 text-center">
           <div className="bg-green-100 rounded-full p-3 inline-block mb-5 ring-4 ring-green-200">
             <CheckCircle2 className="h-12 w-12 text-green-600" />
@@ -73,15 +144,17 @@ export default function AnonymousComplaintPage() {
               Your complaint reference number is: <strong className="block text-lg mt-1">{submissionRef}</strong>
             </p>
             <p className="text-xs text-sky-600 mt-2">
-              Please keep this reference number and your verification code safe. You can use them to check the status of your complaint later (feature coming soon).
+              Please keep this reference number and your verification code safe. You can use them to check the status of
+              your complaint later (feature coming soon).
             </p>
           </div>
-          <Button 
+          <Button
             onClick={() => {
-              setSubmitted(false);
-              form.reset();
-              setSubmissionRef("");
-            }} 
+              setSubmitted(false)
+              form.reset()
+              setSubmissionRef("")
+              setFile(null)
+            }}
             className={primaryButtonClasses}
           >
             Submit Another Complaint
@@ -108,8 +181,8 @@ export default function AnonymousComplaintPage() {
           <AlertTriangle className="h-5 w-5 text-yellow-500" />
           <AlertTitle className="font-semibold text-yellow-800">Your Identity is Protected</AlertTitle>
           <AlertDescription className="text-yellow-700 text-sm">
-            We do not collect any personal information when you submit an anonymous complaint. Your IP address and browser
-            information are not stored or logged with your submission.
+            We do not collect any personal information when you submit an anonymous complaint. Your IP address and
+            browser information are not stored or logged with your submission.
           </AlertDescription>
         </Alert>
 
@@ -119,8 +192,9 @@ export default function AnonymousComplaintPage() {
               <Shield className="h-6 w-6 mr-2.5 text-sky-600" />
               Submit Anonymous Complaint Form
             </CardTitle>
-            <CardDescription className="text-slate-500 pt-1 pl-9"> {/* Aligned with title text */}
-              Report issues with services, staff behavior, or other concerns without revealing your identity. All fields marked with * are required.
+            <CardDescription className="text-slate-500 pt-1 pl-9">
+              Report issues with services, staff behavior, or other concerns without revealing your identity. All fields
+              marked with * are required.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6 px-6 pb-8">
@@ -138,15 +212,42 @@ export default function AnonymousComplaintPage() {
                             <SelectValue placeholder="Select complaint type" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-gray-500 border-slate-200 shadow-lg rounded-md">
+                        <SelectContent className="bg-white border-slate-200 shadow-lg rounded-md">
                           <SelectItem value="corruption">Corruption / Bribery</SelectItem>
                           <SelectItem value="misconduct">Staff Misconduct / Negligence</SelectItem>
                           <SelectItem value="harassment">Harassment (Any Form)</SelectItem>
                           <SelectItem value="discrimination">Discrimination (Any Form)</SelectItem>
                           <SelectItem value="fraud">Fraud / Financial Mismanagement</SelectItem>
-                           <SelectItem value="safety-security">Safety or Security Concern</SelectItem>
+                          <SelectItem value="safety-security">Safety or Security Concern</SelectItem>
                           <SelectItem value="service-delivery">Poor Service Delivery</SelectItem>
                           <SelectItem value="other">Other (Please specify in description)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="departmentId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={labelClasses}>Department *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className={inputClasses}>
+                            <SelectValue
+                              placeholder={isLoadingDepartments ? "Loading departments..." : "Select department"}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-white border-slate-200 shadow-lg rounded-md">
+                          {departments.map((dept) => (
+                            <SelectItem key={dept.id} value={dept.id.toString()}>
+                              {dept.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -180,7 +281,11 @@ export default function AnonymousComplaintPage() {
                       <FormItem>
                         <FormLabel className={labelClasses}>Location of Incident *</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Wereda 07 Main Office, specific department" className={inputClasses} {...field} />
+                          <Input
+                            placeholder="e.g., Wereda 07 Main Office, specific department"
+                            className={inputClasses}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -194,32 +299,11 @@ export default function AnonymousComplaintPage() {
                       <FormItem>
                         <FormLabel className={labelClasses}>Approximate Date of Incident *</FormLabel>
                         <FormControl>
-                          <Input type="date" className={inputClasses} {...field} max={new Date().toISOString().split("T")[0]} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="border-t border-slate-200 pt-6 mt-4">
-                  <h3 className="text-xl font-semibold mb-2 text-slate-700">Create Your Verification Code</h3>
-                  <p className="text-sm text-slate-500 mb-4">
-                    Create a unique and memorable verification code (4-10 characters). <strong className="text-slate-600">Do not use personal information.</strong> You'll use this code along with your reference number (provided after submission) to check the status of your complaint in the future. Keep this code safe.
-                  </p>
-
-                  <FormField
-                    control={form.control}
-                    name="verificationCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className={labelClasses}>Verification Code * <span className="text-xs font-normal text-slate-400">(4-10 characters)</span></FormLabel>
-                        <FormControl>
                           <Input
+                            type="date"
                             className={inputClasses}
-                            placeholder="e.g., SunFlower24"
-                            maxLength={10}
                             {...field}
+                            max={new Date().toISOString().split("T")[0]}
                           />
                         </FormControl>
                         <FormMessage />
@@ -228,9 +312,83 @@ export default function AnonymousComplaintPage() {
                   />
                 </div>
 
-                <Button type="submit" className={`${primaryButtonClasses} w-full md:w-auto group`}>
-                  <Send className="mr-2 h-5 w-5 group-hover:animate-pulse" /> {/* Added Send icon and hover animation */}
-                  Submit Anonymous Complaint
+                {/* File Upload - Using a div instead of FormField since it's not part of the form schema */}
+                <div className="space-y-1.5">
+                  <div className="flex flex-col space-y-1.5">
+                    <label htmlFor="anonymous-file" className={labelClasses}>
+                      Attach Supporting Document (optional)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={fileInputRef}
+                        id="anonymous-file"
+                        type="file"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-2"
+                      >
+                        <Paperclip className="h-4 w-4" />
+                        Choose File
+                      </Button>
+                      <span className="text-sm text-slate-500">{file ? file.name : "No file chosen"}</span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">Accepted formats: PDF, JPG, PNG (max 5MB)</p>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-200 pt-6 mt-4">
+                  <h3 className="text-xl font-semibold mb-2 text-slate-700">Create Your Verification Code</h3>
+                  <p className="text-sm text-slate-500 mb-4">
+                    Create a unique and memorable verification code (4-10 characters).{" "}
+                    <strong className="text-slate-600">Do not use personal information.</strong> You'll use this code
+                    along with your reference number (provided after submission) to check the status of your complaint
+                    in the future. Keep this code safe.
+                  </p>
+
+                  <FormField
+                    control={form.control}
+                    name="verificationCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={labelClasses}>
+                          Verification Code *{" "}
+                          <span className="text-xs font-normal text-slate-400">(4-10 characters)</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input className={inputClasses} placeholder="e.g., SunFlower24" maxLength={10} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {errorMessage && (
+                  <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800 rounded-md">
+                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                    <AlertTitle className="text-red-700">Submission Error</AlertTitle>
+                    <AlertDescription className="text-red-600">{errorMessage}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Button
+                  type="submit"
+                  className={`${primaryButtonClasses} w-full md:w-auto group`}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>Processing...</>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-5 w-5 group-hover:animate-pulse" />
+                      Submit Anonymous Complaint
+                    </>
+                  )}
                 </Button>
               </form>
             </Form>
