@@ -34,6 +34,12 @@ const TruncatedText = ({ text, maxLength = 50 }: { text: string; maxLength?: num
   )
 }
 
+const getLatestItems = (items: any[], count: number = 5) => {
+  return [...items]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, count)
+}
+
 export default function DashboardPage() {
   const [complaints, setComplaints] = useState<any[]>([])
   const [feedback, setFeedback] = useState<any[]>([])
@@ -89,6 +95,13 @@ export default function DashboardPage() {
     totalDepartments: departments.length,
     totalUsers: users.length
   }
+
+  // Get latest items for each section
+  const latestComplaints = getLatestItems(complaints)
+  const latestFeedback = getLatestItems(feedback)
+  const latestAnonymous = getLatestItems(anonymousComplaints)
+  const latestDepartments = getLatestItems(departments)
+  const latestUsers = getLatestItems(users)
 
   if (loading) {
     return <div className="p-8 text-center">Loading dashboard data...</div>
@@ -205,37 +218,206 @@ export default function DashboardPage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
+          {/* Latest Complaints */}
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest updates across all sections</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Latest Complaints</CardTitle>
+                <CardDescription>Most recent complaints</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="text-muted-foreground">
+                View all <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Details</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[...complaints, ...feedback, ...anonymousComplaints]
-                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                    .slice(0, 5)
-                    .map((item) => (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[200px]">Name</TableHead>
+                      <TableHead className="w-[200px]">Email</TableHead>
+                      <TableHead className="w-[150px]">Service</TableHead>
+                      <TableHead className="w-[100px]">Status</TableHead>
+                      <TableHead className="w-[150px]">Created</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {latestComplaints.map((complaint) => (
+                      <TableRow key={complaint.id}>
+                        <TableCell className="font-medium">{complaint.name}</TableCell>
+                        <TableCell className="truncate max-w-[200px]">{complaint.email}</TableCell>
+                        <TableCell className="truncate max-w-[150px]">{complaint.service}</TableCell>
+                        <TableCell>
+                          <Badge>{complaint.status}</Badge>
+                        </TableCell>
+                        <TableCell>{new Date(complaint.created_at).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Latest Feedback */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Latest Feedback</CardTitle>
+                <CardDescription>Most recent feedback</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="text-muted-foreground">
+                View all <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[200px]">Email</TableHead>
+                      <TableHead className="w-[150px]">Service</TableHead>
+                      <TableHead className="w-[100px]">Rating</TableHead>
+                      <TableHead>Details</TableHead>
+                      <TableHead className="w-[150px]">Created</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {latestFeedback.map((item) => (
                       <TableRow key={item.id}>
-                        <TableCell>{item.type || 'Complaint'}</TableCell>
-                        <TableCell>{item.details || item.description || item.complaint_details}</TableCell>
+                        <TableCell className="truncate max-w-[200px]">{item.email}</TableCell>
+                        <TableCell className="truncate max-w-[150px]">{item.service}</TableCell>
+                        <TableCell>{item.rating}</TableCell>
+                        <TableCell className="max-w-[300px]">
+                          <TruncatedText text={item.feedback_details} maxLength={50} />
+                        </TableCell>
+                        <TableCell>{new Date(item.created_at).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Latest Anonymous Complaints */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Latest Anonymous Complaints</CardTitle>
+                <CardDescription>Most recent anonymous complaints</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="text-muted-foreground">
+                View all <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[150px]">Type</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="w-[150px]">Location</TableHead>
+                      <TableHead className="w-[100px]">Status</TableHead>
+                      <TableHead className="w-[150px]">Created</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {latestAnonymous.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.complaint_type}</TableCell>
+                        <TableCell className="max-w-[300px]">
+                          <TruncatedText text={item.description} maxLength={50} />
+                        </TableCell>
+                        <TableCell className="truncate max-w-[150px]">{item.location}</TableCell>
                         <TableCell>
                           <Badge>{item.status}</Badge>
                         </TableCell>
                         <TableCell>{new Date(item.created_at).toLocaleDateString()}</TableCell>
                       </TableRow>
                     ))}
-                </TableBody>
-              </Table>
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Latest Departments */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Latest Departments</CardTitle>
+                <CardDescription>Most recent departments</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="text-muted-foreground">
+                View all <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[200px]">Name</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="w-[100px]">Code</TableHead>
+                      <TableHead className="w-[150px]">Created</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {latestDepartments.map((dept) => (
+                      <TableRow key={dept.id}>
+                        <TableCell className="font-medium">{dept.name}</TableCell>
+                        <TableCell className="max-w-[300px]">
+                          <TruncatedText text={dept.description} maxLength={50} />
+                        </TableCell>
+                        <TableCell>{dept.code}</TableCell>
+                        <TableCell>{new Date(dept.created_at).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Latest Users */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Latest Users</CardTitle>
+                <CardDescription>Most recent users</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="text-muted-foreground">
+                View all <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[200px]">Name</TableHead>
+                      <TableHead className="w-[200px]">Email</TableHead>
+                      <TableHead className="w-[100px]">Role</TableHead>
+                      <TableHead className="w-[150px]">Department</TableHead>
+                      <TableHead className="w-[150px]">Created</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {latestUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.name}</TableCell>
+                        <TableCell className="truncate max-w-[200px]">{user.email}</TableCell>
+                        <TableCell>{user.role}</TableCell>
+                        <TableCell>{user.department_id}</TableCell>
+                        <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
