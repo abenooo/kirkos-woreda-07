@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Edit, Key, MoreHorizontal, Plus, Search, Trash2 } from "lucide-react"
+import { createClient } from "@supabase/supabase-js"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,57 +30,14 @@ import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-// Mock users data
-const mockUsers = [
-  {
-    id: "1",
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "administrator",
-    department: "Administration",
-    status: "active",
-    createdAt: "2023-01-15T10:30:00Z",
-  },
-  {
-    id: "2",
-    name: "John Technician",
-    email: "john@example.com",
-    role: "department_head",
-    department: "Water & Sewage",
-    status: "active",
-    createdAt: "2023-02-20T14:45:00Z",
-  },
-  {
-    id: "3",
-    name: "Sarah Manager",
-    email: "sarah@example.com",
-    role: "department_head",
-    department: "Roads & Infrastructure",
-    status: "active",
-    createdAt: "2023-03-10T09:15:00Z",
-  },
-  {
-    id: "4",
-    name: "Michael Staff",
-    email: "michael@example.com",
-    role: "staff",
-    department: "Waste Management",
-    status: "active",
-    createdAt: "2023-04-05T11:20:00Z",
-  },
-  {
-    id: "5",
-    name: "Emily Operator",
-    email: "emily@example.com",
-    role: "staff",
-    department: "Public Safety",
-    status: "inactive",
-    createdAt: "2023-05-12T16:30:00Z",
-  },
-]
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function UsersPage() {
-  const [users, setUsers] = useState(mockUsers)
+  const [users, setUsers] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -95,17 +53,38 @@ export default function UsersPage() {
     status: "active",
   })
 
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, name, email, role, department_id, created_at, updated_at")
+        .order("created_at", { ascending: false })
+      setUsers(data || [])
+      setLoading(false)
+    }
+    fetchUsers()
+  }, [])
+
   // Filter users based on search query
   const filteredUsers = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchQuery.toLowerCase()),
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.department_id + "").toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  const paginatedUsers = filteredUsers.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
   // Handle adding a new user
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     // Validate form
     if (
       !newUser.name ||
@@ -119,45 +98,58 @@ export default function UsersPage() {
       return
     }
 
-    const user = {
-      id: Date.now().toString(),
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      department: newUser.department,
-      status: newUser.status,
-      createdAt: new Date().toISOString(),
+    const { data, error } = await supabase
+      .from("users")
+      .insert([
+        {
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+          department_id: newUser.department,
+          status: newUser.status,
+        }
+      ])
+      .select()
+    if (!error) {
+      setUsers((prev) => [...prev, ...(data || [])])
+      setIsAddDialogOpen(false)
+      // reset newUser state
     }
-
-    setUsers((prev) => [...prev, user])
-    setNewUser({
-      name: "",
-      email: "",
-      role: "staff",
-      department: "",
-      password: "",
-      confirmPassword: "",
-      status: "active",
-    })
-    setIsAddDialogOpen(false)
   }
 
   // Handle editing a user
-  const handleEditUser = () => {
+  const handleEditUser = async () => {
     if (!currentUser) return
-
-    setUsers((prev) => prev.map((user) => (user.id === currentUser.id ? currentUser : user)))
-
-    setIsEditDialogOpen(false)
+    const { data, error } = await supabase
+      .from("users")
+      .update({
+        name: currentUser.name,
+        email: currentUser.email,
+        role: currentUser.role,
+        department_id: currentUser.department_id,
+        status: currentUser.status,
+      })
+      .eq("id", currentUser.id)
+      .select()
+    if (!error) {
+      setUsers((prev) =>
+        prev.map((user) => (user.id === currentUser.id ? (data ? data[0] : currentUser) : user))
+      )
+      setIsEditDialogOpen(false)
+    }
   }
 
   // Handle deleting a user
-  const handleDeleteUser = () => {
+  const handleDeleteUser = async () => {
     if (!currentUser) return
-
-    setUsers((prev) => prev.filter((user) => user.id !== currentUser.id))
-
-    setIsDeleteDialogOpen(false)
+    const { error } = await supabase
+      .from("users")
+      .delete()
+      .eq("id", currentUser.id)
+    if (!error) {
+      setUsers((prev) => prev.filter((user) => user.id !== currentUser.id))
+      setIsDeleteDialogOpen(false)
+    }
   }
 
   // Get role badge variant
@@ -320,88 +312,32 @@ export default function UsersPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Department ID</TableHead>
+                    <TableHead>Created At</TableHead>
+                    <TableHead>Updated At</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.length === 0 ? (
+                  {loading ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center">
-                        No users found.
-                      </TableCell>
+                      <TableCell colSpan={6}>Loading...</TableCell>
+                    </TableRow>
+                  ) : paginatedUsers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6}>No users found.</TableCell>
                     </TableRow>
                   ) : (
-                    filteredUsers.map((user) => (
+                    paginatedUsers.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src="/placeholder.svg?height=40&width=40" alt={user.name} />
-                              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium">{user.name}</div>
-                              <div className="text-sm text-muted-foreground">{user.email}</div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={getRoleBadgeVariant(user.role)}>{getRoleDisplayName(user.role)}</Badge>
-                        </TableCell>
-                        <TableCell>{user.department}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={user.status === "active" ? "outline" : "secondary"}
-                            className={
-                              user.status === "active" ? "bg-green-500/10 text-green-500 border-green-500/20" : ""
-                            }
-                          >
-                            {user.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setCurrentUser(user)
-                                  setIsEditDialogOpen(true)
-                                }}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Key className="mr-2 h-4 w-4" />
-                                Reset Password
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => {
-                                  setCurrentUser(user)
-                                  setIsDeleteDialogOpen(true)
-                                }}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
+                        <TableCell>{user.name}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>{user.role}</TableCell>
+                        <TableCell>{user.department_id}</TableCell>
+                        <TableCell>{user.created_at ? new Date(user.created_at).toLocaleDateString() : ""}</TableCell>
+                        <TableCell>{user.updated_at ? new Date(user.updated_at).toLocaleDateString() : ""}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -409,11 +345,24 @@ export default function UsersPage() {
               </Table>
             </div>
 
-            <div className="flex items-center justify-end space-x-2">
-              <Button variant="outline" size="sm">
+            <div className="flex items-center justify-end space-x-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
                 Previous
               </Button>
-              <Button variant="outline" size="sm">
+              <span className="text-sm px-2">
+                Page {page} of {Math.ceil(filteredUsers.length / PAGE_SIZE) || 1}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page * PAGE_SIZE >= filteredUsers.length}
+                onClick={() => setPage((p) => p + 1)}
+              >
                 Next
               </Button>
             </div>
