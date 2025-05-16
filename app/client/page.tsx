@@ -361,7 +361,7 @@ export default function ClientHomePage() {
               { href: "/client/anonymous", icon: MessageSquare, label: "Anonymous Report" },
               { href: "/client/misconduct", icon: AlertTriangle, label: "Report Misconduct" },
               { href: "/client/requirements", icon: FileQuestion, label: "Requirements Guide" },
-              { href: "/client/licenses", icon: Building2, label: "Building Licenses" },
+              // { href: "/client/licenses", icon: Building2, label: "Building Licenses" },
             ].map((link) => (
               <Link
                 key={link.href}
