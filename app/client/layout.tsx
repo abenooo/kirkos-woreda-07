@@ -34,7 +34,7 @@ const translations = {
     anonymous: "Anonymous Report",
     misconduct: "Report Misconduct",
     requirements: "Requirements",
-    licenses: "Building Licenses",
+    // licenses: "Building Licenses",
     language: "Language",
     english: "English",
     amharic: "Amharic",
@@ -109,7 +109,7 @@ export default function ClientLayout({
   const secondaryNavItems = [
     { name: t.anonymous, href: "/client/anonymous", icon: MessageSquare },
     { name: t.misconduct, href: "/client/misconduct", icon: AlertTriangle },
-    { name: t.licenses, href: "/client/licenses", icon: Building2 },
+    // { name: t.licenses, href: "/client/licenses", icon: Building2 },
   ]
 
   return (
