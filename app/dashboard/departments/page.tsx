@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Edit, MoreHorizontal, Plus, Search, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -28,79 +28,16 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { createClient } from "@supabase/supabase-js"
 
-// Mock departments data
-const mockDepartments = [
-  {
-    id: "d1",
-    name: "Water & Sewage",
-    description: "Responsible for water supply, sewage systems, and related infrastructure maintenance.",
-    head: "John Technician",
-    email: "water@subcity.gov",
-    phone: "+251-111-234567",
-    status: "active",
-    employeeCount: 45,
-    createdAt: "2023-01-01T00:00:00Z",
-  },
-  {
-    id: "d2",
-    name: "Roads & Infrastructure",
-    description: "Manages road networks, bridges, street lighting, and public infrastructure.",
-    head: "Sarah Manager",
-    email: "roads@subcity.gov",
-    phone: "+251-111-234568",
-    status: "active",
-    employeeCount: 62,
-    createdAt: "2023-01-15T00:00:00Z",
-  },
-  {
-    id: "d3",
-    name: "Waste Management",
-    description: "Handles waste collection, disposal, recycling, and environmental sanitation.",
-    head: "Michael Staff",
-    email: "waste@subcity.gov",
-    phone: "+251-111-234569",
-    status: "active",
-    employeeCount: 38,
-    createdAt: "2023-02-01T00:00:00Z",
-  },
-  {
-    id: "d4",
-    name: "Public Safety",
-    description: "Ensures public safety, manages emergency services, and enforces local regulations.",
-    head: "Emily Operator",
-    email: "safety@subcity.gov",
-    phone: "+251-111-234570",
-    status: "active",
-    employeeCount: 53,
-    createdAt: "2023-03-01T00:00:00Z",
-  },
-  {
-    id: "d5",
-    name: "Housing",
-    description: "Manages public housing, housing assistance programs, and related services.",
-    head: "David Thompson",
-    email: "housing@subcity.gov",
-    phone: "+251-111-234571",
-    status: "maintenance",
-    employeeCount: 27,
-    createdAt: "2023-04-01T00:00:00Z",
-  },
-  {
-    id: "d6",
-    name: "Health Services",
-    description: "Provides public health services, health education, and community health programs.",
-    head: "Lisa Anderson",
-    email: "health@subcity.gov",
-    phone: "+251-111-234572",
-    status: "active",
-    employeeCount: 41,
-    createdAt: "2023-05-01T00:00:00Z",
-  },
-]
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function DepartmentsPage() {
-  const [departments, setDepartments] = useState(mockDepartments)
+  const [departments, setDepartments] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -115,6 +52,19 @@ export default function DepartmentsPage() {
     status: "active",
     employeeCount: 0,
   })
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      setLoading(true)
+      try {
+        const { data } = await supabase.from("departments").select("*")
+        setDepartments(data || [])
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchDepartments()
+  }, [])
 
   // Filter departments based on search query
   const filteredDepartments = departments.filter(
@@ -327,7 +277,13 @@ export default function DepartmentsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredDepartments.length === 0 ? (
+                  {loading ? (
+                    <TableRow className="border-slate-700 hover:bg-slate-800/50">
+                      <TableCell colSpan={6} className="h-24 text-center text-slate-400">
+                        Loading...
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredDepartments.length === 0 ? (
                     <TableRow className="border-slate-700 hover:bg-slate-800/50">
                       <TableCell colSpan={6} className="h-24 text-center text-slate-400">
                         No departments found.
