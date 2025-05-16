@@ -19,6 +19,8 @@ import {
   User,
   Users,
   ExternalLink,
+  Menu,
+  Shield,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -35,6 +37,7 @@ import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { Suspense } from "react"
 import { cn } from "@/lib/utils"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 export default function DashboardLayout({
   children,
@@ -44,32 +47,56 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const router = useRouter()
   const { toast } = useToast()
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
+  const supabase = createClientComponentClient()
 
-  // Simulate authentication check
   useEffect(() => {
-    // In a real app, you would check for a valid session/token
-    const checkAuth = () => {
-      const token = localStorage.getItem("admin-token")
-      if (!token && pathname !== "/dashboard/login") {
-        setIsAuthenticated(false)
-        router.push("/dashboard/login")
-      } else {
-        setIsAuthenticated(true)
+    const checkAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) throw error
+        
+        if (session) {
+          setUser(session.user)
+        }
+      } catch (error) {
+        console.error('Auth error:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
     checkAuth()
-  }, [pathname, router])
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin-token")
-    localStorage.removeItem("user-data")
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account",
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
     })
-    router.push("/dashboard/login")
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [supabase])
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account",
+      })
+      router.push("/dashboard/login")
+    } catch (error) {
+      console.error('Logout error:', error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+      })
+    }
   }
 
   const navItems = [
@@ -116,151 +143,91 @@ export default function DashboardLayout({
     },
   ]
 
-  // If on login page, don't show the dashboard layout
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (pathname === "/dashboard/login") {
     return <>{children}</>
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
-      <div className="flex min-h-screen">
-        {/* Sidebar */}
-        <div className="hidden md:flex md:w-64 md:flex-col">
-          <div className="flex flex-col bg-white border-r border-slate-200 h-full">
-            {/* Sidebar Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-              <div className="flex items-center space-x-2">
-                <Hexagon className="h-8 w-8 text-cyan-500" />
-                <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  Sub-City Admin
-                </span>
-              </div>
-            </div>
-
-            {/* Sidebar Navigation */}
-            <div className="flex-1 overflow-y-auto py-4">
-              <nav className="px-4 space-y-2">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    target={item.external ? "_blank" : undefined}
-                    className={cn(
-                      "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-                      pathname === item.href
-                        ? "bg-slate-800 text-slate-100"
-                        : "text-slate-400 hover:bg-slate-800 hover:text-slate-100",
-                    )}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.name}
-                    {item.external && <ExternalLink className="ml-1 h-3 w-3" />}
-                  </Link>
-                ))}
-              </nav>
-
-              <div className="mt-8 pt-6 border-t border-slate-200 px-4">
-                <div className="text-xs text-slate-500 mb-2 font-mono px-2">SYSTEM STATUS</div>
-                <div className="space-y-3">
-                  <StatusItem label="Core Systems" value={85} color="cyan" />
-                  <StatusItem label="Security" value={75} color="green" />
-                  <StatusItem label="Network" value={92} color="blue" />
-                </div>
-              </div>
-            </div>
-
-            {/* Sidebar Footer */}
-            <div className="border-t border-slate-200 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Avatar>
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Admin" />
-                    <AvatarFallback className="bg-slate-700 text-cyan-500">AD</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">Admin User</p>
-                    <p className="text-xs text-slate-400">Administrator</p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleLogout}
-                  className="text-slate-400 hover:text-slate-100"
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <div className="hidden w-64 border-r bg-muted/40 lg:block">
+        <div className="flex h-full flex-col gap-2">
+          <div className="flex h-[60px] items-center border-b px-6">
+            <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+              <Shield className="h-6 w-6" />
+              <span>Admin Dashboard</span>
+            </Link>
+          </div>
+          <div className="flex-1 overflow-auto py-2">
+            <nav className="grid items-start px-4 text-sm font-medium">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground",
+                    pathname === item.href && "bg-muted text-foreground"
+                  )}
                 >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+                  <item.icon className="h-4 w-4" />
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+          </div>
+          <div className="mt-auto p-4">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
           </div>
         </div>
+      </div>
 
-        {/* Main Content */}
-        <div className="flex-1">
-          {/* Header */}
-          <header className="border-b border-slate-200">
-            <div className="flex h-16 items-center px-4 md:px-6">
-              <div className="md:hidden">
-                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-100">
-                  <Command className="h-5 w-5" />
-                </Button>
-              </div>
-
-              <div className="hidden md:flex md:flex-1 md:items-center md:space-x-2 md:ml-4">
-                <div className="bg-slate-800/50 rounded-full px-3 py-1.5 border border-slate-200 backdrop-blur-sm">
-                  <div className="flex items-center">
-                    <Search className="h-4 w-4 text-slate-400 mr-2" />
-                    <Input
-                      type="text"
-                      placeholder="Search..."
-                      className="bg-transparent border-none focus:outline-none text-sm w-40 placeholder:text-slate-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="ml-auto flex items-center space-x-4">
-                <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-slate-100">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-cyan-500 rounded-full animate-pulse"></span>
-                </Button>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Admin" />
-                        <AvatarFallback className="bg-slate-700 text-cyan-500">AD</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-slate-800 border-slate-200 text-slate-100">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-slate-200" />
-                    <DropdownMenuItem className="hover:bg-slate-700">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-slate-700">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-slate-200" />
-                    <DropdownMenuItem onClick={handleLogout} className="hover:bg-slate-700">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          </header>
-
-          {/* Main Content */}
-          <main className="flex-1 p-4 md:p-6">
-            <Suspense fallback={<>Loading...</>}>{children}</Suspense>
-          </main>
-        </div>
+      {/* Main content */}
+      <div className="flex flex-1 flex-col">
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+          <Button
+            variant="outline"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => {/* Add mobile menu handler */}}
+          >
+            <Menu className="h-6 w-6" />
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-lg font-semibold">
+              {navItems.find((item) => item.href === pathname)?.name || "Dashboard"}
+            </h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon">
+              <Bell className="h-5 w-5" />
+            </Button>
+            <Button variant="outline" size="icon">
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
+        </header>
+        <main className="flex-1 overflow-auto p-4 lg:p-6">
+          <Suspense fallback={<>Loading...</>}>{children}</Suspense>
+        </main>
       </div>
     </div>
   )
