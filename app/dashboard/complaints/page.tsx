@@ -189,53 +189,43 @@ export default function ComplaintsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[100px]">ID</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Department</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Complaint Type</TableHead>
+                    <TableHead>Complaint Details</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Submitted</TableHead>
+                    <TableHead>Created At</TableHead>
+                    <TableHead>Updated At</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center">
+                      <TableCell colSpan={10} className="h-24 text-center">
                         Loading...
                       </TableCell>
                     </TableRow>
                   ) : complaints.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center">
+                      <TableCell colSpan={10} className="h-24 text-center">
                         No complaints found.
                       </TableCell>
                     </TableRow>
                   ) : (
                     complaints.map((complaint) => (
                       <TableRow key={complaint.id}>
-                        <TableCell className="font-medium">#{complaint.id.slice(0, 8)}</TableCell>
+                        <TableCell className="font-medium">{complaint.name}</TableCell>
+                        <TableCell>{complaint.phone}</TableCell>
+                        <TableCell>{complaint.email}</TableCell>
+                        <TableCell>{complaint.service}</TableCell>
+                        <TableCell>{complaint.complaint_type}</TableCell>
                         <TableCell>
-                          <div className="font-medium">{complaint.title}</div>
-                          <div className="text-sm text-muted-foreground line-clamp-1">{complaint.description}</div>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            defaultValue={complaint.department}
-                            onValueChange={(value) => handleDepartmentAssign(complaint.id, value)}
-                          >
-                            <SelectTrigger className="h-8 w-[140px]">
-                              <SelectValue placeholder="Assign" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {departments
-                                .filter((d) => d !== "all")
-                                .map((dept) => (
-                                  <SelectItem key={dept} value={dept}>
-                                    {dept}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
+                          <div className="text-sm text-muted-foreground line-clamp-2">
+                            {complaint.complaint_details}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <Select
@@ -255,6 +245,11 @@ export default function ComplaintsPage() {
                         <TableCell>
                           {complaint.created_at
                             ? new Date(complaint.created_at).toLocaleDateString()
+                            : ""}
+                        </TableCell>
+                        <TableCell>
+                          {complaint.updated_at
+                            ? new Date(complaint.updated_at).toLocaleDateString()
                             : ""}
                         </TableCell>
                         <TableCell className="text-right">
