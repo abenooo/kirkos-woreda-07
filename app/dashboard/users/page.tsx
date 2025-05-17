@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Edit, Key, MoreHorizontal, Plus, Search, Trash2 } from "lucide-react"
 import { createClient } from "@supabase/supabase-js"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,20 +30,26 @@ import {
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { AlertCircle } from "lucide-react"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default function UsersPage() {
+export default function DashboardPage() {
+  const [complaints, setComplaints] = useState<any[]>([])
+  const [feedback, setFeedback] = useState<any[]>([])
+  const [anonymousComplaints, setAnonymousComplaints] = useState<any[]>([])
+  const [departments, setDepartments] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [currentUser, setCurrentUser] = useState<any>(null)
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
@@ -57,17 +64,79 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from("users")
-        .select("id, name, email, role, department_id, created_at, updated_at")
-        .order("created_at", { ascending: false })
-      setUsers(data || [])
-      setLoading(false)
+    const supabase = createClientComponentClient()
+    
+    const fetchData = async () => {
+      try {
+        // First get the current user
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', user.id)
+            .single()
+          setCurrentUser(userData)
+        }
+
+        // Fetch all data
+        const [
+          { data: complaintsData },
+          { data: feedbackData },
+          { data: anonymousData },
+          { data: departmentsData },
+          { data: usersData }
+        ] = await Promise.all([
+          supabase.from('complaints').select('*'),
+          supabase.from('feedback').select('*'),
+          supabase.from('anonymous_complaints').select('*'),
+          supabase.from('departments').select('*'),
+          supabase.from('users').select('*')
+        ])
+
+        // Filter data based on user role and department
+        if (currentUser?.role === 'department_head') {
+          // For department heads, only show their department's data
+          setComplaints(complaintsData?.filter(c => c.department_id === currentUser.department_id) || [])
+          setAnonymousComplaints(anonymousData?.filter(a => a.department_id === currentUser.department_id) || [])
+        } else {
+          // For admins, show all data
+          setComplaints(complaintsData || [])
+          setAnonymousComplaints(anonymousData || [])
+        }
+
+        // Set other data
+        setFeedback(feedbackData || [])
+        setDepartments(departmentsData || [])
+        setUsers(usersData || [])
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-    fetchUsers()
+
+    fetchData()
   }, [])
+
+  // Stats for the dashboard
+  const stats = {
+    totalComplaints: complaints.length,
+    pendingComplaints: complaints.filter((c) => c.status === "pending").length,
+    inProgressComplaints: complaints.filter((c) => c.status === "in_progress").length,
+    resolvedComplaints: complaints.filter((c) => c.status === "resolved").length,
+    rejectedComplaints: complaints.filter((c) => c.status === "rejected").length,
+    totalFeedback: feedback.length,
+    totalAnonymous: anonymousComplaints.length,
+    totalDepartments: departments.length,
+    totalUsers: users.length
+  }
+
+  // Get department name from ID
+  const getDepartmentName = (departmentId: string) => {
+    const department = departments.find(d => d.id === departmentId)
+    return department?.name || departmentId
+  }
 
   // Filter users based on search query
   const filteredUsers = users.filter(
@@ -197,231 +266,270 @@ export default function UsersPage() {
     }
   }
 
+  if (loading) {
+    return <div className="p-8 text-center">Loading dashboard data...</div>
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add User
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add New User</DialogTitle>
-              <DialogDescription>Create a new user account with appropriate role and permissions.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  value={newUser.name}
-                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
-                    <SelectTrigger id="role">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="administrator">Administrator</SelectItem>
-                      <SelectItem value="department_head">Department Head</SelectItem>
-                      <SelectItem value="staff">Staff</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="department">Department</Label>
-                  <Select
-                    value={newUser.department_id}
-                    onValueChange={(value) => setNewUser({ ...newUser, department_id: value })}
-                  >
-                    <SelectTrigger id="department">
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Administration">Administration</SelectItem>
-                      <SelectItem value="Water & Sewage">Water & Sewage</SelectItem>
-                      <SelectItem value="Roads & Infrastructure">Roads & Infrastructure</SelectItem>
-                      <SelectItem value="Waste Management">Waste Management</SelectItem>
-                      <SelectItem value="Public Safety">Public Safety</SelectItem>
-                      <SelectItem value="Housing">Housing</SelectItem>
-                      <SelectItem value="Health Services">Health Services</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={newUser.confirmPassword}
-                  onChange={(e) => setNewUser({ ...newUser, confirmPassword: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={newUser.status} onValueChange={(value) => setNewUser({ ...newUser, status: value })}>
-                  <SelectTrigger id="status">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddUser}>Add User</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          {currentUser?.role === 'department_head' && (
+            <p className="text-muted-foreground">
+              Department: {getDepartmentName(currentUser.department_id)}
+            </p>
+          )}
+        </div>
+        {/* ... (keep existing timeframe selector) */}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Users</CardTitle>
-          <CardDescription>Manage user accounts and their permissions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search users..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Complaints</CardTitle>
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalComplaints}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.pendingComplaints} pending, {stats.resolvedComplaints} resolved
+            </p>
+          </CardContent>
+        </Card>
+        {/* ... (keep other stat cards) */}
+      </div>
 
-            <div className="rounded-md border">
+      {/* Tabs Section */}
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="complaints">Complaints</TabsTrigger>
+          <TabsTrigger value="feedback">Feedback</TabsTrigger>
+          <TabsTrigger value="anonymous">Anonymous</TabsTrigger>
+          {currentUser?.role === 'administrator' && (
+            <>
+              <TabsTrigger value="departments">Departments</TabsTrigger>
+              <TabsTrigger value="users">Users</TabsTrigger>
+            </>
+          )}
+        </TabsList>
+
+        {/* Complaints Tab */}
+        <TabsContent value="complaints">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {currentUser?.role === 'department_head' 
+                  ? `${getDepartmentName(currentUser.department_id)} Complaints`
+                  : 'All Complaints'}
+              </CardTitle>
+              <CardDescription>
+                {currentUser?.role === 'department_head'
+                  ? 'Complaints for your department'
+                  : 'All complaints across departments'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Department ID</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead>Updated At</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={6}>Loading...</TableCell>
+                  {complaints.map((complaint) => (
+                    <TableRow key={complaint.id}>
+                      <TableCell>{complaint.name}</TableCell>
+                      <TableCell>{complaint.email}</TableCell>
+                      <TableCell>{complaint.service}</TableCell>
+                      <TableCell>
+                        <Badge>{complaint.status}</Badge>
+                      </TableCell>
+                      <TableCell>{new Date(complaint.created_at).toLocaleDateString()}</TableCell>
                     </TableRow>
-                  ) : paginatedUsers.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6}>No users found.</TableCell>
-                    </TableRow>
-                  ) : (
-                    paginatedUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.role}</TableCell>
-                        <TableCell>{user.department_id}</TableCell>
-                        <TableCell>{user.created_at ? new Date(user.created_at).toLocaleDateString() : ""}</TableCell>
-                        <TableCell>{user.updated_at ? new Date(user.updated_at).toLocaleDateString() : ""}</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setCurrentUser(user);
-                                  setIsEditDialogOpen(true);
-                                }}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => {
-                                  setCurrentUser(user);
-                                  setIsDeleteDialogOpen(true);
-                                }}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                  ))}
                 </TableBody>
               </Table>
-            </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            <div className="flex items-center justify-end space-x-2 mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                Previous
-              </Button>
-              <span className="text-sm px-2">
-                Page {page} of {Math.ceil(filteredUsers.length / PAGE_SIZE) || 1}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page * PAGE_SIZE >= filteredUsers.length}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Anonymous Complaints Tab */}
+        <TabsContent value="anonymous">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {currentUser?.role === 'department_head'
+                  ? `${getDepartmentName(currentUser.department_id)} Anonymous Complaints`
+                  : 'All Anonymous Complaints'}
+              </CardTitle>
+              <CardDescription>
+                {currentUser?.role === 'department_head'
+                  ? 'Anonymous complaints for your department'
+                  : 'All anonymous complaints across departments'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {anonymousComplaints.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.complaint_type}</TableCell>
+                      <TableCell>{item.description}</TableCell>
+                      <TableCell>{item.location}</TableCell>
+                      <TableCell>
+                        <Badge>{item.status}</Badge>
+                      </TableCell>
+                      <TableCell>{new Date(item.created_at).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Only show these tabs for administrators */}
+        {currentUser?.role === 'administrator' && (
+          <>
+            <TabsContent value="departments">
+              {/* ... (keep existing departments tab content) */}
+            </TabsContent>
+            <TabsContent value="users">
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Users</CardTitle>
+                  <CardDescription>Manage user accounts and their permissions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1 max-w-sm">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="search"
+                          placeholder="Search users..."
+                          className="pl-8"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>Department ID</TableHead>
+                            <TableHead>Created At</TableHead>
+                            <TableHead>Updated At</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {loading ? (
+                            <TableRow>
+                              <TableCell colSpan={6}>Loading...</TableCell>
+                            </TableRow>
+                          ) : paginatedUsers.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={6}>No users found.</TableCell>
+                            </TableRow>
+                          ) : (
+                            paginatedUsers.map((user) => (
+                              <TableRow key={user.id}>
+                                <TableCell>{user.name}</TableCell>
+                                <TableCell>{user.email}</TableCell>
+                                <TableCell>{user.role}</TableCell>
+                                <TableCell>{user.department_id}</TableCell>
+                                <TableCell>{user.created_at ? new Date(user.created_at).toLocaleDateString() : ""}</TableCell>
+                                <TableCell>{user.updated_at ? new Date(user.updated_at).toLocaleDateString() : ""}</TableCell>
+                                <TableCell className="text-right">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" className="h-8 w-8 p-0">
+                                        <span className="sr-only">Open menu</span>
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          setCurrentUser(user);
+                                          setIsEditDialogOpen(true);
+                                        }}
+                                      >
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Edit
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        className="text-destructive"
+                                        onClick={() => {
+                                          setCurrentUser(user);
+                                          setIsDeleteDialogOpen(true);
+                                        }}
+                                      >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    <div className="flex items-center justify-end space-x-2 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page === 1}
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-sm px-2">
+                        Page {page} of {Math.ceil(filteredUsers.length / PAGE_SIZE) || 1}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page * PAGE_SIZE >= filteredUsers.length}
+                        onClick={() => setPage((p) => p + 1)}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </>
+        )}
+      </Tabs>
 
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
