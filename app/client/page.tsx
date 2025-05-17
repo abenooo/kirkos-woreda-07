@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import logo from "../../public/image.png"
 import {
   Building2,
   FileText,
@@ -138,20 +139,20 @@ export default function ClientHomePage() {
       {/* Hero Section */}
       <section className="relative -mx-4 -mt-6 h-[500px] overflow-hidden">
         <Image
-          src="/placeholder.svg?height=800&width=1600"
+          src={logo}
           alt="Kirkos Sub City Administration building"
           width={1600}
           height={800}
           className="object-cover w-full h-full"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 to-slate-800/90 flex flex-col justify-center px-8">
+        <div className="absolute inset-0  flex flex-col justify-center px-8">
           <div className="container mx-auto max-w-5xl">
             <div className="max-w-2xl">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
                 Kirkos Sub City Wereda 07 eServices Portal
               </h1>
-              <p className="text-xl text-white/90 max-w-2xl mb-8">
+              <p className="text-xl text-white/90 font-bold max-w-2xl mb-8">
                 Access government services, submit applications, and get information about requirements and procedures
                 online.
               </p>
