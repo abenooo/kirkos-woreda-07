@@ -143,7 +143,7 @@ export default function ClientHomePage() {
           alt="Kirkos Sub City Administration building"
           width={1600}
           height={800}
-          className="object-cover w-full h-full"
+          className="object-fit w-full h-full mt-2 rounded-lg"
           priority
         />
         <div className="absolute inset-0  flex flex-col justify-center px-8">
