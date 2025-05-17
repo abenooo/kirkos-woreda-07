@@ -403,6 +403,9 @@ export default function ClientLayout({
               <p className="text-sm text-gray-300">
                 &copy; {new Date().getFullYear()} Kirkos Sub City Wereda 07 Administrative Office. All rights reserved.
               </p>
+              <p className="mt-5">
+                Design and Developed by <Link href="https://codexafrica.com/">Codex Africa</Link>
+              </p>
             </div>
           </div>
         </footer>
