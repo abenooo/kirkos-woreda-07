@@ -1,600 +1,257 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Building2,
-  FileText,
-  Users,
-  Briefcase,
-  Car,
-  Home,
-  Landmark,
-  Leaf,
-  School,
-  ShieldCheck,
-  Clock,
-  ArrowRight,
-  Calendar,
-  CheckCircle,
-  AlertCircle,
-  ChevronLeft,
-  Download,
-} from "lucide-react"
+import React from "react"
 
-// Mock data for services
-const services = [
-  {
-    id: "1",
-    title: "ID Card Issuance",
-    description: "Apply for a new ID card or renew an existing one",
-    category: "personal",
-    processingTime: "3-5 days",
-    fee: "100 Birr",
-    icon: FileText,
-    longDescription:
-      "The ID Card Issuance service allows citizens to apply for a new identification card or renew an existing one. This official document is required for various government services and legal transactions.",
-    requirements: [
-      "Completed application form",
-      "Birth certificate (original and copy)",
-      "2 recent passport-sized photographs (3x4cm, white background)",
-      "Residence certificate from kebele",
-      "Proof of address (utility bill or lease agreement)",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Pay the application fee",
-      "Get photographed at the office",
-      "Receive a collection slip",
-      "Collect your ID card on the specified date",
-    ],
-  },
-  {
-    id: "2",
-    title: "Birth Certificate",
-    description: "Request a birth certificate for a newborn or replacement",
-    category: "personal",
-    processingTime: "1-2 days",
-    fee: "50 Birr",
-    icon: FileText,
-    longDescription:
-      "The Birth Certificate service provides official documentation of a child's birth. This is an essential document for school enrollment, passport applications, and other official purposes.",
-    requirements: [
-      "Completed application form",
-      "Hospital birth record or midwife statement",
-      "Parents' ID cards (original and copy)",
-      "Marriage certificate of parents (if applicable)",
-      "Residence certificate from kebele",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Pay the application fee",
-      "Verification of documents",
-      "Receive birth certificate",
-    ],
-  },
-  {
-    id: "3",
-    title: "Marriage Certificate",
-    description: "Apply for a marriage certificate",
-    category: "personal",
-    processingTime: "2-3 days",
-    fee: "200 Birr",
-    icon: Users,
-    longDescription:
-      "The Marriage Certificate service provides official documentation of a legal marriage. This document is required for various legal purposes including property ownership, name changes, and immigration.",
-    requirements: [
-      "Completed application form",
-      "ID cards of both parties (original and copy)",
-      "Birth certificates of both parties",
-      "Witness statements (minimum 2 witnesses)",
-      "Photographs of both parties",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Pay the application fee",
-      "Schedule marriage registration appointment",
-      "Attend with witnesses for official registration",
-      "Receive marriage certificate",
-    ],
-  },
-  {
-    id: "4",
-    title: "Business License",
-    description: "Apply for a new business license or renew an existing one",
-    category: "business",
-    processingTime: "7-10 days",
-    fee: "500-2000 Birr",
-    icon: Briefcase,
-    longDescription:
-      "The Business License service allows entrepreneurs and companies to legally operate their business within the jurisdiction. Different types of businesses require specific licenses based on their activities.",
-    requirements: [
-      "Completed application form",
-      "Business registration certificate",
-      "TIN certificate",
-      "Lease agreement or ownership document for business premises",
-      "ID card of business owner/manager",
-      "Professional qualification certificates (for specialized businesses)",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Pay the application fee",
-      "Premises inspection (if applicable)",
-      "Application review",
-      "License issuance",
-    ],
-  },
-  {
-    id: "5",
-    title: "Building Permit",
-    description: "Apply for a permit to construct or renovate a building",
-    category: "property",
-    processingTime: "14-21 days",
-    fee: "Based on project size",
-    icon: Building2,
-    longDescription:
-      "The Building Permit service ensures that construction projects comply with local building codes, zoning regulations, and safety standards. This permit is required before starting any construction or major renovation work.",
-    requirements: [
-      "Completed application form",
-      "Land ownership document/title deed",
-      "Architectural plans signed by licensed architect",
-      "Structural designs signed by licensed engineer",
-      "Environmental impact assessment (for larger projects)",
-      "Soil test report",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Pay the application fee",
-      "Plan review by various departments",
-      "Site inspection",
-      "Permit issuance",
-    ],
-  },
-  {
-    id: "6",
-    title: "Land Title Transfer",
-    description: "Transfer land ownership from one person to another",
-    category: "property",
-    processingTime: "30 days",
-    fee: "Based on property value",
-    icon: Home,
-    longDescription:
-      "The Land Title Transfer service facilitates the legal transfer of land ownership from one party to another. This process ensures proper documentation and registration of property ownership changes.",
-    requirements: [
-      "Completed transfer application form",
-      "Original title deed",
-      "Sale agreement or inheritance documents",
-      "ID cards of both parties",
-      "Tax clearance certificate",
-      "Property valuation report",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Pay transfer fees and taxes",
-      "Property verification",
-      "Title deed preparation",
-      "Registration of new title",
-    ],
-  },
-  {
-    id: "7",
-    title: "Vehicle Registration",
-    description: "Register a new vehicle or transfer ownership",
-    category: "transport",
-    processingTime: "3-5 days",
-    fee: "300-1000 Birr",
-    icon: Car,
-    longDescription:
-      "The Vehicle Registration service provides official documentation and license plates for vehicles operating within the jurisdiction. This is required for all motorized vehicles using public roads.",
-    requirements: [
-      "Completed registration form",
-      "Vehicle purchase document",
-      "Import declaration (for imported vehicles)",
-      "Technical inspection certificate",
-      "ID card of owner",
-      "Tax payment receipt",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Pay registration fees",
-      "Vehicle inspection",
-      "Registration approval",
-      "License plate issuance",
-    ],
-  },
-  {
-    id: "8",
-    title: "Tax Clearance Certificate",
-    description: "Obtain a tax clearance certificate",
-    category: "business",
-    processingTime: "1-2 days",
-    fee: "100 Birr",
-    icon: Landmark,
-    longDescription:
-      "The Tax Clearance Certificate service provides official confirmation that an individual or business has paid all required taxes. This document is often required for business licenses, property transfers, and travel purposes.",
-    requirements: [
-      "Completed application form",
-      "Tax identification number (TIN)",
-      "Proof of tax payments",
-      "Business registration (for businesses)",
-      "ID card of applicant",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Pay application fee",
-      "Tax payment verification",
-      "Certificate issuance",
-    ],
-  },
-  {
-    id: "9",
-    title: "Environmental Permit",
-    description: "Apply for environmental clearance for projects",
-    category: "property",
-    processingTime: "14-21 days",
-    fee: "Based on project type",
-    icon: Leaf,
-    longDescription:
-      "The Environmental Permit service ensures that development projects comply with environmental regulations and minimize negative impacts on the environment. This is required for construction, industrial, and other projects that may affect the environment.",
-    requirements: [
-      "Completed application form",
-      "Project description",
-      "Environmental impact assessment",
-      "Site plan",
-      "Waste management plan",
-      "Mitigation measures",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Pay application fee",
-      "Environmental assessment review",
-      "Site inspection",
-      "Public consultation (for larger projects)",
-      "Permit decision",
-    ],
-  },
-  {
-    id: "10",
-    title: "School Registration",
-    description: "Register a child for public school",
-    category: "education",
-    processingTime: "1-3 days",
-    fee: "Free",
-    icon: School,
-    longDescription:
-      "The School Registration service allows parents to enroll their children in public schools within the jurisdiction. This service ensures that all children have access to education as required by law.",
-    requirements: [
-      "Completed registration form",
-      "Child's birth certificate",
-      "Immunization records",
-      "Previous school records (for transfers)",
-      "Proof of residence in the school district",
-      "Parents' ID cards",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Verification of documents",
-      "School placement based on residence and availability",
-      "Registration confirmation",
-    ],
-  },
-  {
-    id: "11",
-    title: "Police Clearance",
-    description: "Obtain a police clearance certificate",
-    category: "personal",
-    processingTime: "7-10 days",
-    fee: "150 Birr",
-    icon: ShieldCheck,
-    longDescription:
-      "The Police Clearance Certificate service provides official confirmation that an individual has no criminal record or pending criminal cases. This document is often required for employment, visa applications, and other official purposes.",
-    requirements: [
-      "Completed application form",
-      "ID card (original and copy)",
-      "Passport-sized photographs",
-      "Fingerprint records",
-      "Letter stating purpose of clearance (if applicable)",
-    ],
-    process: [
-      "Submit application with required documents",
-      "Pay application fee",
-      "Fingerprinting",
-      "Background check",
-      "Certificate issuance",
-    ],
-  },
-]
+const headers = [
+  "ተ.ቁ",
+  "የሚሰጡ አገልግሎቶች ዓይነት",
+  "አገልግሎቱ የሚሰጥበት ቦታ",
+  "የአገልግሎት ስታንዳርድ /ደረጃ",
+  "የሚሰጥበት ሁኔታ",
+  "ከተገልጋይ የሚጠበቅ ቅድመ ሁኔታዎች",
+];
 
+const servicesData: Record<string, string[][]> = {
+  "1": [ // Data from ፑብሊክ.txt (Public Services / General Woreda Services)
+    ["1", "ሀብት ማሰባሰብ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በሰነድ/ደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["1.1", "ለመሰረተ ልማት ልማት ፍላጎት ሀብት ማሰባሰብ", "ወረዳ", "መጠን: 1, ጊዜ: 152 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የብሎክ ነዋሪ ያላቸዉን የልማት ፍላጎት መሰረት ያደረገ በህጋዊ የልማት ደረሰኝ ክፍያ መፈፀም\nPየህብረተሰቡን ለልማት ስራ ላይ ተገቢዉን መዋጮ ማድረግ\nPከነዋሪዉ ተሰበሰበዉ የሀብት በተገቢዉ መንገድ በተገቢዉ መንገድ በ24 ሰዓት ዉስጥ ባንክ ገቢ ማድረጉን መረጃ መዉሰድ"],
+    ["1.2", "ለበጎፍቃድ አገልግሎት ሀብት ማሰባሰብ", "ወረዳ", "መጠን: 1, ጊዜ: 148 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የበጎ ፍቃድ አገልግሎት ለመስጠት ፍላጎት ማሳየት እና ፍቃደኛ መሆን\nPየሀብት ስርጭቱ ላይ ተገቢዉን እገዛ ማድረግ"],
+    ["2", "በህብረተሰብ ተሳትፎ የአካባቢ ሰላም መጠበቅ", "ወረዳ", "መጠን: 1, ጊዜ: 201 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "ህብረተሰቡ የአካባቢዉን ሰላም ለማስጠበቅ የሚያደርገዉን ተሳትፎ ከሌሎች ተመሳሳይ የዘርፍ ባለድርሻ አካላት ጋር በመሆን በቅንጅት ዕለቱ በተራ አካባቢዉን እየጠበቀ መሆኑን መረጃ መስጠት"],
+    ["3", "የብሎክ አደረጃጀትን በመጠቀም ሰላም ፀጥታን በተመለከተ ወቅታዊ መረጃ አገልግሎት", "ወረዳ", "መጠን: 1, ጊዜ: 26 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "የ24 ሰዓት መረጃ ልዉዉጥ ማድረግ"],
+    ["4", "የብሎክ አደረጃጀቶችን በመጠቀም ህገወጥ ተግባራትን መከላከል", "ወረዳ", "መጠን: 1, ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "የደንብ ጥሰት እና አዋኪ ድርጊቶችን የሚፈፅሙ በመለየጥ በአካል በመገኘት ጥቆማ እና መረጃ በመስጠት ህገወጥ ነትን መከላከል"],
+    ["5", "የበጎፍቃድ አገልግሎት ማስተባበር", "ወረዳ", "መጠን: 1, ጊዜ: 254 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "የበጎ ፍቃድ አገልግሎት ለመስጠት ፍላጎት ማሳየት እና ፍቃደኛ መሆን"]
+  ],
+  "2": [ // Data from የከተማ_ውበትና_አረንጓዴ_ልማት_ጽ_ቤት.txt (Urban Beauty and Green Development Office)
+    ["1", "የተፋሰስ፤የአረንጓዴ አካባቢዎች ወንዝ ዳርቻዎች የማልማት የመንከባከብ የመጠበቅ ፈቃድ አገልግሎት", "በወረዳ", "N/A", "N/A", "N/A"],
+    ["1.1", "ለበጎ ፈቃድ አልሚዎች የአረንጓዴ ቁርጥራጭ ቦታዎችና 20/50 ሬዲየሰ በውል የልማትና እንክብካቤ ፈቃድ መስጠት፤", "በወረዳ", "ጊዜ: 33 ስዓት, ጥራት: 100%", "በአካል ቢሮ በመምጣት", "ማመልከቻ ደብዳቤ፤"],
+    ["2", "የክፍያ ሰነድ ማዘጋጀት አገልግሎት", "በወረዳ", "N/A", "N/A", "N/A"],
+    ["2.1", "በውሉ መሠረት ስራውን ማከናወኑን አረጋግጦ ለኢንትርፕራይዝ የክፍያ ሰነድ ማዘጋጅት፤", "በወረዳ", "ጊዜ: 16 ስዓት, ጥራት: 100%", "በአካል ቢሮ በመምጣት", "የስራ ውልና የክፍያ ጥያቄ ማቅርብ；"],
+    ["3", "የመፀዳጃ ቤት አገልግሎ", "በወረዳ", "N/A", "N/A", "N/A"],
+    ["3.1", "የመፀዳጃ ቤት አገልግሎት፤", "በወረዳ", "ጊዜ: 20 ደቂቃ, ጥራት: 100%", "በአካል", "የአገልግሎት ክፍያ መክፍልና በቅደም ተከተል መጠቀም；"],
+    ["3.2", "የሻወር አገልግሎት፤", "በወረዳ", "ጊዜ: 30 ደቂቃ, ጥራት: 100%", "በአካል", "የአገልግሎት ክፍያ መክፍልና በቅደም ተከተል መጠቀም；"]
+  ],
+  "3": [ // Data from ባህል፣ኪነ-ጥበብና ቱሪዝም ጽ_ቤት.txt (Culture, Arts and Tourism Office)
+    ["1", "የእደ ጥበብ ማህበራት እንዲደራጁ የተለያዩ ሙያዊ ድጋፍችን መስጠት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 8 ሠዓት, ጥራት: 100%", "በአካል መቅረብ", "Ø በአካል ቀርቦ ማመልከት የሚችል\nØ የተሰማራበትን የእደ ጥበብ ዘርፍ የሚሠራውን የሥራ ለማሳየት/ለማስጐብኘት ፈቃደኛ የሆነ\nØ በማህበር ለመደራጀት ሙያዊ ድጋፍ ፍላጐት ያለው"],
+    ["2", "አዲስ የብቃት ማረጋገጫ አገልግሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 2 ሠዓት, ጥራት: 100%", "በአካል መቅረብ", "Ø የተቋሙ ባለቤት የታደሰ የነዋሪነት መታወቂያ ወይም ፓስፖርት ወይም መንጃ ፈቃድ ከዋናው ጋር የተገናዘበ ፎቶ ኮፒ\nØ ሁለት /3X3/ መጠን ያላቸው በ6 ወር ጊዜ ውስጥ የተነሳው የባለቤቱ ጉርድ ፎቶግራፍ\nØ በዘርፉ የተቀመጠውን የአገልግሎት ክፍያ የሚፈጽም\nØ ተቋሙ ቋሚ አድራሻ ያለው\nØ በባህል ዘርፍ ሙያዊ ድጋፍ ለሚፈልጉ እና ለተቋማቸው የሱፐርቪዠን አገልግሎት ለሚፈልጉ"],
+    ["3", "እድሳት የብቃት ማረጋገጫ አገልግሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 1ሠዓት 20 ደ, ጥራት: 100%", "በአካል መቅረብ", "Ø ነባር ብቃት ማረጋገጫ ሰርተፊኬት\nØ በፋይሉ ከነበሩት መረጃ የጎደሉትን ማሟላት"],
+    ["4", "በጠቃሚ የባህል እሴቶችን በማኅበረሰቡ ዘንድ የማስረፅና የብዛ ባህል አካታች ስራዎች አገልግልሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 40ደ, ጥራት: 100%", "በአካል መቅረብ", "Ø አገልግሎት ፈላጊው ህጋዊ የአገልግሎት ፍላጐት ደብዳቤ ማቅረብ የሚችል\nØ የሥልጠና ዳሰሣ/የባህል አካታች ስራዎች ቅድመ ጥናት ላይ ፍላጐትን ማስፈር\nØ የሥልጠና ቦታ፣ የሥልጠና ጊዜ እና ሠልጣኞችን የሚያመቻች\nØ ሥልጠናው መውሰድ\nØ በወሰዱት ስልጠና ላይ የታዩትን ጠንካራና ደካማ ጐኖች ላይ በቃል ወይም በአስተያየት መስጫ ቅፆች ላይ ለማስፈር ፈቃደኛ የሆነ"],
+    ["5", "የአሉታዊ መጤ ባህሎች እና መከላከከል ስልጠናና የግንዛቤ ማስጨበጫ አገልግልሎት", "የባህል እሴቶች፣ የዕደ ጥﺒብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 40ደ, ጥራት: 100%", "በአካል መቅረብ", "Ø አገልግሎት ፈላጊው ህጋዊ የአገልግሎት ፍላጐት ደብዳቤ ማቅረብ የሚችል\nØ የሥልጠና ዳሰሣ ቅድመ ጥናት ላይ ፍላጐትን ማስፈር\nØ የሥልጠና ቦታ፣ የሥልጠና ጊዜ እና ሠልጣኞችን የሚያመቻች\nØ ሥልጠናው መውሰድ\nØ በወሰዱት ስልጠና ላይ የታዩትን ጠንካራና ደካማ ጐኖች ላይ በቃል ወይም በአስተያየት መስጫ ቅፆች ላይ ለማስፈር ፈቃደኛ የሆነ"],
+    ["6", "ህዝባዊና መንግስታዊ ከተማ አቀፍ የባህል ቀናትና ሁነቶች ከበራ", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 56 ስዓት, ጥራት: 100%", "በአካል በመቅረብ", "Ø ፕሮፖዛል ማዘጋጀት ስልጣንና ተግባራቸው የሚያሳይ ሰነድ ማቅረብ\nØ ለኩነት ወይም ለመድረክ ዝግጅት የሚገልፅ ህጋዊ ደብዳቤ/ሰነድ ከቢሮ ጋር የተፈራረሙት የስምምነት ሰነድ"],
+    ["7", "የንባብ/የሪፈረንስ አገልግሎት", "የመረጃ ሀብቶች ማሰባሰብ፣ማደራጀትና አገልግሎት ቡድን", "ጊዜ: 5 ደቂቃ, ጥራት: 100%", "በአካል በመቅረብ", "· የንባብ አግልግሎት ለማግኘት መታወቂያ ብቻ ማሳየት\n· ህፃናት ምንም አይጠየቁም"],
+    ["8", "የውሰት፤አገልግሎት", "የመረጃ ሀብቶች ማሰባሰብ፣ማደራጀትና አገልግሎት ቡድን", "ጊዜ: 7ደቂቃ, ጥራት: 100%", "በአካል በመቅረብ", "· የአገልግሎት ጥያቄ በደብዳቤ ማቅረብ\n· የመንግስት ሰራተኛ ከሆኑ ከቢሮ ድጋፍ ደብዳቤ\n· የተዋስቱን መጻህፍትና ፖኬት በጥንቃቄ መያዝና በወቅቱ መመለስ"],
+    ["9", "የስነጹሁፍ ምሽት አገልግሎት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል መቅረብ", "ከሚመለከተው አካል የሙያ ማህበራት የድጋፍ ደብደቤ ማቅረብ የሚችል፣ ጥያቄ ማቅረብ"],
+    ["10", "የኪነጥበብ ውድድር ማዛጋጀት አገልግሎት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: 64 ስዓት, ጥራት: 100%", "በአካል መቅረብ", "በመስፈርቱ መሰረት በአካል በመቅረብ"],
+    ["11", "የኪነ-ጥበብ አዲስ የብቃት ማረጋገጫ አገልግሎት መስጠት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: በ20 ደቂቃ, ጥራት: 100%", "በአካል በመቅረብ", "· ማንነትን የሚገልፁ መረጃች መታወቂያ/ፓስፖርት\n· የቤት ካርታ /ህጋዊ የቤት ኪራይ ውል እንዲሁም በውልና ማስረጃ የተረጋገጠ መሆን አለበት\n· የተቋሙ ስራ አስኪሃጅና የየክፍሉ ሰራተኛ የት/ት ማስረጃ ማቅረብ አለበት\n· የቲን ነምበርና ቫት ሰርተፊኬትፎቶ ኮፒ ማቅረብ\n· የንግድ ምዝገባ ፎቶ ኮፒ ማቅረብ ያስፈልጋል"],
+    ["12", "በኪነ-ጥበብ ዘርፉ ለተሰማሩ አካላት ሙያዊ ሥልጠና መስጠት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: 312 ስዓት, ጥራት: 100%", "በአካል በመቅረብ", "የስልጠና ፍላጎት አይነትና የሰልጣኞች ስም ዝርዝር"],
+    ["13", "የኪነ-ጥበብ የሙያ ብቃት እድሳት አገልግሎት መስጠት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: በ10 ደቂቃ, ጥራት: 100%", "በአካል በመቅረብ", "· ነባር ብቃት ማረጋገጫ ሰርተፊኬት\n· በፋይሉ ከነበሩት መረጃ የጎደሉትን ማሟላት"],
+    ["14", "የቱሪዝም መረጃ አገልግሎት መስጠት", "የቱሪስት አገልግሎቶች ብቃት ማረጋገጥ ቡድን", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በቱሪዝም ስታስቲካዊ መረጃ ድህረ ገጾችና መጽሄቶች", "በቱሪዝም ስታስቲካዊ መረጃ ድህረ ገጾችና መጽሄቶች መየትና በአካል መቅረብ"],
+    ["15", "የሃገርን እወቅ ክበባትን ማቋቋምና መደገፍ", "የቱሪስት አገልግሎቶች ብቃት ማረጋገጥ ቡድን", "ጊዜ: 36 ስዓት, ጥራት: 100% (approx.)", "በአካል በመቅረብ", "ፍቃደኛ መሆን፣ ህጋዊ እውቅና ያለው መ/ቤት ሠራተኛ መሆን/የህዝብ አደረጃጀት አባል መሆን"],
+    ["16", "የሆቴልና ቱሪዝም ብቃት ማረጋገጫ መስጠት", "የቱሪስት አገልግሎቶች ብቃት ማረጋገጥ ቡድን", "ጊዜ: 1፡55 ስዓት, ጥራት: 100%", "በአካል በመቅረብ", "ንግድ ፍቃድ ፣ 3 ተኛ ወገን/ኢንሹራንስ 500 ለሆቴል እና 250 ለታክሲ"]
+  ],
+  "4": [ // Data from የወረዳ 07 ሴ_ህ_ማ_ጉ_ጽ_ቤት.txt (Woreda 07 Women, Children & Social Affairs)
+    ["1", "ለሴቶች የማህበራዊ አገልግሎት ድጋፍ መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["1.1", "ከፍለው መማር ለማይችሉ ሴቶች የትምህር እድልና ድጋ ማመቻቸት", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ማስረጃ/ደብዳቤ"],
+    ["1.2", "በጎልማሶች ተግባ ተኮር ትምህርት ማሳተፍ", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ማስረጃ/ደብዳቤ"],
+    ["1.3", "የነፃ ህክምና ድጋፍ እንዲያገኙ ማቻት", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ማስረጃ"],
+    ["2", "ሴቶችን በገቢ ማስገኛ ዘርፎች እንዲሰማሩ ድጋፍ መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["2.1", "ሴቶችን በንግድ ስራ ማሰማራት", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ማስረጃ ማቅረብ"],
+    ["3", "ለህፃናትና ወጣቶች አገልግሎት ድጋፍ ማድረግ", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["3.1", "ህፃናት ማቆያ ማጠናከርና ማስፋፋት", "በስራ ሂደቱ", "ጊዜ: 8 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
+    ["3.2", "ለህፃናት የምገባ ድጋፍ ማድረግ", "በስራ ሂደቱ", "ጊዜ: 1 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
+    ["4", "ለአረጋዊያንና አካል ጉዳተኞች ድጋፍ መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["4.1", "የቀጥታ ድጋፍ ማድረግ", "በስራ ሂደቱ", "ጊዜ: 1 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
+    ["4.2", "የነፃ ህክምና አገልግሎት ተጠቃሚ ማድረግ", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
+    ["5", "የማህበረሰብ አቀፍ የጤና መድህን አገልግሎት መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["5.1", "የማህበረሰብ አቀፍ ጤና መድህን አባል ምዝገባ ማከናወን", "በስራ ሂደቱ", "ጊዜ: 160 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "የታደሰ የቀበሌ መታወቂያ"],
+    ["5.2", "የአባልነት መታወቂያ መስጠት", "በስራ ሂደቱ", "ጊዜ: 0.5 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "የታደሰ የቀበሌ መታወቂያ"],
+    ["6", "ለተጎጂዎች የምክርና የህግ ድጋፍ አገልግሎት መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["6.1", "የምክር አገልግሎት መስጠት", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ"],
+    ["6.2", "የህግ ድጋፍ አገልግሎት መስጠት", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ"],
+    ["7", "ለተጎጂዎች ጊዜያዊ መጠለያ አገልግሎት መስጠት", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ"],
+    ["8", "ለቀጥታ ድጋፍ ተጠቃሚዎች የባንክ አገልግሎት ማተሳሰር", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["8.1", "ከባንክ ገንዘብ መቀበል የማይችሉ የቀጥታ ድጋፍ ተጠቃሚዎች ውክልና ማመቻት", "በስራ ሂደቱ", "ጊዜ: 8 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "የነዋሪነት መታወቂያ ማስረጃ"],
+    ["8.2", "ቅሬታ ማስተናድ", "በስራ ሂደቱ", "ጊዜ: 8 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በአካል ከተገልጋይ በሚቀርብ ጥያቄ"],
+    ["9", "ለተጠቃሚዎች የኑሮ ማሻሻያ አገልግሎት መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["9.1", "ተቋቋሚዎችን ወደ ቤተሰብ መሸኘት", "በስራ ሂደቱ", "ጊዜ: 40 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ /ፍላጎት/"],
+    ["10", "ለከፋ የማህበራዊ ችግር ውስጠ ለገቡ የህብረተሰብ ክፍሎች ማህበራዊ ድጋፍ ማድረግ", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["10.1", "ለከፋ የምግብ ችግር ለተጋለጡ ነዋሪዎችን ተጠቃሚ ማድረግ", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ"],
+    ["10.2", "ተጠቃሚዎችን ከማህበረሰብ አቀፍ ድጋፍና ክብካቤ ጥምረቶች ጋር ማስተሳሰር", "በስራ ሂደቱ", "ጊዜ: 0.5 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "የመቀበል ፍላጎትና ዝግጁነት"]
+  ],
+  "5": [ // Data from አርሶ አደር ከ_ግ_ል_ጽ_ ቤት.txt (Farmers & Rural Development)
+    ["1", "ድጋፍ እና የምክር አገልግሎት", "N/A", "N/A", "N/A", "N/A"],
+    ["1.1", "የስልጠና አገልግሎት ፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 80 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የፍላጎት ጥያቄ ማቅረብ"],
+    ["1.2", "የሙያ ምክር አገልግሎት፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 4 ሰዓት, ጥራት: 100%", "በአካል ወይም በኮሚኒኬሽን ቴክኖሎጂ", "ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"],
+    ["1.3", "የቴክኒክ ምክር አገልግሎት፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 14.25 ሰዓት, ጥራት: 100%", "በአካል ወይም በኮሚኒኬሽን ቴክኖሎጂ", "ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"],
+    ["1.4", "የገበያ መረጃ እና ትስስር አገልግሎት፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 70 ሰዓት, ጥራት: 100%", "በአካል ወይም በኮሚኒኬሽን ቴክኖሎጂ", "ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"],
+    ["2", "የልማት ተነሺ አርሶ አደሮችን የመደገፍ አገልግሎት", "N/A", "N/A", "N/A", "N/A"],
+    ["2.1", "የማህበራት ምዝገባ እና ህጋዊ ሰውነት ማረጋገጫ አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የመተዳደሪያ ደንብ፣ የመመስረቻ ቃለ ጉባኤ፣ የአባላት ዝርዝር፣ መታወቂያ፣ የልማት ተነሺነት ማረጋገጫ"],
+    ["2.2", "የቦታ ካሳ ክፍያ አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 80 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የይዞታ ማረጋገጫ ካርታ፣ የባንክ ደብተር፣ የልማት ተነሺነት ማረጋገጫ፣ የቀበሌ መታወቂያ፣ የውክልና ማሰረጃ"],
+    ["2.3", "የመኖሪያ ቤት አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 176 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የልማት ተነሺ አርሶ አደር ስለመሆን፣መታወቂያ፤የውክልና ማሰረጃ"],
+    ["2.4", "ለአርሶ አደርሮች የሥራ ዕድል ማመቻቸትና በማህበር የማደራጀት አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የንግድ ሥራ ዕቅድ፣ ስልጠና ወስደው በሥራ ዕድል መደራጀት፣ ልማት ተነሺ አርሶ አደር ስለመሆን፣ መታወቂያ"],
+    ["2.5", "የፋይናንስ፣ የማሽነሪ እና ቁሳቁስ ግብዓቶች ድጋፍ እንዲያገኙ በማድረግ ወደ ስራ ማስገባት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 192 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የንግድ ሥራ ዕቅድ፣ ስልጠና ወስደው በሥራ ዕድል መደራጀት፣ ልማት ተነሺ አርሶ አደር ስለመሆን፣ መታወቂያ"],
+    ["2.6", "የመስሪያ ቦታዎችን የማስተላለፍ እና የማስተዳደር አገልግሎት፤", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 120 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የመስሪያ ቦታ የተሰጣቸው ስለመሆኑ፣ በድርጅት የተደራጁ ስለመሆናቸው ማረጋገጫ ማቅረብ"]
+  ],
+  "6": [ // Data from ቤቶች.txt (Housing)
+    ["1", "የመንግስት ቤቶችን የኪራይ ውል ማዋዋል", "በወረዳ", "መጠን: 1, ጊዜ: 0.5 ሰዓት, ጥራት: 100%", "N/A", "• ቤት እንዲሰጣቸው የተወሰነበት ደብዳቤ\n• ኢትዮጲያዊ ዜግነት ያለው እና የታደሰ መታወቂያ ያለው\n• በስማቸው ወይም በትዳር አጋራቸው ስም በከተማው አስተዳደር ስር የመንግስት ወይንም የግል ቤት መስሪያ ቦታ መሆኑን ከ6ወር ወር በኃላየተሰጠ ህጋዊ ማስረጃ"],
+    ["2", "የመንግስት ቤቶች ኪራይ ውል ማደስ", "በወረዳ", "መጠን: 1, ጊዜ: 0.5 ሰዓት, ጥራት: 100%", "N/A", "• ቀደም ሲል የነበረ ውል\n• ወቅታዊ ኪራይ የተከፈለበት ደረሰኝ\n• የታደሰ ህጋዊ የነዋሪነት መታወቂያ"],
+    ["3", "የኪራይ ዋጋ መተመን", "በወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "N/A", "• ቤቱ የኪራይ ተመን ያልወጣለት መሆኑን ማረጋገጥ\n• ቤቱ የሚገኝበት የአጎራባች የግራና ቀኝ የኪራይ ተመን"],
+    ["4", "የተለየ ጥገና ፈቃድ መስጠት", "በወረዳ", "መጠን: 1, ጊዜ: 1 ሰዓት, ጥራት: 100%", "N/A", "• የጥገና አይነት የተገለጸበት ማመልከቻ\n• ቀደም ሲል የነበረ ውል\n• ወቅታዊ ኪራይ የተከፈለበት ደረሰኝ\n• የቅርጽ እና የይዘት ለውጥ ለውጥ የገባበት ፎርም\n• የጥገና ስራዎ በራሱ ወጪ የሚገነባ እና ወጭውን የማይጠይቅ መሆኑ"],
+    ["5", "ህገወጦች ራሳቸው ቤቱን እንዲለቁ የጽሁፍ ማስጠንቀቂያ ደብዳቤ መስጠት", "በወረዳ", "መጠን: 1, ጊዜ: 0.5 ሰዓት, ጥራት: 100%", "N/A", "• በህገወጦች የተያዙ ቤቶች ዝርዝር መረጃ"],
+    ["6", "በህገወጥ የተያዙ የመንግስት ቤቶችን ማስለቀቅ", "በወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "N/A", "• በህገወጥ የተያዙ ቤቶች ዝርዝር መረጃ ማደራጀት\n• ቤቱን እንዲለቅ የተሰጠ የጽሁፍ ማስጠንቀቂያ\n• ቤቱ ውስጥያለውን ንብረት በራሱ እንዲያወጣ በፅሁፍ የተገለጸበት አስፈላጊ መረጃ\n• የሚመለከታቸው የህግ አካላት ያሉበት ቡድን ማደራጀት"],
+    ["7", "የመንግስት መኖሪያ እና ንግድ ቤቶችን አስመልክቶ መረጃ ለሚጠይቁ አካላት መረጃ መስጠት", "በወረዳ", "መጠን: 1, ጊዜ: 0.33 ሰዓት, ጥራት: 100%", "N/A", "• የቅሬታቸው ጭብጥ በፅሁፍ ቅሬታቸውን ሊያስረዳ የሚችል ተጨማሪ ሰነዶች"],
+    ["8", "ለመንግስት ቤት ካርታ ስራ የሚያስፈልጉ መረጃዎችን በማደራጀት ለክፍለ ከተማ መላክ", "በወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "N/A", "• የቤቱ ሙሉ መረጃ"]
+  ],
+  "7": [ // Data from የሰው ኃይል.txt (Human Resources)
+    ["1", "የሰው ሃይል መረጃ ማደራጀት ፣ ማሰራጨትና አገልግሎት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በሰነድ/ደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["2", "የሰው ሃይል የማሟላት አገልግሎት", "N/A", "N/A", "N/A", "N/A"],
+    ["2.1", "በቅጥር", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 15 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["2.2", "በደረጃ እድገት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["2.3", "በውስጥ ዝውውር", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["2.4", "ከክልል በማዛወር", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["2.5", "ድልድልና ምደባ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 3 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["3", "የሰው ሃይል የልማት ስራዎችን ማከናወን", "N/A", "N/A", "N/A", "N/A"],
+    ["3.1", "የስልጠና ፍላጎት መለየት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በแบบફોર્મ", "የተሟላ መረጃ ማቅረብ"],
+    ["3.2", "ስልጠና መስጠት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በአካል", "የተሟላ መረጃ ማቅረብ"],
+    ["3.3", "የስልጠና ግምገማ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 2 ቀን, ጥራት: 100%", "በቃል/በፅሁፍ", "የተሟላ መረጃ ማቅረብ"],
+    ["4", "የስራ አፈፃፀም ስርዓት ማስፈፀምና መከታተል", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በአካል/በስልክ", "የተሟላ መረጃ ማቅረብ"],
+    ["5", "የሰው ሃብት አስተዳደር", "N/A", "N/A", "N/A", "N/A"],
+    ["5.1", "የዲስፕሊን ጉዳዮችን መከታተል", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["5.2", "የቅሬታ አፈታት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በደብዳቤ/በአካል", "የተሟላ መረጃ ማቅረብ"],
+    ["5.3", "የልዩ ልዩ ፈቃድ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 1 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["5.4", "ከስራ መልቀቅ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"]
+  ],
+  "8": [ // Data from ወረዳ 07 ህብረት ስራ ጽ_ቤት.txt (Woreda 07 Cooperative Office)
+    ["1", "የማደራጀት አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 105.5 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የእንደራጅ ጥያቀ በጽሁፍ ማቅረብ"],
+    ["1.1", "ግንዛቤ መፍጠር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 8 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["1.2", "የመደራጀት ጥያቄ መቀበልና አዋጭነት ጥናት ማካሄድ", "በቢሮ", "ጊዜ: 16.5 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["1.3", "ማደራጀት", "በቢሮ", "ጊዜ: 81 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["2", "የማጠናከር አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 328 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የድጋፍ ጥያቄ"],
+    ["2.1", "በማዋሀድ ማጠናከር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 80 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["2.2", "በመክፈል ማጠናከር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 64 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["2.3", "በአደረጃጀት ማጠናከር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 80 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["2.4", "የኦዲትና ኢንስፔክሽን አገልግሎት", "ከቢሮ ውጪ", "ጊዜ: 104 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የድጋፍ ጥያቄ"],
+    ["3", "የቁጠባና ብድር አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 196 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የቁጠባና ብድር ድጋፍ ጥያቄ"],
+    ["3.1", "የቁጠባ ባህል ማዳበር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 120 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["3.2", "የብድር አገልግሎት ማመቻቸት", "በቢሮ", "ጊዜ: 76 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["4", "የግብይት አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 328 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የግብይት ድጋፍ ጥያቄ"],
+    ["4.1", "የግብዓት አቅርቦት ማመቻቸት", "ከቢሮ ውጪ", "ጊዜ: 104 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["4.2", "የምርት ማሰባሰብና ማከፋፈያ ማዕከላት ማደራጀት", "ከቢሮ ውጪ", "ጊዜ: 120 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["4.3", "የገበያ ትስስር መፍጠር", "ከቢሮ ውጪ", "ጊዜ: 104 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["5", "የአቅም ግንባታ አገልግሎት", "በቢሮ", "ጊዜ: 236 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የአቅም ግንባታ ድጋፍ ጥያቄ"],
+    ["5.1", "የአሰልጣኞች ስልጠና መስጠት", "በቢሮ", "ጊዜ: 160 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["5.2", "የልምድ ልውውጥ ማመቻቸት", "ከቢሮ ውጪ", "ጊዜ: 76 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["6", "የመረጃ አገልግሎት", "በቢሮ", "ጊዜ: 88 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የመረጃ ድጋፍ ጥያቄ"],
+    ["7", "የምክር አገልግሎት", "በቢሮ", "ጊዜ: 98 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የምክር ድጋፍ ጥያቄ"],
+    ["8", "የህግ አገልግሎት", "በቢሮ", "ጊዜ: 90 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የህግ ድጋፍ ጥያቄ"],
+    ["9", "ፈንድ ማፈላለግና ማስተባበር አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 68 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የፈንድ ድጋፍ ጥያቄ"],
+    ["9.1", "የገቢ ማሰባሰቢያ ዝግጅት ማመቻቸት", "ከቢሮ ውጪ", "ጊዜ: 34 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["9.2", "የተገኙ የገንዘብና የዓይነት ድጋፎች ስርጭት ቁጥጥር ማድረግ", "ከቢሮ ውጪ", "ጊዜ: 26 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የድጋፍ ጥያቄና ጥቆማ መስጠት"],
+    ["9.3", "የሚመቻቹ ፈንዶች ለታለመለት ዓላማ መዋላቸውን መከታልና መቆጣጠር", "ከቢሮ ውጪ", "ጊዜ: 8 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የድጋፍ ጥያቄ"],
+    ["10", "ምርትና አገልግሎት የማስተዋወቅ አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 220 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "ምርትና አገልግሎት ይተዋወቅልኝ ድጋፍ ጥያቄ"],
+    ["10.1", "ምርትንና አገልግሎትን ማስተዋወቅ", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 24 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["10.2", "ኤግዚቢሽንና ባዛር ማዘጋጀት", "ከቢሮ ውጪ", "ጊዜ: 196 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["10.3", "በተዘጋጁ ሌሎች ባዛሮች ላይ መሳተፍ", "ከቢሮ ውጪ", "ጊዜ: 112 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["11", "የተቋማት አጠቃቀም ድጋፍ ማድረግ", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 56 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የገበያ መሰረተ ልማትና የተቋማት አጠቃቀም ድጋፍ ጥያቄ"]
+  ],
+  "9": [ // Data from የወጣቶችና ስፖርት ጽ_ቤት.txt (Youth and Sports Office)
+    ["1", "ፕሮጀክቶችን የማዘጋጀትና የማበልፀግ አገልግሎት መስጠት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "N/A", "በአካል በመምጣትና ያሉበት ድረስ በመሄድ", "ፕሮጀክታቸውን ማቅረብ\nወቅታዊና ተአማኒ መረጃ መስጠት\nሪፖርት መላክና በጋራ መገምገም\nበግብረ-መልስ መሠረት ማስተካከያ ማድረግ"],
+    ["1.1", "ፕሮጀክት መቅረፅና ስራ ፈጣሪና ልዩ ፍላጎት ያለቸው ወጣቶችን መደገፍ", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "ጊዜ: 150 ሰዓት, ጥራት: 100%", "በአካል በመምጣትና ያሉበት ድረስ በመሄድ", "ፕሮጀክታቸውን ማቅረብ\nወቅታዊና ተአማኒ መረጃ መስጠት"],
+    ["1.2", "ፕሮጀክት ማበልጸግና ትግበራውን መከታተል", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "ጊዜ: 69 ሰዓት, ጥራት: 100%", "በአካል በመምጣትና ያሉበት ድረስ በመሄድ", "ሪፖርት መላክና በጋራ መገምገም\nበግብረ-መልስ መሠረት ማስተካከያ ማድረግ"],
+    ["2", "የአቅም ማጎልበቻ ስልጠና አገልግሎት መስጠት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን እና የስፖርት ትምህርትና ስልጠና ዳይሬክቶሬት)", "N/A", "ለስልጠና የሚጠሩበት ቦታ በአካል በመምጣት እና ኦንላይን", "ፍላጎት/ፍቃደኝነት፤\nየስልጠና ዓይነትና የሚጠበቅ ውጤት መለየት፤\nበስልጠና ፕሮግራም መሠረት መገኘት፤\nየማሰልጠኛ ቦታ፣ ቁሳቁስና ግብዓት ማቅረብ/ማመቻቸት፤\nወቅታዊና ተዓማኒነት ያለው መረጃ ማቅረብ"],
+    ["2.1", "የአቅም ማጎልበቻ ስልጠና ፍላጎት መለየት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "ጊዜ: 38 ሰዓት, ጥራት: 100%", "ለስልጠና የሚጠሩበት ቦታ በአካል በመምጣት እና ኦንላይን", "ፍላጎት/ፍቃደኝነት፤\nየስልጠና ዓይነትና የሚጠበቅ ውጤት መለየት"],
+    ["2.2", "የአቅም ማጎልበቻ ስልጠና መስጠት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "ጊዜ: 160 ሰዓት, ጥራት: 100%", "ለስልጠና የሚጠሩበት ቦታ በአካል በመምጣት እና ኦንላይን", "በስልጠና ፕሮግራም መሠረት መገኘት፤\nየማሰልጠኛ ቦታ፣ ቁሳቁስና ግብዓት ማቅረብ/ማመቻቸት"],
+    ["3", "የወጣቶች ማዕከላትን ማደራጀትና ማጠናከር", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "N/A", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "ህጋዊ ሰውነት ያለው ማህበር/ተቋም መሆን\nበየደረጃው ካለ አመራር የድጋፍ ደብዳቤ ማቅረብ\nጥያቄ ማቅረብ\nየተሟላ መረጃ ማቅረብ\nየአገልግሎት ክፍያ መፈጸም"],
+    ["3.1", "የወጣት ማዕከላትን ማደራጀትና ማቋቋም", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "ጊዜ: 120 ሰዓት, ጥራት: 100%", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "ህጋዊ ሰውነት ያለው ማህበር/ተቋም መሆን\nበየደረጃው ካለ አመራር የድጋፍ ደብዳቤ ማቅረብ"],
+    ["3.2", "የወጣት ማዕከላትን ማጠናከርና መደገፍ", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "ጊዜ: 80 ሰዓት, ጥራት: 100%", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "ጥያቄ ማቅረብ\nየተሟላ መረጃ ማቅረብ"],
+    ["4", "የወጣቶችን ሁለንተናዊ ተሳትፎና ተጠቃሚነት ማረጋገጥ", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "N/A", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "የተሳትፎና ተጠቃሚነት ፍላጎት ማሳየት"],
+    ["4.1", "ወጣቶችን በበጎ ፈቃድና የዜግነት ግዴታ ማሳተፍ", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "ጊዜ: 200 ሰዓት, ጥራት: 100%", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "የተሳትፎና ተጠቃሚነት ፍላጎት ማሳየት"],
+    ["5", "የክትትል፣ ድጋፍና ግብረ-መልስ አገልግሎት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የወጣቶች ጉዳይ ቡድን)", "ጊዜ: 120 ሰዓት, ጥራት: 100%", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ", "የክትትልና ድጋፍ ጥያቄ ማቅረብ\nለግብረ-መልስ ዝግጁ መሆን"],
+    ["6", "የስፖርት ትምህርትና ስልጠና አገልግሎት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ትምህርትና ስልጠና ቡድን)", "N/A", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "ለስልጠና መመዝገብና መስፈርት ማሟላት\nየሚፈለገውን የአገልግሎት ክፍያ መፈጸም\nበፕሮግራም መሠረት መገኘት\nቁሳቁስ በአግባቡ መያዝ"],
+    ["6.1", "የስፖርት ትምህርትና ስልጠና መስጠት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ትምህርትና ስልጠና ቡድን)", "ጊዜ: 248 ሰዓት, ጥራት: 100%", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "ለስልጠና መመዝገብና መስፈርት ማሟላት"],
+    ["7", "የስፖርት ውድድርና ዝግጅት አገልግሎት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ውድድርና ዝግጅት ቡድን)", "N/A", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "ለመሳተፍ መመዝገብና መስፈርት ማሟላት\nበፕሮግራም መሠረት መገኘት\nቁሳቁስ በአግባቡ መያዝ"],
+    ["7.1", "የስፖርት ውድድሮችንና ዝግጅቶችን ማካሄድ", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ውድድርና ዝግጅት ቡድን)", "ጊዜ: 160 ሰዓት, ጥራት: 100%", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "ለመሳተፍ መመዝገብና መስፈርት ማሟላት"],
+    ["8", "የስፖርት ህክምና፣ ሳይንስና ምርምር አገልግሎት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ህክምና፣ ሳይንስና ምርምር ቡድን)", "N/A", "በአካል በመምጣት", "የህክምና አገልግሎት መጠየቅ\nወቅታዊና እውነተኛ መረጃ መስጠት"],
+    ["8.1", "የስፖርት ህክምና አገልግሎት መስጠት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ህክምና፣ ሳይንስና ምርምር ቡድን)", "ጊዜ: 80 ሰዓት, ጥራት: 100%", "በአካል በመምጣት", "የህክምና አገልግሎት መጠየቅ"],
+    ["9", "የስፖርት መረጃና ግንኙነት አገልግሎት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት መረጃና ግንኙነት ቡድን)", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "የመረጃ ጥያቄ ማቅረብ\nወቅታዊ መረጃ መስጠት"],
+    ["10", "የስፖርት ፋሲሊቲ፣ ቁሳቁስና መሳሪያዎች አገልግሎት", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ተሳትፎ፣ አካል ብቃትና ፋሲሊቲ ቡድን)", "N/A", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "ወቅታዊና እውነተኛ መረጃ መስጠት\nየስፖርት ፋሲሊቲ፣ ቁሳቁስና መሳሪ አቅርቦት ጥያቄ ማቅረብ\nየአገልግሎት ክፍያ መፈፀም\nንብረትና ጊዜን በአግባቡ መጠቀም"],
+    ["10.1", "ማዕከላትና የስፖርት ማዘውተሪያ ስፍራዎች አገልግሎት እንዲሰጡ ማድረግ", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ተሳትፎ፣ አካል ብቃትና ፋሲሊቲ ቡድን)", "ጊዜ: 74 ሰዓት, ጥራት: 100%", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "የስፖርት ፋሲሊቲ፣ ቁሳቁስና መሳሪ አቅርቦት ጥያቄ ማቅረብ"],
+    ["10.2", "ማዕከላትንና የስፖርት ማዘውተሪያ ስፍራዎችን ማስተዳደር", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ተሳትፎ፣ አካል ብቃትና ፋሲሊቲ ቡድን)", "ጊዜ: 236 ሰዓት, ጥራት: 100%", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "የአገልግሎት ክፍያ መፈፀም\nንብረትና ጊዜን በአግባቡ መጠቀም"],
+    ["11", "ህብረተሰቡን በስፖርት ለሁሉም፣ በአካል ብቃት እንቅስቃሴ እና በመዝናኛና ትርዒት ማሳተፍ", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ተሳትፎ፣ አካል ብቃትና ፋሲሊቲ ቡድን)", "N/A", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "ለአገልግሎቱ ፕሮግራም እንዲዘጋጅላቸው መጠየቅ\nየሚጠየቀውን ክፍያ መፈጸም\nየስፖርት መዝናኛና ተሳትፎ ፕሮግራም እንዲዘረጋ መጠየቅ\nወቅታዊና ተዓማኒነት ያለው መረጃ ማቅረብ"],
+    ["11.1", "ህብረተሰቡን በአካል ብቃትና በስፖርት ለሁሉም ማሳተፍ", "በወረዳ የወጣቶችና ስፖርት ጽ/ቤት (የስፖርት ተሳትፎ፣ አካል ብቃትና ፋሲሊቲ ቡድን)", "ጊዜ: 180 ሰዓት, ጥራት: 100%", "በአካል በመምጣት እና ያሉበት ድረስ በመሄድ እና ኦንላይን", "ለአገልግሎቱ ፕሮግራም እንዲዘጋጅላቸው መጠየቅ"]
+  ],
+  "10": [ // Data from ጽዳት አስተዳደር ጽ_ቤት.txt (Cleaning Administration Office)
+    ["1", "በየቀኑ አስፓልትና እግረኛ መንገድ ማጽዳት", "አስፓልትና እግረኛ መንገድ", "መጠን: 43 ኪ.ሜ, ጊዜ: 4 ሰዓት, ጥራት: 100%, ተጠቃሚዎች: ነዋሪው፣እንግዶች፣በወረዳዋ የሚገኙ መስሪያ ቤቶችና ተቋማቶች", "N/A", "አካባቢያቸውን በንጽህና መጠበቅና መረጃ መስጠት"],
+    ["2", "በቀን ከነዋሪው፣ከድረጅትና ከመንገድ ደረቅ ቆሻሻ ሰብስቦ ማስወገድ", "ቤት ለቤት፣ከድረጅት፣ ከተቋም ከእግረኛና አስፓልት መንገድ", "መጠን: 37 ካ.ሜ, ጊዜ: በሳምንት 2ጊዜ, ጥራት: 100%, ተጠቃሚዎች: ነዋሪዎች፣ድረጅቶች፣ተቋማቶች፣የመንግስትና መንግስታዊ ያልሆኑ መስሪያ ቤቶች", "N/A", "ደንበኛ ደረቅ ቆሻሻን በስርአት በመያዝ በጠዋት አውጥቶ ማስረከብ"],
+    ["3", "በጽዳት ዙሪያ የሚነሱ የህዝብ ቅሬታዎችን አፋጣኝ ምላሽ መስጠት", "በወረዳደረቅ ቆሻሻ አስተዳደር ጽ/ቤት", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%, ተጠቃሚዎች: ነዋሪዎች፣ድረጅቶች፣ተቋማቶች", "N/A", "በአካል በመቅረብ ወይም በስልክ ቅሬታውን ማቅረብ"],
+    ["4", "ለመንግስት ተቋማት የጽዳት አገልግሎት መስጠት", "በወረዳው ስር ያሉ ተቋማት", "መጠን: 18, ጊዜ: በወር 2 ጊዜ, ጥራት: 100%, ተጠቃሚዎች: የመንግስት ተቋማት", "N/A", "በደብዳቤ የአገልግሎት ጥያቄ ማቅረብና የአገልግሎት ክፍያ መክፈል"],
+    ["5", "ሕብረተሰቡን በማሳተፍ ህገ ወጥ የቆሻሻ መጣያ ስፍራዎችን እንዲጸዱ ይደርጋል", "በመንደር", "መጠን: 2, ጊዜ: በየ15 ቀኑ, ጥራት: 100%, ተጠቃሚዎች: ነዋሪዎች", "N/A", "በጽዳት ዘመቻው መሳተፍ መንደሩን መጠበቅ"],
+    ["6", "አገልግሎት የሚሰጡ ገንዳዎች ዙሪያ ጽዳታቸው እንዲጠበቅና ገንዳ እንደሸፈንይደረጋል", "በማህበራት ገንዳ ዙሪያ", "መጠን: 4, ጊዜ: በየቀኑ, ጥራት: 100%, ተጠቃሚዎች: ሁሉም የህብረተሰብ ክፍል", "N/A", "በገንዳ ዙሪያ የሚደረግ ጽዳትን ቆሻሻ ባለመጣል ማገዝና መረጃ መስጠት"],
+    ["7", "የህብረተሰቡን እርካታ ለማሳደግ በደረቅ ቆሻሻ አያያዝና አገልግሎት አሰጣጥ የዳሰሳ ጥናት ያደርጋል", "በሁሉም መንደሮች", "መጠን: 12, ጊዜ: በየወሩ, ጥራት: 100%, ተጠቃሚዎች: ነዋሪዎች", "N/A", "ትክክለኛውን መረጃ መስጠት"],
+    ["8", "ወቅታቸውን የጠበቁና ታማኝ መረጃዎችን በማደራጀት ለተገልጋይ /ለጠያቂዎች/ ይሰጣል", "በጽ/ቤቱ", "መጠን: እንደአስፈላጊነቱ, ጊዜ: በየቀኑ, ጥራት: 100%, ተጠቃሚዎች: ማንኛውም ጠያቂ", "N/A", "የመረጃ ጥያቄ ማቅረብ"],
+    ["9", "በጽዳት ለሚሳተፉ ማህበራት የአገልግሎት ክፍያ በመመሪያው መሰረት ይከፍላል", "በጽ/ቤቱ", "መጠን: እንደአስፈላጊነቱ, ጊዜ: በየወሩ, ጥራት: 100%, ተጠቃሚዎች: የጽዳት ማህበራት", "N/A", "የሥራ ክንውን ሪፖርት ማቅረብ"]
+  ]
+};
 
-export default function ServiceDetailPage() {
-  const params = useParams()
-  const serviceId = params.id as string
+const ServiceFullTable = () => { // Renamed from Service11FullTable to be more generic
+  const { id } = useParams<{ id: string }>()
+  const data = servicesData[id] || []
+  
+  // Dynamically get the office name based on ID, or have a mapping
+  // For simplicity, using a placeholder or the ID itself in the title if a specific name isn't readily available for all IDs
+  let officeName = `አገልግሎት ${id}`;
+  // You can create a mapping for IDs to Amharic names here if needed:
+  const officeNames: Record<string, string> = {
+    "1": "ፑብሊክ አገልግሎቶች", 
+    "2": "የከተማ ውበትና አረንጓዴ ልማት ጽ/ቤት",
+    "3": "ባህል፣ ኪነ-ጥበብና ቱሪዝም ጽ/ቤት",
+    "4": "የወረዳ 07 ሴቶች፣ ህፃናትና ማህበራዊ ጉዳይ ጽ/ቤት",
+    "5": "አርሶ አደርና ከተማ ግብርና ልማት ጽ/ቤት",
+    "6": "የቤቶች ልማት አስተዳደር ጽ/ቤት",
+    "7": "የሰው ሃብት አስተዳደር ጽ/ቤት",
+    "8": "የወረዳ 07 ህብረት ስራ ጽ/ቤት",
+    "9": "የወጣቶችና ስፖርት ጽ/ቤት",
+    "10": "የደረቅ ቆሻሻ አስተዳደር ጽ/ቤት"
+  };
 
-  const service = services.find((s) => s.id === serviceId)
-
-  if (!service) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="bg-red-50 rounded-full p-4 mb-4">
-          <AlertCircle className="h-16 w-16 text-red-500" />
-        </div>
-        <h2 className="text-2xl font-bold mb-2">Service Not Found</h2>
-        <p className="text-gray-600 mb-6 text-center">
-          The service you are looking for does not exist or has been removed.
-        </p>
-        <Button asChild>
-          <Link href="/client/services">
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back to Services
-          </Link>
-        </Button>
-      </div>
-    )
+  if (officeNames[id]) {
+    officeName = `${officeNames[id]} - አገልግሎት ${id}`;
   }
 
-  const ServiceIcon = service.icon
 
   return (
-    <div className="space-y-8">
-      <div>
-        <Link
-          href="/client/services"
-          className="inline-flex items-center text-sm text-emerald-600 hover:text-emerald-700 mb-4"
-        >
-          <ChevronLeft className="mr-1 h-4 w-4" />
-          Back to Services
-        </Link>
-        <h1 className="text-3xl font-bold text-emerald-800 mb-2">{service.title}</h1>
-        <div className="flex items-center gap-2 mb-4">
-          <Badge variant="outline" className="bg-emerald-50/80 text-emerald-700 border-emerald-200 backdrop-blur-sm">
-            {service.category}
-          </Badge>
-          <div className="flex items-center text-sm text-gray-500">
-            <Clock className="h-4 w-4 mr-1" />
-            Processing time: {service.processingTime}
-          </div>
-        </div>
-        <p className="text-gray-600 max-w-3xl">{service.longDescription}</p>
+    <div className="p-6 max-w-full mx-auto"> {/* Changed max-w-6xl to max-w-full for wider tables */}
+      <h1 className="text-2xl font-bold text-sky-700 mb-4">{officeName}</h1>
+      <div className="overflow-auto border border-sky-200 rounded-xl">
+        <table className="min-w-full table-auto text-right text-sm text-slate-800">
+          <thead className="bg-sky-100">
+            <tr>
+              {headers.map((header, idx) => (
+                <th key={idx} className="px-4 py-2 border border-sky-200 whitespace-nowrap">
+                  {header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((row, rowIdx) => (
+              <tr key={rowIdx} className="hover:bg-sky-50">
+                {row.map((cell, cellIdx) => (
+                  <td key={cellIdx} className={`px-4 py-2 border border-slate-200 ${cellIdx === 1 || cellIdx === 5 ? 'whitespace-pre-wrap text-left' : 'whitespace-pre-wrap'}`}> {/* Align service type and prerequisites to left for better readability */}
+                    {cell}
+                  </td>
+                ))}
+                {/* Ensure empty cells are rendered if a row has fewer than 6 columns, though ideally all rows should have 6 */}
+                {Array(Math.max(0, headers.length - row.length)).fill(null).map((_, emptyCellIdx) => (
+                    <td key={`empty-${emptyCellIdx}`} className="px-4 py-2 border border-slate-200 whitespace-pre-wrap"></td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      <Tabs defaultValue="details" className="w-full">
-        <TabsList className="bg-white/80 backdrop-blur-sm border border-emerald-100/50">
-          <TabsTrigger 
-            value="details" 
-            className="data-[state=active]:bg-emerald-600/90 data-[state=active]:text-white data-[state=active]:shadow-sm"
-          >
-            Details
-          </TabsTrigger>
-          <TabsTrigger
-            value="requirements"
-            className="data-[state=active]:bg-emerald-600/90 data-[state=active]:text-white data-[state=active]:shadow-sm"
-          >
-            Requirements
-          </TabsTrigger>
-          <TabsTrigger 
-            value="process" 
-            className="data-[state=active]:bg-emerald-600/90 data-[state=active]:text-white data-[state=active]:shadow-sm"
-          >
-            Process
-          </TabsTrigger>
-          <TabsTrigger 
-            value="apply" 
-            className="data-[state=active]:bg-emerald-600/90 data-[state=active]:text-white data-[state=active]:shadow-sm"
-          >
-            Apply
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="details" className="mt-6">
-          <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <ServiceIcon className="h-5 w-5 mr-2 text-emerald-600" />
-                Service Details
-              </CardTitle>
-              <CardDescription>Complete information about this service</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">Service Category</h3>
-                  <p className="font-medium capitalize">{service.category}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">Processing Time</h3>
-                  <p className="font-medium">{service.processingTime}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">Service Fee</h3>
-                  <p className="font-medium">{service.fee}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">Department</h3>
-                  <p className="font-medium">
-                    {service.category === "personal"
-                      ? "Personal Documents"
-                      : service.category === "business"
-                        ? "Business Licensing"
-                        : service.category === "property"
-                          ? "Land & Construction"
-                          : service.category === "transport"
-                            ? "Transportation"
-                            : "Education"}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Description</h3>
-                <p>{service.longDescription}</p>
-              </div>
-
-              <Alert className="bg-blue-50/80 border-blue-100/50 backdrop-blur-sm">
-                <AlertCircle className="h-4 w-4 text-blue-500" />
-                <AlertDescription className="text-blue-800">
-                  For more information about this service, please visit our office or call us at +251-111-234567.
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="requirements" className="mt-6">
-          <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <CheckCircle className="h-5 w-5 mr-2 text-emerald-600" />
-                Required Documents
-              </CardTitle>
-              <CardDescription>Documents you need to prepare for this service</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3 text-gray-400">
-                {service.requirements.map((requirement, index) => (
-                  <li key={index} className="flex items-start">
-                    <CheckCircle className="h-5 w-5 mr-2 text-emerald-600 mt-0.5 flex-shrink-0" />
-                    <span>{requirement}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-6 flex justify-center">
-                <Button 
-                  variant="outline" 
-                  className="border-emerald-200 hover:bg-emerald-50/50 hover:text-emerald-700 backdrop-blur-sm"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Requirements Checklist
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="process" className="mt-6">
-          <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Clock className="h-5 w-5 mr-2 text-emerald-600" />
-                Application Process
-              </CardTitle>
-              <CardDescription>Step-by-step guide to applying for this service</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ol className="relative border-l border-gray-200 ml-3 space-y-6">
-                {service.process.map((step, index) => (
-                  <li key={index} className="ml-6">
-                    <span className="absolute flex items-center justify-center w-8 h-8 bg-emerald-100/80 rounded-full -left-4 ring-4 ring-white/80 text-emerald-800 font-medium">
-                      {index + 1}
-                    </span>
-                    <h3 className="font-medium mb-1">Step {index + 1}</h3>
-                    <p className="text-gray-600">{step}</p>
-                  </li>
-                ))}
-              </ol>
-
-              <div className="mt-8 p-4 bg-yellow-50/80 rounded-lg border border-yellow-100/50 backdrop-blur-sm">
-                <h3 className="font-medium text-yellow-800 mb-2 flex items-center">
-                  <AlertCircle className="h-5 w-5 mr-2 text-yellow-600" />
-                  Important Notes
-                </h3>
-                <ul className="list-disc pl-5 space-y-1 text-yellow-800">
-                  <li>All documents must be original with photocopies</li>
-                  <li>Applications with incomplete documents will not be processed</li>
-                  <li>Processing times are estimates and may vary based on workload</li>
-                  <li>You will receive a tracking number to check your application status</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="apply" className="mt-6">
-          <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="h-5 w-5 mr-2 text-emerald-600" />
-                Apply for {service.title}
-              </CardTitle>
-              <CardDescription>Choose how you want to apply for this service</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="border border-gray-200/50 rounded-lg p-4 hover:border-emerald-200 hover:bg-emerald-50/30 transition-colors backdrop-blur-sm">
-                  <h3 className="font-medium mb-2 flex items-center">
-                    <Calendar className="h-5 w-5 mr-2 text-emerald-600" />
-                    Apply in Person
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Visit our office with all required documents to apply for this service in person.
-                  </p>
-                  <Button className="w-full bg-emerald-600/90 hover:bg-emerald-700/90 backdrop-blur-sm">
-                    Book Appointment
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="border border-gray-200/50 rounded-lg p-4 hover:border-emerald-200 hover:bg-emerald-50/30 transition-colors backdrop-blur-sm">
-                  <h3 className="font-medium mb-2 flex items-center">
-                    <FileText className="h-5 w-5 mr-2 text-emerald-600" />
-                    Apply Online
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Complete the application process online by uploading all required documents.
-                  </p>
-                  <Button className="w-full bg-emerald-600/90 hover:bg-emerald-700/90 backdrop-blur-sm">
-                    Start Online Application
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="border-t border-gray-200/50 pt-6">
-                <h3 className="font-medium mb-4">Office Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500 mb-1">Address</h4>
-                    <p>Kirkos Sub City Wereda 07 Administrative Office</p>
-                    <p>Addis Ababa, Ethiopia</p>
-                    <p className="text-sm text-gray-500 mt-1">GPS: Lat 9.013789 / Lon 38.751536</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500 mb-1">Office Hours</h4>
-                    <p>Monday - Friday: 8:30 AM - 5:00 PM</p>
-                    <p>Saturday: 8:30 AM - 12:30 PM</p>
-                    <p>Sunday: Closed</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="border-t border-gray-200/50 pt-6 flex flex-col items-start">
-              <h3 className="font-medium mb-2">Need Help?</h3>
-              <p className="text-gray-600 mb-4">
-                If you have questions about this service or need assistance with your application, please contact us.
-              </p>
-              <div className="flex gap-4">
-                <Button 
-                  variant="outline" 
-                  className="border-emerald-200 hover:bg-emerald-50/50 hover:text-emerald-700 backdrop-blur-sm"
-                >
-                  Call Us: +251-111-234567
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-emerald-200 hover:bg-emerald-50/50 hover:text-emerald-700 backdrop-blur-sm"
-                >
-                  Email: support@kirkoswereda07.gov.et
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
     </div>
-  )
-}
+  );
+};
+
+export default ServiceFullTable; // Renamed
