@@ -24,7 +24,8 @@ import {
 import { ThemeProvider } from "@/components/theme-provider"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-
+import Image from "next/image"
+import logo from "../../public/kirkos-wo7.png"
 // Language translations
 const translations = {
   en: {
@@ -163,8 +164,8 @@ export default function ClientLayout({
               {/* Logo and Site Title */}
               <Link href="/client" className="flex items-center space-x-3">
                 <div className="relative h-12 w-12">
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#FFC621] via-[#078C43] to-[#BC0F2F] opacity-20"></div>
-                  <Building2 className="h-8 w-8 text-[#0F2557] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                  {/* <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#FFC621] via-[#078C43] to-[#BC0F2F] opacity-20"></div> */}
+                  <Image width={100} height={300} src={logo} alt="Kirkos Sub City Logo" className="h-12 w-32 text-[#0F2557] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
                 </div>
                 <div>
                   <div className="font-bold text-lg text-[#0F2557]">Kirkos Sub City</div>
