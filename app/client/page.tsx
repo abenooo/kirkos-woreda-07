@@ -157,8 +157,8 @@ export default function ClientHomePage() {
                 online.
               </p>
 
-              <div className="flex flex-wrap gap-4 mt-6">
-                <div className="relative w-full max-w-md">
+              <div className="flex flex-row gap-4 mt-6">
+                <div className="relative w-full max-w-md ">
                   <Input
                     type="search"
                     placeholder="Search for services..."
@@ -171,10 +171,10 @@ export default function ClientHomePage() {
                 </div>
                 <Button asChild size="lg" className={`${primaryButtonClasses}`}>
                   <Link href="/client/services">
-                    <span> 
-                      Browse All Services
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </span>
+                    <div className="w-full flex flex-row"> 
+                      Browse All Services      <ArrowRight className="ml-2 h-5 w-5" />
+                 
+                    </div>
                   </Link>
                 </Button>
               </div>
