@@ -183,11 +183,12 @@ export default function ClientHomePage() {
         </div>
       </section>
 
-      {/* Featured Services - MODIFIED FOR SIZE INCREASE */}
-      <section>
+    
+      {/* c Categories */}
+      <section className="bg-slate-50 py-12 -mx-4 px-4">
         <div className="container mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className={`text-3xl font-bold ${headingTextClasses}`}>Featured Services</h2>
+        <div className="flex items-center justify-between mb-6">
+            <h2 className={`text-3xl font-bold ${headingTextClasses}`}>Service Services</h2>
             <Link
               href="/client/services"
               className={`${linkClasses} flex items-center text-sm font-medium`}
@@ -196,46 +197,6 @@ export default function ClientHomePage() {
               <ChevronRight className="ml-1 h-4 w-4" />
             </Link>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredServices.map((service) => {
-              const categoryGradient = categoryGradients[service.category as keyof typeof categoryGradients] || "from-slate-600 to-slate-700";
-              
-              return (
-                <Card key={service.id} className="hover:shadow-xl transition-all duration-300 border border-slate-200 overflow-hidden rounded-xl group bg-white flex flex-col"> {/* Added flex flex-col for content growth */}
-                  {/* Card Header - Increased padding, icon size, and wrapper padding */}
-                  <div className={`bg-gradient-to-br ${categoryGradient} px-6 py-5 flex items-center text-white`}>
-                    <div className="bg-white/20 p-3 rounded-lg mr-4 shadow-md backdrop-blur-sm"> {/* Increased padding to p-3, margin to mr-4 */}
-                      <service.icon className="h-6 w-6 text-white" /> {/* Increased icon size */}
-                    </div>
-                    <CardTitle className="text-base font-bold">{service.title}</CardTitle>
-                  </div>
-                  {/* Card Content - Increased padding and description min-height */}
-                  <CardContent className="p-6 flex flex-col flex-grow"> {/* Increased padding to p-6, added flex-grow for button alignment */}
-                    <p className={`${bodyTextClasses} mb-4 text-sm min-h-[56px] flex-grow`}>{service.description}</p> {/* Increased min-h, added flex-grow to push button down */}
-                    <Button
-                      asChild
-                      className={`w-full mt-auto ${primaryButtonClasses}`} /* Added mt-auto to stick button to bottom */
-                    >
-                      <Link href={`/client/services/${service.id}`}>
-                        <span> 
-                          Apply Now
-                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                        </span>
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Service Categories */}
-      <section className="bg-slate-50 py-12 -mx-4 px-4">
-        <div className="container mx-auto">
-          <h2 className={`text-3xl font-bold ${headingTextClasses} mb-8`}>Service Categories</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {serviceCategories.map((category, index) => {
               const categoryGradient = categoryGradients[category.category as keyof typeof categoryGradients] || "from-slate-500 to-slate-600";
