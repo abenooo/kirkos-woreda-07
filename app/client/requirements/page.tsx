@@ -1,206 +1,1005 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { FileText, AlertCircle, Download, ExternalLink } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { FileText } from "lucide-react"
+import PrerequisitesList from "@/components/PrerequisitesList" // Declare the variable before using it
 
-const servicesData: Record<string, string[][]> = {
-"1": [ // Data from ፑብሊክ.txt (Public Services / General Woreda Services)
-    ["1", "ሀብት ማሰባሰብ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በሰነድ/ደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
-    ["1.1", "ለመሰረተ ልማት ልማት ፍላጎት ሀብት ማሰባሰብ", "ወረዳ", "መጠን: 1, ጊዜ: 152 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የብሎክ ነዋሪ ያላቸዉን የልማት ፍላጎት መሰረት ያደረገ በህጋዊ የልማት ደረሰኝ ክፍያ መፈፀም\nPየህብረተሰቡን ለልማት ስራ ላይ ተገቢዉን መዋጮ ማድረግ\nPከነዋሪዉ ተሰበሰበዉ የሀብት በተገቢዉ መንገድ በተገቢዉ መንገድ በ24 ሰዓት ዉስጥ ባንክ ገቢ ማድረጉን መረጃ መዉሰድ"],
-    ["1.2", "ለበጎፍቃድ አገልግሎት ሀብት ማሰባሰብ", "ወረዳ", "መጠን: 1, ጊዜ: 148 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የበጎ ፍቃድ አገልግሎት ለመስጠት ፍላጎት ማሳየት እና ፍቃደኛ መሆን\nPየሀብት ስርጭቱ ላይ ተገቢዉን እገዛ ማድረግ"],
-    ["2", "በህብረተሰብ ተሳትፎ የአካባቢ ሰላም መጠበቅ", "ወረዳ", "መጠን: 1, ጊዜ: 201 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "ህብረተሰቡ የአካባቢዉን ሰላም ለማስጠበቅ የሚያደርገዉን ተሳትፎ ከሌሎች ተመሳሳይ የዘርፍ ባለድርሻ አካላት ጋር በመሆን በቅንጅት ዕለቱ በተራ አካባቢዉን እየጠበቀ መሆኑን መረጃ መስጠት"],
-    ["3", "የብሎክ አደረጃጀትን በመጠቀም ሰላም ፀጥታን በተመለከተ ወቅታዊ መረጃ አገልግሎት", "ወረዳ", "መጠን: 1, ጊዜ: 26 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "የ24 ሰዓት መረጃ ልዉዉጥ ማድረግ"],
-    ["4", "የብሎክ አደረጃጀቶችን በመጠቀም ህገወጥ ተግባራትን መከላከል", "ወረዳ", "መጠን: 1, ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "የደንብ ጥሰት እና አዋኪ ድርጊቶችን የሚፈፅሙ በመለየጥ በአካል በመገኘት ጥቆማ እና መረጃ በመስጠት ህገወጥ ነትን መከላከል"],
-    ["5", "የበጎፍቃድ አገልግሎት ማስተባበር", "ወረዳ", "መጠን: 1, ጊዜ: 254 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "የበጎ ፍቃድ አገልግሎት ለመስጠት ፍላጎት ማሳየት እና ፍቃደኛ መሆን"],
-    ["6", "የመረጃ አገልግሎት ማቅረብ", "ወረዳ", "መጠን: 1, ጊዜ: 24 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የመረጃ ጥያቄ ማቅረብ\nመረጃውን ለምን እንደሚፈልጉ ማብራራት\nአስፈላጊ ከሆነ የመታወቂያ ቅጂ ማቅረብ"],
-    ["7", "የሰነድ ማረጋገጫ አገልግሎት", "ወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "ዋናውን ሰነድ ማቅረብ\nየሰነድ ባለቤትነት ማረጋገጫ ማቅረብ\nየመታወቂያ ቅጂ ማቅረብ"],
-    ["8", "የክስተት ፈቃድ ማመቻቸት", "ወረዳ", "መጠን: 1, ጊዜ: 48 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የፕሮግራም ዝርዝር ማቅረብ\nየተሳታፊዎች ዝርዝር ማቅረብ\nየቦታና ጊዜ ማቅረብ\nአስፈላጊ የደህንነት ዋስትና ማቅረብ"],
-    ["9", "የህብረተሰብ ግንኙነት አገልግሎት", "ወረዳ", "መጠን: 1, ጊዜ: 8 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦንላይን", "ግንኙነት ለማድረግ የሚፈልጉበትን ምክንያት ማቅረብ\nየተሟላ ማመልከቻ ማቅረብ\nየመደበኛ መግለጫ ሰነድ ማቅረብ"],
-    ["10", "የማህበረሰብ ምክክር አገልግሎት", "ወረዳ", "መጠን: 1, ጊዜ: 72 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የምክክር ጥያቄ ማቅረብ\nየሚመለከታቸውን አካላት ማለት\nየምክክር አጀንዳ ማቅረብ\nየተሳታፊዎች ዝርዝር ማቅረብ"]
-  ],
-  "2": [ // Data from የከተማ_ውበትና_አረንጓዴ_ልማት_ጽ_ቤት.txt (Urban Beauty and Green Development Office)
-    ["1", "የተፋሰስ፤የአረንጓዴ አካባቢዎች ወንዝ ዳርቻዎች የማልማት የመንከባከብ የመጠበቅ ፈቃድ አገልግሎት", "በወረዳ", "N/A", "N/A", "N/A"],
-    ["1.1", "ለበጎ ፈቃድ አልሚዎች የአረንጓዴ ቁርጥራጭ ቦታዎችና 20/50 ሬዲየሰ በውል የልማትና እንክብካቤ ፈቃድ መስጠት፤", "በወረዳ", "ጊዜ: 33 ስዓት, ጥራት: 100%", "በአካል ቢሮ በመምጣት", "ማመልከቻ ደብዳቤ፤"],
-    ["2", "የክፍያ ሰነድ ማዘጋጀት አገልግሎት", "በወረዳ", "N/A", "N/A", "N/A"],
-    ["2.1", "በውሉ መሠረት ስራውን ማከናወኑን አረጋግጦ ለኢንትርፕራይዝ የክፍያ ሰነድ ማዘጋጅት፤", "በወረዳ", "ጊዜ: 16 ስዓት, ጥራት: 100%", "በአካል ቢሮ በመምጣት", "የስራ ውልና የክፍያ ጥያቄ ማቅርብ；"],
-    ["3", "የመፀዳጃ ቤት አገልግሎ", "በወረዳ", "N/A", "N/A", "N/A"],
-    ["3.1", "የመፀዳጃ ቤት አገልግሎት፤", "በወረዳ", "ጊዜ: 20 ደቂቃ, ጥራት: 100%", "በአካል", "የአገልግሎት ክፍያ መክፍልና በቅደም ተከተል መጠቀም；"],
-    ["3.2", "የሻወር አገልግሎት፤", "በወረዳ", "ጊዜ: 30 ደቂቃ, ጥራት: 100%", "በአካል", "የአገልግሎት ክፍያ መክፍልና በቅደም ተከተል መጠቀም；"],
-    ["4", "የአረንጓዴ ቦታዎች እንክብካቤ አገልግሎት", "በወረዳ", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል", "የእንክብካቤ ጥያቄ ማቅረብ\nየአካባቢውን ነዋሪዎች ድጋፍ ማረጋገጫ\nአካባቢውን ለማሳመር ያለ ዕቅድ ማቅረብ"],
-    ["5", "የከተማ ውበት ማስጠበቂያ ፈቃድ", "በወረዳ", "ጊዜ: 24 ሰዓት, ጥራት: 100%", "በአካል ቢሮ በመምጣት", "ማመልከቻ ደብዳቤ\nየስራ ዕቅድ ማቅረብ\nየቴክኒክ ብቃት ማረጋገጫ ማቅረብ"],
-    ["6", "የአካባቢያዊ አረንጓዴ ልማት ስልጠና", "በወረዳ", "ጊዜ: 16 ሰዓት, ጥራት: 100%", "በአካል", "ለስልጠና ማመልከት\nበአካባቢው ውበት ላይ ለመስራት ፍላጎት ማሳየት\nእንክብካቤ ለማድረግ ቁርጠኝነት ማሳየት"],
-    ["7", "የኮምፖስት ዝግጅት ስልጠና", "በወረዳ", "ጊዜ: 8 ሰዓት, ጥራት: 100%", "በአካል", "ለስልጠና ማመልከት\nበአካባቢው ለመተግበር ፍላጎት ማሳየት\nቢያንስ 5 ተሳታፊዎችን ማሰባሰብ"],
-    ["8", "የውሃ ማጠራቀሚያ ስርዓት ምክር አገልግሎት", "በወረዳ", "ጊዜ: 5 ሰዓት, ጥራት: 100%", "በአካል", "የአገልግሎት ጥያቄ ማቅረብ\nየንብረት ባለቤትነት ማረጋገጫ ማቅረብ\nየግቢ ሁኔታ ማቅረብ"],
-    ["9", "የአካባቢ ውበት ግምገማ አገልግሎት", "በወረዳ", "ጊዜ: 8 ሰዓት, ጥራት: 100%", "በአካል", "የግምገማ ጥያቄ ማቅረብ\nአካባቢውን ለማሳየት ፈቃደኝነት ማሳየት\nየተፈለገውን ግምገማ ዓላማ ማብራራት"],
-    ["10", "የአካባቢ ማሻሻያ የቴክኒክ ድጋፍ", "በወረዳ", "ጊዜ: 12 ሰዓት, ጥራት: 100%", "በአካል", "የድጋፍ ጥያቄ ማቅረብ\nየሚሻሻለውን ቦታ ዝርዝር ማቅረብ\nከማሻሻያው በኋላ ለመንከባከብ ቁርጠኝነት ማሳየት"]
-  ],
-  "3": [ // Data from ባህል፣ኪነ-ጥበብና ቱሪዝም ጽ_ቤት.txt (Culture, Arts and Tourism Office)
-    ["1", "የእደ ጥበብ ማህበራት እንዲደራጁ የተለያዩ ሙያዊ ድጋፍችን መስጠት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 8 ሠዓት, ጥራት: 100%", "በአካል መቅረብ", "Ø በአካል ቀርቦ ማመልከት የሚችል\nØ የተሰማራበትን የእደ ጥበብ ዘርፍ የሚሠራውን የሥራ ለማሳየት/ለማስጐብኘት ፈቃደኛ የሆነ\nØ በማህበር ለመደራጀት ሙያዊ ድጋፍ ፍላጐት ያለው"],
-    ["2", "አዲስ የብቃት ማረጋገጫ አገልግሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 2 ሠዓት, ጥራት: 100%", "በአካል መቅረብ", "Ø የተቋሙ ባለቤት የታደሰ የነዋሪነት መታወቂያ ወይም ፓስፖርት ወይም መንጃ ፈቃድ ከዋናው ጋር የተገናዘበ ፎቶ ኮፒ\nØ ሁለት /3X3/ መጠን ያላቸው በ6 ወር ጊዜ ውስጥ የተነሳው የባለቤቱ ጉርድ ፎቶግራፍ\nØ በዘርፉ የተቀመጠውን የአገልግሎት ክፍያ የሚፈጽም\nØ ተቋሙ ቋሚ አድራሻ ያለው\nØ በባህል ዘርፍ ሙያዊ ድጋፍ ለሚፈልጉ እና ለተቋማቸው የሱፐርቪዠን አገልግሎት ለሚፈልጉ"],
-    ["3", "እድሳት የብቃት ማረጋገጫ አገልግሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 1ሠዓት 20 ደ, ጥራት: 100%", "በአካል መቅረብ", "Ø ነባር ብቃት ማረጋገጫ ሰርተፊኬት\nØ በፋይሉ ከነበሩት መረጃ የጎደሉትን ማሟላት"],
-    ["4", "በጠቃሚ የባህል እሴቶችን በማኅበረሰቡ ዘንድ የማስረፅና የብዛ ባህል አካታች ስራዎች አገልግልሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 40ደ, ጥራት: 100%", "በአካል መቅረብ", "Ø አገልግሎት ፈላጊው ህጋዊ የአገልግሎት ፍላጐት ደብዳቤ ማቅረብ የሚችል\nØ የሥልጠና ዳሰሣ/የባህል አካታች ስራዎች ቅድመ ጥናት ላይ ፍላጐትን ማስፈር\nØ የሥልጠና ቦታ፣ የሥልጠና ጊዜ እና ሠልጣኞችን የሚያመቻች\nØ ሥልጠናው መውሰድ\nØ በወሰዱት ስልጠና ላይ የታዩትን ጠንካራና ደካማ ጐኖች ላይ በቃል ወይም በአስተያየት መስጫ ቅፆች ላይ ለማስፈር ፈቃደኛ የሆነ"],
-    ["5", "የአሉታዊ መጤ ባህሎች እና መከላከከል ስልጠናና የግንዛቤ ማስጨበጫ አገልግልሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 40ደ, ጥራት: 100%", "በአካል መቅረብ", "Ø አገልግሎት ፈላጊው ህጋዊ የአገልግሎት ፍላጐት ደብዳቤ ማቅረብ የሚችል\nØ የሥልጠና ዳሰሣ ቅድመ ጥናት ላይ ፍላጐትን ማስፈር\nØ የሥልጠና ቦታ፣ የሥልጠና ጊዜ እና ሠልጣኞችን የሚያመቻች\nØ ሥልጠናው መውሰድ\nØ በወሰዱት ስልጠና ላይ የታዩትን ጠንካራና ደካማ ጐኖች ላይ በቃል ወይም በአስተያየት መስጫ ቅፆች ላይ ለማስፈር ፈቃደኛ የሆነ"],
-    ["6", "ህዝባዊና መንግስታዊ ከተማ አቀፍ የባህል ቀናትና ሁነቶች ከበራ", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 56 ስዓት, ጥራት: 100%", "በአካል በመቅረብ", "Ø ፕሮፖዛል ማዘጋጀት ስልጣንና ተግባራቸው የሚያሳይ ሰነድ ማቅረብ\nØ ለኩነት ወይም ለመድረክ ዝግጅት የሚገልፅ ህጋዊ ደብዳቤ/ሰነድ ከቢሮ ጋር የተፈራረሙት የስምምነት ሰነድ"],
-    ["7", "የንባብ/የሪፈረንስ አገልግሎት", "የመረጃ ሀብቶች ማሰባሰብ፣ማደራጀትና አገልግሎት ቡድን", "ጊዜ: 5 ደቂቃ, ጥራት: 100%", "በአካል በመቅረብ", "· የንባብ አግልግሎት ለማግኘት መታወቂያ ብቻ ማሳየት\n· ህፃናት ምንም አይጠየቁም"],
-    ["8", "የውሰት፤አገልግሎት", "የመረጃ ሀብቶች ማሰባሰብ፣ማደራጀትና አገልግሎት ቡድን", "ጊዜ: 7ደቂቃ, ጥራት: 100%", "በአካል በመቅረብ", "· የአገልግሎት ጥያቄ በደብዳቤ ማቅረብ\n· የመንግስት ሰራተኛ ከሆኑ ከቢሮ ድጋፍ ደብዳቤ\n· የተዋስቱን መጻህፍትና ፖኬት በጥንቃቄ መያዝና በወቅቱ መመለስ"],
-    ["9", "የስነጹሁፍ ምሽት አገልግሎት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል መቅረብ", "ከሚመለከተው አካል የሙያ ማህበራት የድጋፍ ደብዳቤ ማቅረብ የሚችል፣ ጥያቄ ማቅረብ"],
-    ["10", "የኪነጥበብ ውድድር ማዛጋጀት አገልግሎት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: 64 ስዓት, ጥራት: 100%", "በአካል መቅረብ", "በመስፈርቱ መሰረት በአካል በመቅረብ"],
-    ["11", "የባህል ቱሪዝም ልማት ድጋፍ", "የቱሪስት አገልግሎቶች ብቃት ማረጋገጥ ቡድን", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል መቅረብ", "ጥያቄ ማቅረብ\nየፕሮጀክት ዕቅድ ማቅረብ\nየባህላዊ ቱሪዝም ጣቢያ ቦታ ማመላከት\nአካባቢውን ለማሳየት ፈቃደኝነት ማሳየት"],
-    ["12", "የፌስቲቫል አገልግሎት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: 72 ሰዓት, ጥራት: 100%", "በአካል መቅረብ", "የፌስቲቫል ፕሮግራም ዝርዝር ማቅረብ\nየተሳታፊዎች ዝርዝር ማቅረብ\nበፌስቲቫሉ ለመሳተፍ የሚያስፈልግ ብቃት ማረጋገጫ\nአስፈላጊውን የፀጥታ ሁኔታ ማሟላት"]
-  ],
-  "4": [ // Data from የወረዳ 07 ሴ_ህ_ማ_ጉ_ጽ_ቤት.txt (Woreda 07 Women, Children & Social Affairs)
-    ["1", "ለሴቶች የማህበራዊ አገልግሎት ድጋፍ መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
-    ["1.1", "ከፍለው መማር ለማይችሉ ሴቶች የትምህር እድልና ድጋ ማመቻቸት", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ማስረጃ/ደብዳቤ"],
-    ["1.2", "በጎልማሶች ተግባ ተኮር ትምህርት ማሳተፍ", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ማስረጃ/ደብዳቤ"],
-    ["1.3", "የነፃ ህክምና ድጋፍ እንዲያገኙ ማቻት", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ማስረጃ"],
-    ["2", "ሴቶችን በገቢ ማስገኛ ዘርፎች እንዲሰማሩ ድጋፍ መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
-    ["2.1", "ሴቶችን በንግድ ስራ ማሰማራት", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ማስረጃ ማቅረብ"],
-    ["3", "ለህፃናትና ወጣቶች አገልግሎት ድጋፍ ማድረግ", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
-    ["3.1", "ህፃናት ማቆያ ማጠናከርና ማስፋፋት", "በስራ ሂደቱ", "ጊዜ: 8 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
-    ["3.2", "ለህፃናት የምገባ ድጋፍ ማድረግ", "በስራ ሂደቱ", "ጊዜ: 1 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
-    ["4", "ለአረጋዊያንና አካል ጉዳተኞች ድጋፍ መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
-    ["4.1", "የቀጥታ ድጋፍ ማድረግ", "በስራ ሂደቱ", "ጊዜ: 1 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
-    ["4.2", "የነፃ ህክምና አገልግሎት ተጠቃሚ ማድረግ", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
-    ["5", "የማህበረሰብ አቀፍ የጤና መድህን አገልግሎት መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
-    ["5.1", "የማህበረሰብ አቀፍ ጤና መድህን አባል ምዝገባ ማከናወን", "በስራ ሂደቱ", "ጊዜ: 160 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "የታደሰ የቀበሌ መታወቂያ"],
-    ["5.2", "የአባልነት መታወቂያ መስጠት", "በስራ ሂደቱ", "ጊዜ: 0.5 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "የታደሰ የቀበሌ መታወቂያ"],
-    ["6", "ለተጎጂዎች የምክርና የህግ ድጋፍ አገልግሎት መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
-    ["6.1", "የምክር አገልግሎት መስጠት", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ"],
-    ["6.2", "የህግ ድጋፍ አገልግሎት መስጠት", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ"],
-    ["7", "ለተጎጂዎች ጊዜያዊ መጠለያ አገልግሎት መስጠት", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ"],
-    ["8", "ለቀጥታ ድጋፍ ተጠቃሚዎች የባንክ አገልግሎት ማተሳሰር", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
-    ["8.1", "ከባንክ ገንዘብ መቀበል የማይችሉ የቀጥታ ድጋፍ ተጠቃሚዎች ውክልና ማመቻት", "በስራ ሂደቱ", "ጊዜ: 8 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "የነዋሪነት መታወቂያ ማስረጃ"],
-    ["8.2", "ቅሬታ ማስተናድ", "በስራ ሂደቱ", "ጊዜ: 8 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በአካል ከተገልጋይ በሚቀርብ ጥያቄ"]
-  ],
-  "5": [ // Data from አርሶ አደር ከ_ግ_ል_ጽ_ ቤት.txt (Farmers & Rural Development)
-    ["1", "ድጋፍ እና የምክር አገልግሎት", "N/A", "N/A", "N/A", "N/A"],
-    ["1.1", "የስልጠና አገልግሎት ፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 80 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የፍላጎት ጥያቄ ማቅረብ"],
-    ["1.2", "የሙያ ምክር አገልግሎት፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 4 ሰዓት, ጥራት: 100%", "በአካል ወይም በኮሚኒኬሽን ቴክኖሎጂ", "ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"],
-    ["1.3", "የቴክኒክ ምክር አገልግሎት፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 14.25 ሰዓት, ጥራት: 100%", "በአካል ወይም በኮሚኒኬሽን ቴክኖሎጂ", "ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"],
-    ["1.4", "የገበያ መረጃ እና ትስስር አገልግሎት፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 70 ሰዓት, ጥራት: 100%", "በአካል ወይም በኮሚኒኬሽን ቴክኖሎጂ", "ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"],
-    ["2", "የልማት ተነሺ አርሶ አደሮችን የመደገፍ አገልግሎት", "N/A", "N/A", "N/A", "N/A"],
-    ["2.1", "የማህበራት ምዝገባ እና ህጋዊ ሰውነት ማረጋገጫ አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የመተዳደሪያ ደንብ፣ የመመስረቻ ቃለ ጉባኤ፣ የአባላት ዝርዝር፣ መታወቂያ፣ የልማት ተነሺነት ማረጋገጫ"],
-    ["2.2", "የቦታ ካሳ ክፍያ አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 80 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የይዞታ ማረጋገጫ ካርታ፣ የባንክ ደብተር፣ የልማት ተነሺነት ማረጋገጫ፣ የቀበሌ መታወቂያ፣ የውክልና ማሰረጃ"],
-    ["2.3", "የመኖሪያ ቤት አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 176 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የልማት ተነሺ አርሶ አደር ስለመሆን፣መታወቂያ፤የውክልና ማሰረጃ"],
-    ["2.4", "ለአርሶ አደርሮች የሥራ ዕድል ማመቻቸትና በማህበር የማደራጀት አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የንግድ ሥራ ዕቅድ፣ ስልጠና ወስደው በሥራ ዕድል መደራጀት፣ ልማት ተነሺ አርሶ አደር ስለመሆን፣ መታወቂያ"],
-    ["2.5", "የፋይናንስ፣ የማሽነሪ እና ቁሳቁስ ግብዓቶች ድጋፍ እንዲያገኙ በማድረግ ወደ ስራ ማስገባት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 192 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የንግድ ሥራ ዕቅድ፣ ስልጠና ወስደው በሥራ ዕድል መደራጀት፣ ልማት ተነሺ አርሶ አደር ስለመሆን፣ መታወቂያ"]
-  ],
-  "6": [ // Data from ቤቶች.txt (Housing)
-    ["1", "የመንግስት ቤቶችን የኪራይ ውል ማዋዋል", "በወረዳ", "መጠን: 1, ጊዜ: 0.5 ሰዓት, ጥራት: 100%", "N/A", "• ቤት እንዲሰጣቸው የተወሰነበት ደብዳቤ\n• ኢትዮጲያዊ ዜግነት ያለው እና የታደሰ መታወቂያ ያለው\n• በስማቸው ወይም በትዳር አጋራቸው ስም በከተማው አስተዳደር ስር የመንግስት ወይንም የግል ቤት መስሪያ ቦታ መሆኑን ከ6ወር ወር በኃላየተሰጠ ህጋዊ ማስረጃ"],
-    ["2", "የመንግስት ቤቶች ኪራይ ውል ማደስ", "በወረዳ", "መጠን: 1, ጊዜ: 0.5 ሰዓት, ጥራት: 100%", "N/A", "• ቀደም ሲል የነበረ ውል\n• ወቅታዊ ኪራይ የተከፈለበት ደረሰኝ\n• የታደሰ ህጋዊ የነዋሪነት መታወቂያ"],
-    ["3", "የኪራይ ዋጋ መተመን", "በወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "N/A", "• ቤቱ የኪራይ ተመን ያልወጣለት መሆኑን ማረጋገጥ\n• ቤቱ የሚገኝበት የአጎራባች የግራና ቀኝ የኪራይ ተመን"],
-    ["4", "የተለየ ጥገና ፈቃድ መስጠት", "በወረዳ", "መጠን: 1, ጊዜ: 1 ሰዓት, ጥራት: 100%", "N/A", "• የጥገና አይነት የተገለጸበት ማመልከቻ\n• ቀደም ሲል የነበረ ውል\n• ወቅታዊ ኪራይ የተከፈለበት ደረሰኝ\n• የቅርጽ እና የይዘት ለውጥ ለውጥ የገባበት ፎርም\n• የጥገና ስራዎ በራሱ ወጪ የሚገነባ እና ወጭውን የማይጠይቅ መሆኑ"],
-    ["5", "ህገወጦች ራሳቸው ቤቱን እንዲለቁ የጽሁፍ ማስጠንቀቂያ ደብዳቤ መስጠት", "በወረዳ", "መጠን: 1, ጊዜ: 0.5 ሰዓት, ጥራት: 100%", "N/A", "• በህገወጦች የተያዙ ቤቶች ዝርዝር መረጃ"],
-    ["6", "በህገወጥ የተያዙ የመንግስት ቤቶችን ማስለቀቅ", "በወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "N/A", "• በህገወጥ የተያዙ ቤቶች ዝርዝር መረጃ ማደራጀት\n• ቤቱን እንዲለቅ የተሰጠ የጽሁፍ ማስጠንቀቂያ\n• ቤቱ ውስጥያለውን ንብረት በራሱ እንዲያወጣ በፅሁፍ የተገለጸበት አስፈላጊ መረጃ\n• የሚመለከታቸው የህግ አካላት ያሉበት ቡድን ማደራጀት"],
-    ["7", "የመንግስት መኖሪያ እና ንግድ ቤቶችን አስመልክቶ መረጃ ለሚጠይቁ አካላት መረጃ መስጠት", "በወረዳ", "መጠን: 1, ጊዜ: 0.33 ሰዓት, ጥራት: 100%", "N/A", "• የቅሬታቸው ጭብጥ በፅሁፍ ቅሬታቸውን ሊያስረዳ የሚችል ተጨማሪ ሰነዶች"],
-    ["8", "ለመንግስት ቤት ካርታ ስራ የሚያስፈልጉ መረጃዎችን በማደራጀት ለክፍለ ከተማ መላክ", "በወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "N/A", "• የቤቱ ሙሉ መረጃ"]
-  ],
-  "7": [ // Data from የሰው ኃይል.txt (Human Resources)
-    ["1", "የሰው ሃይል መረጃ ማደራጀት ፣ ማሰራጨትና አገልግሎት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በሰነድ/ደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
-    ["2", "የሰው ሃይል የማሟላት አገልግሎት", "N/A", "N/A", "N/A", "N/A"],
-    ["2.1", "በቅጥር", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 15 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
-    ["2.2", "በደረጃ እድገት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
-    ["2.3", "በውስጥ ዝውውር", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
-    ["2.4", "ከክልል በማዛወር", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
-    ["2.5", "ድልድልና ምደባ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 3 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
-    ["3", "የሰው ሃይል የልማት ስራዎችን ማከናወን", "N/A", "N/A", "N/A", "N/A"],
-    ["3.1", "የስልጠና ፍላጎት መለየት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በแบบફોર્મ", "የተሟላ መረጃ ማቅረብ"],
-    ["3.2", "ስልጠና መስጠት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በአካል", "የተሟላ መረጃ ማቅረብ"],
-    ["3.3", "የስልጠና ግምገማ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 2 ቀን, ጥራት: 100%", "በቃል/በፅሁፍ", "የተሟላ መረጃ ማቅረብ"]
-  ],
-  "8": [ // Data from ወረዳ 07 ህብረት ስራ ጽ_ቤት.txt (Woreda 07 Cooperative Office)
-    ["1", "የማደራጀት አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 105.5 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የእንደራጅ ጥያቀ በጽሁፍ ማቅረብ"],
-    ["1.1", "ግንዛቤ መፍጠር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 8 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
-    ["1.2", "የመደራጀት ጥያቄ መቀበልና አዋጭነት ጥናት ማካሄድ", "በቢሮ", "ጊዜ: 16.5 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
-    ["1.3", "ማደራጀት", "በቢሮ", "ጊዜ: 81 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
-    ["2", "የማጠናከር አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 328 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የድጋፍ ጥያቄ"],
-    ["2.1", "በማዋሀድ ማጠናከር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 80 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
-    ["2.2", "በመክፈል ማጠናከር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 64 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
-    ["2.3", "በአደረጃጀት ማጠናከር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 80 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
-    ["2.4", "የኦዲትና ኢንስፔክሽን አገልግሎት", "ከቢሮ ውጪ", "ጊዜ: 104 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የድጋፍ ጥያቄ"],
-    ["3", "የቁጠባና ብድር አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 196 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የቁጠባና ብድር ድጋፍ ጥያቄ"]
-  ],
-}
-
-export default function RequirementsPage() {
+export default function ServicesPrerequisites() {
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6 text-slate-800">የአገልግሎት ቅድመ ሁኔታዎች</h1>
-      
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6 text-center">የአገልግሎት ቅድመ ሁኔታዎች</h1>
+      <p className="text-center mb-8 text-muted-foreground">ከተገልጋይ የሚጠበቅ ቅድመ ሁኔታዎች</p>
+
       <Tabs defaultValue="1" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-8">
-          <TabsTrigger value="1">የህዝብ አገልግሎት</TabsTrigger>
-          <TabsTrigger value="2">የከተማ ውበትና አረንጓዴ ልማት</TabsTrigger>
-          <TabsTrigger value="3">ባህል፣ኪነ-ጥበብና ቱሪዝም</TabsTrigger>
-          <TabsTrigger value="4">የሴቶችና ልጆች ጉዳይ</TabsTrigger>
-          <TabsTrigger value="5">የሰው ሃብት አስተዳደር</TabsTrigger>
-          <TabsTrigger value="6">የህብረት ስራ ማህበራት</TabsTrigger>
-          <TabsTrigger value="7">የወጣቶችና ስፖርት ጉዳይ</TabsTrigger>
-          <TabsTrigger value="8">የከተማ ንፅህና</TabsTrigger>
-          <TabsTrigger value="9">የንግድ እና ኢንዱስትሪ ጽ/ቤት</TabsTrigger>
-          <TabsTrigger value="10">የግብርና ልማት ጽ/ቤት</TabsTrigger>
+        <TabsList className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-10 mb-8">
+          <TabsTrigger value="1">ፑብሊክ</TabsTrigger>
+          <TabsTrigger value="2">ከተማ ውበት</TabsTrigger>
+          <TabsTrigger value="3">ባህል</TabsTrigger>
+          <TabsTrigger value="4">ሴ/ህ/ማ/ጉ</TabsTrigger>
+          <TabsTrigger value="5">አርሶ አደር</TabsTrigger>
+          <TabsTrigger value="6">ቤቶች</TabsTrigger>
+          <TabsTrigger value="7">ሰው ኃይል</TabsTrigger>
+          <TabsTrigger value="8">ህብረት ስራ</TabsTrigger>
+          <TabsTrigger value="9">ወጣቶች</TabsTrigger>
+          <TabsTrigger value="10">ሌሎች</TabsTrigger>
         </TabsList>
 
-        {Object.entries(servicesData).map(([categoryId, services]) => (
-          <TabsContent key={categoryId} value={categoryId}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services.map((service, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-semibold text-slate-800">
-                      {service[1]} {/* Service Title */}
-                    </CardTitle>
-                    <CardDescription className="text-slate-600">
-                      {service[2]} {/* Department */}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-3">
-                        <AlertCircle className="h-5 w-5 text-slate-500 mt-0.5" />
-                        <div>
-                          <h4 className="font-medium text-slate-700 mb-2">ቅድመ ሁኔታዎች</h4>
-                          <div className="text-sm text-slate-600 space-y-2">
-                            {service[5] ? (
-                              service[5].split('\n').map((requirement, idx) => (
-                                <p key={idx} className="flex items-start">
-                                  <span className="mr-2">•</span>
-                                  {requirement.replace('P', '').replace('Ø', '')}
-                                </p>
-                              ))
-                            ) : (
-                              <p>ቅድመ ሁኔታዎች አልተገለጹም</p>
-                            )}
-                          </div>
-                        </div>
+        {/* Tab 1: Public Services */}
+        <TabsContent value="1">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>ፑብሊክ አገልግሎቶች</CardTitle>
+                <CardDescription>የወረዳ አጠቃላይ አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ሀብት ማሰባሰብ</span>
                       </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <FileText className="h-5 w-5 text-slate-500 mt-0.5" />
-                        <div>
-                          <h4 className="font-medium text-slate-700 mb-2">የማስኬጃ መረጃ</h4>
-                          <p className="text-sm text-slate-600">{service[3]}</p>
-                        </div>
-                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የተሟላ መረጃ ማቅረብ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
 
-                      <div className="flex items-start space-x-3">
-                        <ExternalLink className="h-5 w-5 text-slate-500 mt-0.5" />
-                        <div>
-                          <h4 className="font-medium text-slate-700 mb-2">የአገልግሎት ዘዴ</h4>
-                          <p className="text-sm text-slate-600">{service[4]}</p>
-                        </div>
+                  <AccordionItem value="item-1.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ለመሰረተ ልማት ልማት ፍላጎት ሀብት ማሰባሰብ</span>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        ))}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "የብሎክ ነዋሪ ያላቸዉን የልማት ፍላጎት መሰረት ያደረገ በህጋዊ የልማት ደረሰኝ ክፍያ መፈፀም",
+                          "የህብረተሰቡን ለልማት ስራ ላይ ተገቢዉን መዋጮ ማድረግ",
+                          "ከነዋሪዉ ተሰበሰበዉ የሀብት በተገቢዉ መንገድ በተገቢዉ መንገድ በ24 ሰዓት ዉስጥ ባንክ ገቢ ማድረጉን መረጃ መዉሰድ",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-1.2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ለበጎፍቃድ አገልግሎት ሀብት ማሰባሰብ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የበጎ ፍቃድ አገልግሎት ለመስጠት ፍላጎት ማሳየት እና ፍቃደኛ መሆን", "የሀብት ስርጭቱ ላይ ተገቢዉን እገዛ ማድረግ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>በህብረተሰብ ተሳትፎ የአካባቢ ሰላም መጠበቅ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "ህብረተሰቡ የአካባቢዉን ሰላም ለማስጠበቅ የሚያደርገዉን ተሳትፎ ከሌሎች ተመሳሳይ የዘርፍ ባለድርሻ አካላት ጋር በመሆን በቅንጅት ዕለቱ በተራ አካባቢዉን እየጠበቀ መሆኑን መረጃ መስጠት",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የብሎክ አደረጃጀትን በመጠቀም ሰላም ፀጥታን በተመለከተ ወቅታዊ መረጃ አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የ24 ሰዓት መረጃ ልዉዉጥ ማድረግ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-4">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የብሎክ አደረጃጀቶችን በመጠቀም ህገወጥ ተግባራትን መከላከል</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "የደንብ ጥሰት እና አዋኪ ድርጊቶችን የሚፈፅሙ በመለየጥ በአካል በመገኘት ጥቆማ እና መረጃ በመስጠት ህገወጥ ነትን መከላከል",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-5">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የበጎፍቃድ አገልግሎት ማስተባበር</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የበጎ ፍቃድ አገልግሎት ለመስጠት ፍላጎት ማሳየት እና ፍቃደኛ መሆን"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-6">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የመረጃ አገልግሎት ማቅረብ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የመረጃ ጥያቄ ማቅረብ", "መረጃውን ለምን እንደሚፈልጉ ማብራራት", "አስፈላጊ ከሆነ የመታወቂያ ቅጂ ማቅረብ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-7">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የሰነድ ማረጋገጫ አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["ዋናውን ሰነድ ማቅረብ", "የሰነድ ባለቤትነት ማረጋገጫ ማቅረብ", "የመታወቂያ ቅጂ ማቅረብ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-8">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የክስተት ፈቃድ ማመቻቸት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "የፕሮግራም ዝርዝር ማቅረብ",
+                          "የተሳታፊዎች ዝርዝር ማቅረብ",
+                          "የቦታና ጊዜ ማቅረብ",
+                          "አስፈላጊ የደህንነት ዋስትና ማቅረብ",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-9">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የህብረተሰብ ግንኙነት አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["ግንኙነት ለማድረግ የሚፈልጉበትን ምክንያት ማቅረብ", "የተሟላ ማመልከቻ ማቅረብ", "የመደበኛ መግለጫ ሰነድ ማቅረብ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-10">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የማህበረሰብ ምክክር አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የምክክር ጥያቄ ማቅረብ", "የሚመለከታቸውን አካላት ማለት", "የምክክር አጀንዳ ማቅረብ", "የተሳታፊዎች ዝርዝር ማቅረብ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab 2: Urban Beauty */}
+        <TabsContent value="2">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>የከተማ ውበትና አረንጓዴ ልማት</CardTitle>
+                <CardDescription>የከተማ ውበትና አረንጓዴ ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የተፋሰስ፤የአረንጓዴ አካባቢዎች ወንዝ ዳርቻዎች የማልማት የመንከባከብ የመጠበቅ ፈቃድ አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["N/A"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-1.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ለበጎ ፈቃድ አልሚዎች የአረንጓዴ ቁርጥራጭ ቦታዎችና 20/50 ሬዲየሰ በውል የልማትና እንክብካቤ ፈቃድ መስጠት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["ማመልከቻ ደብዳቤ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>በውሉ መሠረት ስራውን ማከናወኑን አረጋግጦ ለኢንትርፕራይዝ የክፍያ ሰነድ ማዘጋጅት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የስራ ውልና የክፍያ ጥያቄ ማቅርብ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የመፀዳጃ ቤት አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የአገልግሎት ክፍያ መክፍልና በቅደም ተከተል መጠቀም"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3.2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የሻወር አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የአገልግሎት ክፍያ መክፍልና በቅደም ተከተል መጠቀም"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-4">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የአረንጓዴ ቦታዎች እንክብካቤ አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የእንክብካቤ ጥያቄ ማቅረብ", "የአካባቢውን ነዋሪዎች ድጋፍ ማረጋገጫ", "አካባቢውን ለማሳመር ያለ ዕቅድ ማቅረብ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-5">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የከተማ ውበት ማስጠበቂያ ፈቃድ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["ማመልከቻ ደብዳቤ", "የስራ ዕቅድ ማቅረብ", "የቴክኒክ ብቃት ማረጋገጫ ማቅረብ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-6">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የአካባቢያዊ አረንጓዴ ልማት ስልጠና</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["ለስልጠና ማመልከት", "በአካባቢው ውበት ላይ ለመስራት ፍላጎት ማሳየት", "እንክብካቤ ለማድረግ ቁርጠኝነት ማሳየት"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-7">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የኮምፖስት ዝግጅት ስልጠና</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["ለስልጠና ማመልከት", "በአካባቢው ለመተግበር ፍላጎት ማሳየት", "ቢያንስ 5 ተሳታፊዎችን ማሰባሰብ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-8">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የውሃ ማጠራቀሚያ ስርዓት ምክር አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የአገልግሎት ጥያቄ ማቅረብ", "የንብረት ባለቤትነት ማረጋገጫ ማቅረብ", "የግቢ ሁኔታ ማቅረብ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-9">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የአካባቢ ውበት ግምገማ አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የግምገማ ጥያቄ ማቅረብ", "አካባቢውን ለማሳየት ፈቃደኝነት ማሳየት", "የተፈለገውን ግምገማ ዓላማ ማብራራት"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-10">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የአካባቢ ማሻሻያ የቴክኒክ ድጋፍ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የድጋፍ ጥያቄ ማቅረብ", "የሚሻሻለውን ቦታ ዝርዝር ማቅረብ", "ከማሻሻያው በኋላ ለመንከባከብ ቁርጠኝነት ማሳየት"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab 3: Culture */}
+        <TabsContent value="3">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>ባህል፣ ኪነ-ጥበብና ቱሪዝም</CardTitle>
+                <CardDescription>ባህል፣ ኪነ-ጥበብና ቱሪዝም ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የእደ ጥበብ ማህበራት እንዲደራጁ የተለያዩ ሙያዊ ድጋፍችን መስጠት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "በአካል ቀርቦ ማመልከት የሚችል",
+                          "የተሰማራበትን የእደ ጥበብ ዘርፍ የሚሠራውን የሥራ ለማሳየት/ለማስጐብኘት ፈቃደኛ የሆነ",
+                          "በማህበር ለመደራጀት ሙያዊ ድጋፍ ፍላጐት ያለው",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>አዲስ የብቃት ማረጋገጫ አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "የተቋሙ ባለቤት የታደሰ የነዋሪነት መታወቂያ ወይም ፓስፖርት ወይም መንጃ ፈቃድ ከዋናው ጋር የተገናዘበ ፎቶ ኮፒ",
+                          "ሁለት /3X3/ መጠን ያላቸው በ6 ወር ጊዜ ውስጥ የተነሳው የባለቤቱ ጉርድ ፎቶግራፍ",
+                          "በዘርፉ የተቀመጠውን የአገልግሎት ክፍያ የሚፈጽም",
+                          "ተቋሙ ቋሚ አድራሻ ያለው",
+                          "በባህል ዘርፍ ሙያዊ ድጋፍ ለሚፈልጉ እና ለተቋማቸው የሱፐርቪዠን አገልግሎት ለሚፈልጉ",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>እድሳት የብቃት ማረጋገጫ አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["ነባር ብቃት ማረጋገጫ ሰርተፊኬት", "በፋይሉ ከነበሩት መረጃ የጎደሉትን ማሟላት"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-4">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>በጠቃሚ የባህል እሴቶችን በማኅበረሰቡ ዘንድ የማስረፅና የብዛ ባህል አካታች ስራዎች አገልግልሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "አገልግሎት ፈላጊው ህጋዊ የአገልግሎት ፍላጐት ደብዳቤ ማቅረብ የሚችል",
+                          "የሥልጠና ዳሰሣ/የባህል አካታች ስራዎች ቅድመ ጥናት ላይ ፍላጐትን ማስፈር",
+                          "የሥልጠና ቦታ፣ የሥልጠና ጊዜ እና ሠልጣኞችን የሚያመቻች",
+                          "ሥልጠናው መውሰድ",
+                          "በወሰዱት ስልጠና ላይ የታዩትን ጠንካራና ደካማ ጐኖች ላይ በቃል ወይም በአስተያየት መስጫ ቅፆች ላይ ለማስፈር ፈቃደኛ የሆነ",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-5">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የአሉታዊ መጤ ባህሎች እና መከላከከል ስልጠናና የግንዛቤ ማስጨበጫ አገልግልሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "አገልግሎት ፈላጊው ህጋዊ የአገልግሎት ፍላጐት ደብዳቤ ማቅረብ የሚችል",
+                          "የሥልጠና ዳሰሣ ቅድመ ጥናት ላይ ፍላጐትን ማስፈር",
+                          "የሥልጠና ቦታ፣ የሥልጠና ጊዜ እና ሠልጣኞችን የሚያመቻች",
+                          "ሥልጠናው መውሰድ",
+                          "በወሰዱት ስልጠና ላይ የታዩትን ጠንካራና ደካማ ጐኖች ላይ በቃል ወይም በአስተያየት መስጫ ቅፆች ላይ ለማስፈር ፈቃደኛ የሆነ",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-6">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ህዝባዊና መንግስታዊ ከተማ አቀፍ የባህል ቀናትና ሁነቶች ከበራ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "ፕሮፖዛል ማዘጋጀት ስልጣንና ተግባራቸው የሚያሳይ ሰነድ ማቅረብ",
+                          "ለኩነት ወይም ለመድረክ ዝግጅት የሚገልፅ ህጋዊ ደብዳቤ/ሰነድ ከቢሮ ጋር የተፈራረሙት የስምምነት ሰነድ",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-7">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የንባብ/የሪፈረንስ አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የንባብ አግልግሎት ለማግኘት መታወቂያ ብቻ ማሳየት", "ህፃናት ምንም አይጠየቁም"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-8">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የውሰት፤አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "የአገልግሎት ጥያቄ በደብዳቤ ማቅረብ",
+                          "የመንግስት ሰራተኛ ከሆኑ ከቢሮ ድጋፍ ደብዳቤ",
+                          "የተዋስቱን መጻህፍትና ፖኬት በጥንቃቄ መያዝና በወቅቱ መመለስ",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-9">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የስነጹሁፍ ምሽት አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["ከሚመለከተው አካል የሙያ ማህበራት የድጋፍ ደብዳቤ ማቅረብ የሚችል፣ ጥያቄ ማቅረብ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-10">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የኪነጥበብ ውድድር ማዛጋጀት አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["በመስፈርቱ መሰረት በአካል በመቅረብ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab 4: Women & Children */}
+        <TabsContent value="4">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>ሴቶች፣ ህፃናት እና ማህበራዊ ጉዳዮች</CardTitle>
+                <CardDescription>የወረዳ 07 ሴ/ህ/ማ/ጉ/ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ከፍለው መማር ለማይችሉ ሴቶች የትምህር እድልና ድጋ ማመቻቸት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["በተገልጋይ ማስረጃ/ደብዳቤ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-1.2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>በጎልማሶች ተግባ ተኮር ትምህርት ማሳተፍ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["በተገልጋይ ማስረጃ/ደብዳቤ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-1.3">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የነፃ ህክምና ድጋፍ እንዲያገኙ ማቻት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["በተገልጋይ ማስረጃ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ሴቶችን በንግድ ስራ ማሰማራት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["ማስረጃ ማቅረብ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ህፃናት ማቆያ ማጠናከርና ማስፋፋት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["በተገልጋይ ጥያቄ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3.2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ለህፃናት የምገባ ድጋፍ ማድረግ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["በተገልጋይ ጥያቄ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-4.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የቀጥታ ድጋፍ ማድረግ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["በተገልጋይ ጥያቄ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-4.2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የነፃ ህክምና አገልግሎት ተጠቃሚ ማድረግ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["በተገልጋይ ጥያቄ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-5.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የማህበረሰብ አቀፍ ጤና መድህን አባል ምዝገባ ማከናወን</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የታደሰ የቀበሌ መታወቂያ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-5.2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የአባልነት መታወቂያ መስጠት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የታደሰ የቀበሌ መታወቂያ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab 5: Farmers */}
+        <TabsContent value="5">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>አርሶ አደር ከተማ ግብርና ልማት</CardTitle>
+                <CardDescription>አርሶ አደር ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የስልጠና አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የፍላጎት ጥያቄ ማቅረብ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-1.2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የሙያ ምክር አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-1.3">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የቴክኒክ ምክር አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-1.4">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የገበያ መረጃ እና ትስስር አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2.1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የማህበራት ምዝገባ እና ህጋዊ ሰውነት ማረጋገጫ አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የመተዳደሪያ ደንብ", "የመመስረቻ ቃለ ጉባኤ", "የአባላት ዝርዝር", "መታወቂያ", "የልማት ተነሺነት ማረጋገጫ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2.2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የቦታ ካሳ ክፍያ አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የይዞታ ማረጋገጫ ካርታ", "የባንክ ደብተር", "የልማት ተነሺነት ማረጋገጫ", "የቀበሌ መታወቂያ", "የውክልና ማሰረጃ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2.3">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የመኖሪያ ቤት አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["የልማት ተነሺ አርሶ አደር ስለመሆን", "መታወቂያ", "የውክልና ማሰረጃ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2.4">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ለአርሶ አደርሮች የሥራ ዕድል ማመቻቸትና በማህበር የማደራጀት አገልግሎት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የንግድ ሥራ ዕቅድ", "ስልጠና ወስደው በሥራ ዕድል መደራጀት", "ልማት ተነሺ አርሶ አደር ስለመሆን", "መታወቂያ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2.5">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የፋይናንስ፣ የማሽነሪ እና ቁሳቁስ ግብዓቶች ድጋፍ እንዲያገኙ በማድረግ ወደ ስራ ማስገባት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["የንግድ ሥራ ዕቅድ", "ስልጠና ወስደው በሥራ ዕድል መደራጀት", "ልማት ተነሺ አርሶ አደር ስለመሆን", "መታወቂያ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab 6: Housing */}
+        <TabsContent value="6">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>ቤቶች</CardTitle>
+                <CardDescription>የቤቶች አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የመንግስት ቤቶችን የኪራይ ውል ማዋዋል</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "ቤት እንዲሰጣቸው የተወሰነበት ደብዳቤ",
+                          "ኢትዮጲያዊ ዜግነት ያለው እና የታደሰ መታወቂያ ያለው",
+                          "በስማቸው ወይም በትዳር አጋራቸው ስም በከተማው አስተዳደር ስር የመንግስት ወይንም የግል ቤት መስሪያ ቦታ መሆኑን ከ6ወር ወር በኃላየተሰጠ ህጋዊ ማስረጃ",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የመንግስት ቤቶች ኪራይ ውል ማደስ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["ቀደም ሲል የነበረ ውል", "ወቅታዊ ኪራይ የተከፈለበት ደረሰኝ", "የታደሰ ህጋዊ የነዋሪነት መታወቂያ"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የኪራይ ዋጋ መተመን</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={["ቤቱ የኪራይ ተመን ያልወጣለት መሆኑን ማረጋገጥ", "ቤቱ የሚገኝበት የአጎራባች የግራና ቀኝ የኪራይ ተመን"]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-4">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>የተለየ ጥገና ፈቃድ መስጠት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList
+                        prerequisites={[
+                          "የጥገና አይነት የተገለጸበት ማመልከቻ",
+                          "ቀደም ሲል የነበረ ውል",
+                          "ወቅታዊ ኪራይ የተከፈለበት ደረሰኝ",
+                          "የቅርጽ እና የይዘት ለውጥ ለውጥ የገባበት ፎርም",
+                          "የጥገና ስራዎ በራሱ ወጪ የሚገነባ እና ወጭውን የማይጠይቅ መሆኑ",
+                        ]}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-5">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>ህገወጦች ራሳቸው ቤቱን እንዲለቁ የጽሁፍ ማስጠንቀቂያ ደብዳቤ መስጠት</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["በህገወጦች የተያዙ ቤቶች ዝርዝር መረጃ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-6">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <span>በህገወጥ የተያዙ የመንግስት ቤቶችን ማስለቀቅ</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <PrerequisitesList prerequisites={["በህገወጥ የተያዙ የመንግስት ቤቶችን ማስለቀቅ"]} />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab 7: Social Services */}
+        <TabsContent value="7">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>ሰው ኃይል</CardTitle>
+                <CardDescription>ሰው ኃይል ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {/* Accordion items for Social Services */}
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab 8: Community Services */}
+        <TabsContent value="8">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>ህብረት ስራ</CardTitle>
+                <CardDescription>ህብረት ስራ ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {/* Accordion items for Community Services */}
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab 9: Transport */}
+        <TabsContent value="9">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>ወጣቶች</CardTitle>
+                <CardDescription>ወጣቶች ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {/* Accordion items for Transport */}
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab 10: Miscellaneous */}
+        <TabsContent value="10">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>ሌሎች</CardTitle>
+                <CardDescription>ሌሎች ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {/* Accordion items for Miscellaneous */}
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }
