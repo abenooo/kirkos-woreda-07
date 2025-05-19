@@ -35,10 +35,10 @@ export default function ServicesPrerequisites() {
           {/* Tab 1: Public Services */}
           <TabsContent value="1">
             <div className="grid gap-6">
-              <Card>
+              <Card className="bg-gray-100 text-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
-                  <CardTitle>ፑብሊክ አገልግሎቶች</CardTitle>
-                  <CardDescription>የወረዳ አጠቃላይ አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardTitle className="text-gray-900">ፑብሊክ አገልግሎቶች</CardTitle>
+                  <CardDescription className="text-gray-600">የወረዳ አጠቃላይ አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
@@ -225,10 +225,10 @@ export default function ServicesPrerequisites() {
           {/* Tab 2: Urban Beauty */}
           <TabsContent value="2">
             <div className="grid gap-6">
-              <Card>
+              <Card className="bg-gray-100 text-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
-                  <CardTitle>የከተማ ውበትና አረንጓዴ ልማት</CardTitle>
-                  <CardDescription>የከተማ ውበትና አረንጓዴ ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardTitle className="text-gray-900">የከተማ ውበትና አረንጓዴ ልማት</CardTitle>
+                  <CardDescription className="text-gray-600">የከተማ ውበትና አረንጓዴ ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
@@ -396,10 +396,10 @@ export default function ServicesPrerequisites() {
           {/* Tab 3: Culture */}
           <TabsContent value="3">
             <div className="grid gap-6">
-              <Card>
+              <Card className="bg-gray-100 text-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
-                  <CardTitle>ባህል፣ ኪነ-ጥበብና ቱሪዝም</CardTitle>
-                  <CardDescription>ባህል፣ ኪነ-ጥበብና ቱሪዝም ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardTitle className="text-gray-900">ባህል፣ ኪነ-ጥበብና ቱሪዝም</CardTitle>
+                  <CardDescription className="text-gray-600">ባህል፣ ኪነ-ጥበብና ቱሪዝም ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
@@ -514,10 +514,10 @@ export default function ServicesPrerequisites() {
           {/* Tab 4: Women & Children */}
           <TabsContent value="4">
             <div className="grid gap-6">
-              <Card>
+              <Card className="bg-gray-100 text-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
-                  <CardTitle>ሴቶች፣ ህፃናት እና ማህበራዊ ጉዳዮች</CardTitle>
-                  <CardDescription>የወረዳ 07 ሴ/ህ/ማ/ጉ/ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardTitle className="text-gray-900">ሴቶች፣ ህፃናት እና ማህበራዊ ጉዳዮች</CardTitle>
+                  <CardDescription className="text-gray-600">የወረዳ 07 ሴ/ህ/ማ/ጉ/ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
@@ -649,10 +649,10 @@ export default function ServicesPrerequisites() {
           {/* Tab 5: Farmers */}
           <TabsContent value="5">
             <div className="grid gap-6">
-              <Card>
+              <Card className="bg-gray-100 text-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
-                  <CardTitle>አርሶ አደር ከተማ ግብርና ልማት</CardTitle>
-                  <CardDescription>አርሶ አደር ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardTitle className="text-gray-900">አርሶ አደር ከተማ ግብርና ልማት</CardTitle>
+                  <CardDescription className="text-gray-600">አርሶ አደር ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
@@ -780,10 +780,10 @@ export default function ServicesPrerequisites() {
           {/* Tab 6: Housing */}
           <TabsContent value="6">
             <div className="grid gap-6">
-              <Card>
+              <Card className="bg-gray-100 text-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
-                  <CardTitle>ቤቶች</CardTitle>
-                  <CardDescription>የቤቶች አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardTitle className="text-gray-900">ቤቶች</CardTitle>
+                  <CardDescription className="text-gray-600">የቤቶች አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
@@ -885,10 +885,10 @@ export default function ServicesPrerequisites() {
           {/* Tab 7: Social Services */}
           <TabsContent value="7">
             <div className="grid gap-6">
-              <Card>
+              <Card className="bg-gray-100 text-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
-                  <CardTitle>ሰው ኃይል</CardTitle>
-                  <CardDescription>የሰው ሃብት አስተዳደር ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardTitle className="text-gray-900">ሰው ኃይል</CardTitle>
+                  <CardDescription className="text-gray-600">የሰው ሃብት አስተዳደር ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
@@ -954,10 +954,10 @@ export default function ServicesPrerequisites() {
           {/* Tab 8: Community Services */}
           <TabsContent value="8">
             <div className="grid gap-6">
-              <Card>
+              <Card className="bg-gray-100 text-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
-                  <CardTitle>ህብረት ስራ</CardTitle>
-                  <CardDescription>የህብረት ስራ ማህበራት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardTitle className="text-gray-900">ህብረት ስራ</CardTitle>
+                  <CardDescription className="text-gray-600">የህብረት ስራ ማህበራት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
@@ -1023,10 +1023,10 @@ export default function ServicesPrerequisites() {
           {/* Tab 9: Youth */}
           <TabsContent value="9">
             <div className="grid gap-6">
-              <Card>
+              <Card className="bg-gray-100 text-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
-                  <CardTitle>ወጣቶች</CardTitle>
-                  <CardDescription>የወጣቶችና ስፖርት ጉዳይ አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardTitle className="text-gray-900">ወጣቶች</CardTitle>
+                  <CardDescription className="text-gray-600">የወጣቶችና ስፖርት ጉዳይ አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
@@ -1092,10 +1092,10 @@ export default function ServicesPrerequisites() {
           {/* Tab 10: Miscellaneous */}
           <TabsContent value="10">
             <div className="grid gap-6">
-              <Card>
+              <Card className="bg-gray-100 text-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <CardHeader>
-                  <CardTitle>ሌሎች</CardTitle>
-                  <CardDescription>የጽዳት አስተዳደር ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardTitle className="text-gray-900">ሌሎች</CardTitle>
+                  <CardDescription className="text-gray-600">የጽዳት አስተዳደር ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
