@@ -150,7 +150,7 @@ export default function ClientHomePage() {
           <div className="container mx-auto max-w-5xl">
             <div className="max-w-2xl">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                Kirkos Sub City Wereda 07 eServices Portal
+                Kirkos Sub City Woreda 07 Public Service Portal
               </h1>
               <p className="text-xl text-white/90 font-bold max-w-2xl mb-8">
                 Access government services, submit applications, and get information about requirements and procedures
