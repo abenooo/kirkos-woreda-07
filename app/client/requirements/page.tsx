@@ -888,11 +888,63 @@ export default function ServicesPrerequisites() {
               <Card>
                 <CardHeader>
                   <CardTitle>ሰው ኃይል</CardTitle>
-                  <CardDescription>ሰው ኃይል ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardDescription>የሰው ሃብት አስተዳደር ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
-                    {/* Accordion items for Social Services */}
+                    <AccordionItem value="item-7.1">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የሰው ሃብት ማሰልጠኛ አገልግሎት</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የስልጠና ጥያቄ ማቅረብ",
+                          "የተሳታፊዎች ዝርዝር",
+                          "የስልጠና ዓላማ ማብራራት",
+                          "የስልጠና ቦታ እና ጊዜ ማረጋገጫ",
+                          "የስልጠና ወጪ የመክፈል ቃል ኪዳን"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="item-7.2">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የሥራ አመራር ስልጠና</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የሥራ ልምድ",
+                          "የተማሪ ማስረጃ",
+                          "የሥራ ውሎች",
+                          "የሥራ አመራር ልምድ ማረጋገጫ",
+                          "የሥራ አመራር የሚያስፈልገው የተጠናቀቀ ስልጠና"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="item-7.3">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የሥራ አመራር ምክር</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የሥራ ውሎች",
+                          "የሥራ ልምድ",
+                          "የተማሪ ማስረጃ",
+                          "የሥራ አመራር ችግር ዝርዝር",
+                          "የሥራ አመራር የሚያስፈልገው የተጠናቀቀ ስልጠና"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
                   </Accordion>
                 </CardContent>
               </Card>
@@ -905,28 +957,132 @@ export default function ServicesPrerequisites() {
               <Card>
                 <CardHeader>
                   <CardTitle>ህብረት ስራ</CardTitle>
-                  <CardDescription>ህብረት ስራ ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardDescription>የህብረት ስራ ማህበራት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
-                    {/* Accordion items for Community Services */}
+                    <AccordionItem value="item-8.1">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የህብረት ስራ ማህበር ምዝገባ</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የአባላት ዝርዝር",
+                          "የማህበር ደንብ",
+                          "የመስራች አባላት መታወቂያ",
+                          "የማህበር የስራ አመራር ዝርዝር",
+                          "የማህበር የስራ አመራር የሚያስፈልገው የተጠናቀቀ ስልጠና"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="item-8.2">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የህብረት ስራ ማህበር ድጋፍ</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የማህበር ምዝገባ",
+                          "የአባላት ዝርዝር",
+                          "የማህበር ደንብ",
+                          "የማህበር የስራ አመራር ዝርዝር",
+                          "የማህበር የስራ አመራር የሚያስፈልገው የተጠናቀቀ ስልጠና"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="item-8.3">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የህብረት ስራ ማህበር ስልጠና</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የማህበር ምዝገባ",
+                          "የአባላት ዝርዝር",
+                          "የማህበር ደንብ",
+                          "የማህበር የስራ አመራር ዝርዝር",
+                          "የማህበር የስራ አመራር የሚያስፈልገው የተጠናቀቀ ስልጠና"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
                   </Accordion>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          {/* Tab 9: Transport */}
+          {/* Tab 9: Youth */}
           <TabsContent value="9">
             <div className="grid gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle>ወጣቶች</CardTitle>
-                  <CardDescription>ወጣቶች ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardDescription>የወጣቶችና ስፖርት ጉዳይ አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
-                    {/* Accordion items for Transport */}
+                    <AccordionItem value="item-9.1">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የወጣቶች ማሰልጠኛ አገልግሎት</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የወጣት መታወቂያ",
+                          "የስልጠና ጥያቄ",
+                          "የዕድሜ ማረጋገጫ",
+                          "የስልጠና ቦታ እና ጊዜ ማረጋገጫ",
+                          "የስልጠና ወጪ የመክፈል ቃል ኪዳን"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="item-9.2">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የስፖርት ስልጠና</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የስፖርት ዓይነት",
+                          "የስልጠና ጥያቄ",
+                          "የዕድሜ ማረጋገጫ",
+                          "የስልጠና ቦታ እና ጊዜ ማረጋገጫ",
+                          "የስልጠና ወጪ የመክፈል ቃል ኪዳን"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="item-9.3">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የወጣቶች ማሰልጠኛ አገልግሎት</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የወጣት መታወቂያ",
+                          "የስልጠና ጥያቄ",
+                          "የዕድሜ ማረጋገጫ",
+                          "የስልጠና ቦታ እና ጊዜ ማረጋገጫ",
+                          "የስልጠና ወጪ የመክፈል ቃል ኪዳን"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
                   </Accordion>
                 </CardContent>
               </Card>
@@ -939,11 +1095,63 @@ export default function ServicesPrerequisites() {
               <Card>
                 <CardHeader>
                   <CardTitle>ሌሎች</CardTitle>
-                  <CardDescription>ሌሎች ከተማ ግብርና ልማት ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
+                  <CardDescription>የጽዳት አስተዳደር ጽ/ቤት አገልግሎቶች ቅድመ ሁኔታዎች</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
-                    {/* Accordion items for Miscellaneous */}
+                    <AccordionItem value="item-10.1">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የቆሻሻ አሰባሰብ አገልግሎት</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የአገልግሎት ጥያቄ",
+                          "የንብረት ባለቤትነት ማረጋገጫ",
+                          "የአገልግሎት ክፍያ",
+                          "የአገልግሎት ቦታ እና ጊዜ ማረጋገጫ",
+                          "የአገልግሎት ወጪ የመክፈል ቃል ኪዳን"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="item-10.2">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የቆሻሻ አወጋገድ አገልግሎት</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የአገልግሎት ጥያቄ",
+                          "የንብረት ባለቤትነት ማረጋገጫ",
+                          "የአገልግሎት ክፍያ",
+                          "የአገልግሎት ቦታ እና ጊዜ ማረጋገጫ",
+                          "የአገልግሎት ወጪ የመክፈል ቃል ኪዳን"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="item-10.3">
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span>የቆሻሻ አሰባሰብ አገልግሎት</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <PrerequisitesList prerequisites={[
+                          "የአገልግሎት ጥያቄ",
+                          "የንብረት ባለቤትነት ማረጋገጫ",
+                          "የአገልግሎት ክፍያ",
+                          "የአገልግሎት ቦታ እና ጊዜ ማረጋገጫ",
+                          "የአገልግሎት ወጪ የመክፈል ቃል ኪዳን"
+                        ]} />
+                      </AccordionContent>
+                    </AccordionItem>
                   </Accordion>
                 </CardContent>
               </Card>
