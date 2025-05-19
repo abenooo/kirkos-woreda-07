@@ -318,20 +318,21 @@ export default function ClientHomePage() {
       <section className="bg-slate-800 text-white py-12 -mx-4 px-4">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">Quick Links</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
             {[
               { href: "/client/anonymous", icon: MessageSquare, label: "Anonymous Report" },
               { href: "/client/misconduct", icon: AlertTriangle, label: "Report Misconduct" },
               { href: "/client/requirements", icon: FileQuestion, label: "Requirements Guide" },
-              // { href: "/client/licenses", icon: Building2, label: "Building Licenses" },
             ].map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="bg-sky-500/10 hover:bg-sky-500/20 p-6 rounded-xl flex flex-col items-center text-center transition-all duration-300 transform hover:scale-105 group"
+                className="bg-sky-500/10 hover:bg-sky-500/20 p-4 sm:p-6 rounded-xl flex flex-col items-center text-center transition-all duration-300 transform hover:scale-105 group h-full"
               >
-                <link.icon className="h-10 w-10 mb-3 text-sky-300 group-hover:text-sky-200 transition-colors" />
-                <span className="font-medium text-sky-100 group-hover:text-white transition-colors">{link.label}</span>
+                <link.icon className="h-8 w-8 sm:h-10 sm:w-10 mb-3 text-sky-300 group-hover:text-sky-200 transition-colors" />
+                <span className="font-medium text-sky-100 group-hover:text-white transition-colors text-sm sm:text-base">
+                  {link.label}
+                </span>
               </Link>
             ))}
           </div>
