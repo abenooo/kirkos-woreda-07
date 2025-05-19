@@ -1,8 +1,8 @@
 "use client"
-import type React from "react"
-import { useState, Suspense } from "react"
+
+import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   Building2,
@@ -26,6 +26,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import logo from "../../public/kirkos-wo7.png"
+
 // Language translations
 const translations = {
   en: {
@@ -35,7 +36,6 @@ const translations = {
     anonymous: "Anonymous Report",
     misconduct: "Report Misconduct",
     requirements: "Requirements",
-    // licenses: "Building Licenses",
     language: "Language",
     english: "English",
     amharic: "Amharic",
@@ -54,13 +54,11 @@ const translations = {
     anonymous: "ስም የማይገለጽ ሪፖርት",
     misconduct: "ስነ-ምግባር ጉድለት ሪፖርት",
     requirements: "መስፈርቶች",
-    licenses: "የግንባታ ፈቃዶች",
     language: "ቋንቋ",
     english: "እንግሊዘኛ",
     amharic: "አማርኛ",
     oromo: "ኦሮምኛ",
     search: "ፈልግ",
-    login: "ግባ",
     help: "እገዛ እና ድጋፍ",
     contact: "አግኙን",
     about: "ስለ እኛ",
@@ -74,13 +72,11 @@ const translations = {
     anonymous: "Gabaasa Maqaa Malee",
     misconduct: "Gabaasa Amala Badaa",
     requirements: "Ulaagaalee",
-    licenses: "Hayyama Ijaarsa",
     language: "Afaan",
     english: "Ingiliffaa",
     amharic: "Amaariffaa",
     oromo: "Afaan Oromoo",
     search: "Barbaadi",
-    login: "Seeni",
     help: "Gargaarsa fi Deeggarsa",
     contact: "Nu Quunnamaa",
     about: "Waa'ee Keenya",
@@ -97,8 +93,24 @@ export default function ClientLayout({
   const [language, setLanguage] = useState<"en" | "am" | "or">("en")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
 
   const t = translations[language]
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      // Navigate to search results page with query parameter
+      router.push(`/client/search?q=${encodeURIComponent(searchQuery)}`)
+      setMobileMenuOpen(false)
+    }
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
 
   const mainNavItems = [
     { name: t.home, href: "/client", icon: Home },
@@ -110,7 +122,6 @@ export default function ClientLayout({
   const secondaryNavItems = [
     { name: t.anonymous, href: "/client/anonymous", icon: MessageSquare },
     { name: t.misconduct, href: "/client/misconduct", icon: AlertTriangle },
-    // { name: t.licenses, href: "/client/licenses", icon: Building2 },
   ]
 
   return (
@@ -164,7 +175,6 @@ export default function ClientLayout({
               {/* Logo and Site Title */}
               <Link href="/client" className="flex items-center space-x-3">
                 <div className="relative h-12 w-12">
-                  {/* <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#FFC621] via-[#078C43] to-[#BC0F2F] opacity-20"></div> */}
                   <Image width={100} height={300} src={logo} alt="Kirkos Sub City Logo" className="h-12 w-32 text-[#0F2557] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
                 </div>
                 <div>
@@ -176,17 +186,25 @@ export default function ClientLayout({
               {/* Search Bar - Desktop */}
               <div className="hidden md:flex items-center flex-1 max-w-xl mx-8">
                 <div className="relative w-full">
-                  <Input
-                    type="search"
-                    placeholder={t.search + "..."}
-                    className="pl-10 pr-4 py-2 w-full border-gray-300 focus:border-[#0F2557] focus:ring-[#0F2557]"
-                  />
+                  <div className="flex">
+                    <Input
+                      type="search"
+                      placeholder={t.search + "..."}
+                      className="pl-10 pr-4 py-3 w-full text-gray-800 border border-gray-200 focus:ring-2 focus:ring-sky-500 rounded-l-md bg-gray-50 focus:bg-white"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                    />
+                    <Button 
+                      className="bg-[#0F2557] text-white rounded-l-none rounded-r-md hover:bg-[#0F2557]/90"
+                      onClick={handleSearch}
+                    >
+                      {t.search}
+                    </Button>
+                  </div>
                   <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                 </div>
               </div>
-
-              {/* User Actions */}
-        
 
               {/* Mobile menu button */}
               <Button
@@ -256,18 +274,24 @@ export default function ClientLayout({
             <div className="md:hidden border-t border-gray-200">
               {/* Mobile Search */}
               <div className="p-4 border-b border-gray-200">
-                <div className="relative">
+                <div className="relative flex">
                   <Input
                     type="search"
                     placeholder={t.search + "..."}
-                    className="pl-10 pr-4 py-2 w-full border-gray-300"
+                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-l-md bg-gray-50 focus:bg-white"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={handleKeyPress}
                   />
+                  <Button 
+                    className="bg-[#0F2557] text-white rounded-l-none rounded-r-md hover:bg-[#0F2557]/90"
+                    onClick={handleSearch}
+                  >
+                    {t.search}
+                  </Button>
                   <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                 </div>
               </div>
-
-              {/* Mobile Auth Buttons */}
-             
 
               {/* Mobile Menu Items */}
               <nav className="py-2">
@@ -299,7 +323,7 @@ export default function ClientLayout({
 
         {/* Main Content */}
         <main className="container mx-auto px-4 py-6">
-          <Suspense>{children}</Suspense>
+          {children}
         </main>
 
         {/* Footer */}
@@ -321,29 +345,29 @@ export default function ClientLayout({
                 <ul className="space-y-2 text-sm text-gray-300">
                   <li>
                     <Link href="/client" className="hover:text-white hover:underline">
-                      Home
+                      {t.home}
                     </Link>
                   </li>
                   <li>
                     <Link href="/client/services" className="hover:text-white hover:underline">
-                      Services
+                      {t.services}
                     </Link>
                   </li>
                   <li>
                     <Link href="/client/complaints" className="hover:text-white hover:underline">
-                      Complaints
+                      {t.complaints}
                     </Link>
                   </li>
                   <li>
                     <Link href="/client/requirements" className="hover:text-white hover:underline">
-                      Requirements
+                      {t.requirements}
                     </Link>
                   </li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-4">Contact</h3>
+                <h3 className="text-lg font-semibold mb-4">{t.contact}</h3>
                 <ul className="space-y-2 text-sm text-gray-300">
                   <li className="flex items-center">
                     <Phone className="h-4 w-4 mr-2" />
@@ -389,7 +413,7 @@ export default function ClientLayout({
             <div className="border-t border-gray-700 mt-8 pt-6 text-center">
               <div className="flex justify-center space-x-6 mb-4">
                 <Link href="/client/about" className="text-sm text-gray-300 hover:text-white hover:underline">
-                  About
+                  {t.about}
                 </Link>
                 <Link href="/client/privacy" className="text-sm text-gray-300 hover:text-white hover:underline">
                   Privacy Policy
