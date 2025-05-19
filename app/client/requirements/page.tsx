@@ -1,560 +1,206 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { FileText, AlertCircle, Download, ExternalLink } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FileText, AlertCircle, Download, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
+const servicesData: Record<string, string[][]> = {
+"1": [ // Data from ፑብሊክ.txt (Public Services / General Woreda Services)
+    ["1", "ሀብት ማሰባሰብ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በሰነድ/ደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["1.1", "ለመሰረተ ልማት ልማት ፍላጎት ሀብት ማሰባሰብ", "ወረዳ", "መጠን: 1, ጊዜ: 152 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የብሎክ ነዋሪ ያላቸዉን የልማት ፍላጎት መሰረት ያደረገ በህጋዊ የልማት ደረሰኝ ክፍያ መፈፀም\nPየህብረተሰቡን ለልማት ስራ ላይ ተገቢዉን መዋጮ ማድረግ\nPከነዋሪዉ ተሰበሰበዉ የሀብት በተገቢዉ መንገድ በተገቢዉ መንገድ በ24 ሰዓት ዉስጥ ባንክ ገቢ ማድረጉን መረጃ መዉሰድ"],
+    ["1.2", "ለበጎፍቃድ አገልግሎት ሀብት ማሰባሰብ", "ወረዳ", "መጠን: 1, ጊዜ: 148 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የበጎ ፍቃድ አገልግሎት ለመስጠት ፍላጎት ማሳየት እና ፍቃደኛ መሆን\nPየሀብት ስርጭቱ ላይ ተገቢዉን እገዛ ማድረግ"],
+    ["2", "በህብረተሰብ ተሳትፎ የአካባቢ ሰላም መጠበቅ", "ወረዳ", "መጠን: 1, ጊዜ: 201 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "ህብረተሰቡ የአካባቢዉን ሰላም ለማስጠበቅ የሚያደርገዉን ተሳትፎ ከሌሎች ተመሳሳይ የዘርፍ ባለድርሻ አካላት ጋር በመሆን በቅንጅት ዕለቱ በተራ አካባቢዉን እየጠበቀ መሆኑን መረጃ መስጠት"],
+    ["3", "የብሎክ አደረጃጀትን በመጠቀም ሰላም ፀጥታን በተመለከተ ወቅታዊ መረጃ አገልግሎት", "ወረዳ", "መጠን: 1, ጊዜ: 26 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "የ24 ሰዓት መረጃ ልዉዉጥ ማድረግ"],
+    ["4", "የብሎክ አደረጃጀቶችን በመጠቀም ህገወጥ ተግባራትን መከላከል", "ወረዳ", "መጠን: 1, ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "የደንብ ጥሰት እና አዋኪ ድርጊቶችን የሚፈፅሙ በመለየጥ በአካል በመገኘት ጥቆማ እና መረጃ በመስጠት ህገወጥ ነትን መከላከል"],
+    ["5", "የበጎፍቃድ አገልግሎት ማስተባበር", "ወረዳ", "መጠን: 1, ጊዜ: 254 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦላይን", "የበጎ ፍቃድ አገልግሎት ለመስጠት ፍላጎት ማሳየት እና ፍቃደኛ መሆን"],
+    ["6", "የመረጃ አገልግሎት ማቅረብ", "ወረዳ", "መጠን: 1, ጊዜ: 24 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የመረጃ ጥያቄ ማቅረብ\nመረጃውን ለምን እንደሚፈልጉ ማብራራት\nአስፈላጊ ከሆነ የመታወቂያ ቅጂ ማቅረብ"],
+    ["7", "የሰነድ ማረጋገጫ አገልግሎት", "ወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "ዋናውን ሰነድ ማቅረብ\nየሰነድ ባለቤትነት ማረጋገጫ ማቅረብ\nየመታወቂያ ቅጂ ማቅረብ"],
+    ["8", "የክስተት ፈቃድ ማመቻቸት", "ወረዳ", "መጠን: 1, ጊዜ: 48 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የፕሮግራም ዝርዝር ማቅረብ\nየተሳታፊዎች ዝርዝር ማቅረብ\nየቦታና ጊዜ ማቅረብ\nአስፈላጊ የደህንነት ዋስትና ማቅረብ"],
+    ["9", "የህብረተሰብ ግንኙነት አገልግሎት", "ወረዳ", "መጠን: 1, ጊዜ: 8 ሰዓት, ጥራት: 100%", "በአካል መገኘት እና በኦንላይን", "ግንኙነት ለማድረግ የሚፈልጉበትን ምክንያት ማቅረብ\nየተሟላ ማመልከቻ ማቅረብ\nየመደበኛ መግለጫ ሰነድ ማቅረብ"],
+    ["10", "የማህበረሰብ ምክክር አገልግሎት", "ወረዳ", "መጠን: 1, ጊዜ: 72 ሰዓት, ጥራት: 100%", "በአካል መገኘት", "የምክክር ጥያቄ ማቅረብ\nየሚመለከታቸውን አካላት ማለት\nየምክክር አጀንዳ ማቅረብ\nየተሳታፊዎች ዝርዝር ማቅረብ"]
+  ],
+  "2": [ // Data from የከተማ_ውበትና_አረንጓዴ_ልማት_ጽ_ቤት.txt (Urban Beauty and Green Development Office)
+    ["1", "የተፋሰስ፤የአረንጓዴ አካባቢዎች ወንዝ ዳርቻዎች የማልማት የመንከባከብ የመጠበቅ ፈቃድ አገልግሎት", "በወረዳ", "N/A", "N/A", "N/A"],
+    ["1.1", "ለበጎ ፈቃድ አልሚዎች የአረንጓዴ ቁርጥራጭ ቦታዎችና 20/50 ሬዲየሰ በውል የልማትና እንክብካቤ ፈቃድ መስጠት፤", "በወረዳ", "ጊዜ: 33 ስዓት, ጥራት: 100%", "በአካል ቢሮ በመምጣት", "ማመልከቻ ደብዳቤ፤"],
+    ["2", "የክፍያ ሰነድ ማዘጋጀት አገልግሎት", "በወረዳ", "N/A", "N/A", "N/A"],
+    ["2.1", "በውሉ መሠረት ስራውን ማከናወኑን አረጋግጦ ለኢንትርፕራይዝ የክፍያ ሰነድ ማዘጋጅት፤", "በወረዳ", "ጊዜ: 16 ስዓት, ጥራት: 100%", "በአካል ቢሮ በመምጣት", "የስራ ውልና የክፍያ ጥያቄ ማቅርብ；"],
+    ["3", "የመፀዳጃ ቤት አገልግሎ", "በወረዳ", "N/A", "N/A", "N/A"],
+    ["3.1", "የመፀዳጃ ቤት አገልግሎት፤", "በወረዳ", "ጊዜ: 20 ደቂቃ, ጥራት: 100%", "በአካል", "የአገልግሎት ክፍያ መክፍልና በቅደም ተከተል መጠቀም；"],
+    ["3.2", "የሻወር አገልግሎት፤", "በወረዳ", "ጊዜ: 30 ደቂቃ, ጥራት: 100%", "በአካል", "የአገልግሎት ክፍያ መክፍልና በቅደም ተከተል መጠቀም；"],
+    ["4", "የአረንጓዴ ቦታዎች እንክብካቤ አገልግሎት", "በወረዳ", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል", "የእንክብካቤ ጥያቄ ማቅረብ\nየአካባቢውን ነዋሪዎች ድጋፍ ማረጋገጫ\nአካባቢውን ለማሳመር ያለ ዕቅድ ማቅረብ"],
+    ["5", "የከተማ ውበት ማስጠበቂያ ፈቃድ", "በወረዳ", "ጊዜ: 24 ሰዓት, ጥራት: 100%", "በአካል ቢሮ በመምጣት", "ማመልከቻ ደብዳቤ\nየስራ ዕቅድ ማቅረብ\nየቴክኒክ ብቃት ማረጋገጫ ማቅረብ"],
+    ["6", "የአካባቢያዊ አረንጓዴ ልማት ስልጠና", "በወረዳ", "ጊዜ: 16 ሰዓት, ጥራት: 100%", "በአካል", "ለስልጠና ማመልከት\nበአካባቢው ውበት ላይ ለመስራት ፍላጎት ማሳየት\nእንክብካቤ ለማድረግ ቁርጠኝነት ማሳየት"],
+    ["7", "የኮምፖስት ዝግጅት ስልጠና", "በወረዳ", "ጊዜ: 8 ሰዓት, ጥራት: 100%", "በአካል", "ለስልጠና ማመልከት\nበአካባቢው ለመተግበር ፍላጎት ማሳየት\nቢያንስ 5 ተሳታፊዎችን ማሰባሰብ"],
+    ["8", "የውሃ ማጠራቀሚያ ስርዓት ምክር አገልግሎት", "በወረዳ", "ጊዜ: 5 ሰዓት, ጥራት: 100%", "በአካል", "የአገልግሎት ጥያቄ ማቅረብ\nየንብረት ባለቤትነት ማረጋገጫ ማቅረብ\nየግቢ ሁኔታ ማቅረብ"],
+    ["9", "የአካባቢ ውበት ግምገማ አገልግሎት", "በወረዳ", "ጊዜ: 8 ሰዓት, ጥራት: 100%", "በአካል", "የግምገማ ጥያቄ ማቅረብ\nአካባቢውን ለማሳየት ፈቃደኝነት ማሳየት\nየተፈለገውን ግምገማ ዓላማ ማብራራት"],
+    ["10", "የአካባቢ ማሻሻያ የቴክኒክ ድጋፍ", "በወረዳ", "ጊዜ: 12 ሰዓት, ጥራት: 100%", "በአካል", "የድጋፍ ጥያቄ ማቅረብ\nየሚሻሻለውን ቦታ ዝርዝር ማቅረብ\nከማሻሻያው በኋላ ለመንከባከብ ቁርጠኝነት ማሳየት"]
+  ],
+  "3": [ // Data from ባህል፣ኪነ-ጥበብና ቱሪዝም ጽ_ቤት.txt (Culture, Arts and Tourism Office)
+    ["1", "የእደ ጥበብ ማህበራት እንዲደራጁ የተለያዩ ሙያዊ ድጋፍችን መስጠት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 8 ሠዓት, ጥራት: 100%", "በአካል መቅረብ", "Ø በአካል ቀርቦ ማመልከት የሚችል\nØ የተሰማራበትን የእደ ጥበብ ዘርፍ የሚሠራውን የሥራ ለማሳየት/ለማስጐብኘት ፈቃደኛ የሆነ\nØ በማህበር ለመደራጀት ሙያዊ ድጋፍ ፍላጐት ያለው"],
+    ["2", "አዲስ የብቃት ማረጋገጫ አገልግሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 2 ሠዓት, ጥራት: 100%", "በአካል መቅረብ", "Ø የተቋሙ ባለቤት የታደሰ የነዋሪነት መታወቂያ ወይም ፓስፖርት ወይም መንጃ ፈቃድ ከዋናው ጋር የተገናዘበ ፎቶ ኮፒ\nØ ሁለት /3X3/ መጠን ያላቸው በ6 ወር ጊዜ ውስጥ የተነሳው የባለቤቱ ጉርድ ፎቶግራፍ\nØ በዘርፉ የተቀመጠውን የአገልግሎት ክፍያ የሚፈጽም\nØ ተቋሙ ቋሚ አድራሻ ያለው\nØ በባህል ዘርፍ ሙያዊ ድጋፍ ለሚፈልጉ እና ለተቋማቸው የሱፐርቪዠን አገልግሎት ለሚፈልጉ"],
+    ["3", "እድሳት የብቃት ማረጋገጫ አገልግሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 1ሠዓት 20 ደ, ጥራት: 100%", "በአካል መቅረብ", "Ø ነባር ብቃት ማረጋገጫ ሰርተፊኬት\nØ በፋይሉ ከነበሩት መረጃ የጎደሉትን ማሟላት"],
+    ["4", "በጠቃሚ የባህል እሴቶችን በማኅበረሰቡ ዘንድ የማስረፅና የብዛ ባህል አካታች ስራዎች አገልግልሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 40ደ, ጥራት: 100%", "በአካል መቅረብ", "Ø አገልግሎት ፈላጊው ህጋዊ የአገልግሎት ፍላጐት ደብዳቤ ማቅረብ የሚችል\nØ የሥልጠና ዳሰሣ/የባህል አካታች ስራዎች ቅድመ ጥናት ላይ ፍላጐትን ማስፈር\nØ የሥልጠና ቦታ፣ የሥልጠና ጊዜ እና ሠልጣኞችን የሚያመቻች\nØ ሥልጠናው መውሰድ\nØ በወሰዱት ስልጠና ላይ የታዩትን ጠንካራና ደካማ ጐኖች ላይ በቃል ወይም በአስተያየት መስጫ ቅፆች ላይ ለማስፈር ፈቃደኛ የሆነ"],
+    ["5", "የአሉታዊ መጤ ባህሎች እና መከላከከል ስልጠናና የግንዛቤ ማስጨበጫ አገልግልሎት", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 40ደ, ጥራት: 100%", "በአካል መቅረብ", "Ø አገልግሎት ፈላጊው ህጋዊ የአገልግሎት ፍላጐት ደብዳቤ ማቅረብ የሚችል\nØ የሥልጠና ዳሰሣ ቅድመ ጥናት ላይ ፍላጐትን ማስፈር\nØ የሥልጠና ቦታ፣ የሥልጠና ጊዜ እና ሠልጣኞችን የሚያመቻች\nØ ሥልጠናው መውሰድ\nØ በወሰዱት ስልጠና ላይ የታዩትን ጠንካራና ደካማ ጐኖች ላይ በቃል ወይም በአስተያየት መስጫ ቅፆች ላይ ለማስፈር ፈቃደኛ የሆነ"],
+    ["6", "ህዝባዊና መንግስታዊ ከተማ አቀፍ የባህል ቀናትና ሁነቶች ከበራ", "የባህል እሴቶች፣ የዕደ ጥበብ ሀብቶችና ቋንቋዎች ልማት ቡድን", "ጊዜ: 56 ስዓት, ጥራት: 100%", "በአካል በመቅረብ", "Ø ፕሮፖዛል ማዘጋጀት ስልጣንና ተግባራቸው የሚያሳይ ሰነድ ማቅረብ\nØ ለኩነት ወይም ለመድረክ ዝግጅት የሚገልፅ ህጋዊ ደብዳቤ/ሰነድ ከቢሮ ጋር የተፈራረሙት የስምምነት ሰነድ"],
+    ["7", "የንባብ/የሪፈረንስ አገልግሎት", "የመረጃ ሀብቶች ማሰባሰብ፣ማደራጀትና አገልግሎት ቡድን", "ጊዜ: 5 ደቂቃ, ጥራት: 100%", "በአካል በመቅረብ", "· የንባብ አግልግሎት ለማግኘት መታወቂያ ብቻ ማሳየት\n· ህፃናት ምንም አይጠየቁም"],
+    ["8", "የውሰት፤አገልግሎት", "የመረጃ ሀብቶች ማሰባሰብ፣ማደራጀትና አገልግሎት ቡድን", "ጊዜ: 7ደቂቃ, ጥራት: 100%", "በአካል በመቅረብ", "· የአገልግሎት ጥያቄ በደብዳቤ ማቅረብ\n· የመንግስት ሰራተኛ ከሆኑ ከቢሮ ድጋፍ ደብዳቤ\n· የተዋስቱን መጻህፍትና ፖኬት በጥንቃቄ መያዝና በወቅቱ መመለስ"],
+    ["9", "የስነጹሁፍ ምሽት አገልግሎት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል መቅረብ", "ከሚመለከተው አካል የሙያ ማህበራት የድጋፍ ደብዳቤ ማቅረብ የሚችል፣ ጥያቄ ማቅረብ"],
+    ["10", "የኪነጥበብ ውድድር ማዛጋጀት አገልግሎት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: 64 ስዓት, ጥራት: 100%", "በአካል መቅረብ", "በመስፈርቱ መሰረት በአካል በመቅረብ"],
+    ["11", "የባህል ቱሪዝም ልማት ድጋፍ", "የቱሪስት አገልግሎቶች ብቃት ማረጋገጥ ቡድን", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል መቅረብ", "ጥያቄ ማቅረብ\nየፕሮጀክት ዕቅድ ማቅረብ\nየባህላዊ ቱሪዝም ጣቢያ ቦታ ማመላከት\nአካባቢውን ለማሳየት ፈቃደኝነት ማሳየት"],
+    ["12", "የፌስቲቫል አገልግሎት", "የኪነጥበብ ሃብቶች ማበልፅግና ማስፋፋትና የመድረክ ዝግጅት ቡድን", "ጊዜ: 72 ሰዓት, ጥራት: 100%", "በአካል መቅረብ", "የፌስቲቫል ፕሮግራም ዝርዝር ማቅረብ\nየተሳታፊዎች ዝርዝር ማቅረብ\nበፌስቲቫሉ ለመሳተፍ የሚያስፈልግ ብቃት ማረጋገጫ\nአስፈላጊውን የፀጥታ ሁኔታ ማሟላት"]
+  ],
+  "4": [ // Data from የወረዳ 07 ሴ_ህ_ማ_ጉ_ጽ_ቤት.txt (Woreda 07 Women, Children & Social Affairs)
+    ["1", "ለሴቶች የማህበራዊ አገልግሎት ድጋፍ መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["1.1", "ከፍለው መማር ለማይችሉ ሴቶች የትምህር እድልና ድጋ ማመቻቸት", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ማስረጃ/ደብዳቤ"],
+    ["1.2", "በጎልማሶች ተግባ ተኮር ትምህርት ማሳተፍ", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ማስረጃ/ደብዳቤ"],
+    ["1.3", "የነፃ ህክምና ድጋፍ እንዲያገኙ ማቻት", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ማስረጃ"],
+    ["2", "ሴቶችን በገቢ ማስገኛ ዘርፎች እንዲሰማሩ ድጋፍ መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["2.1", "ሴቶችን በንግድ ስራ ማሰማራት", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ማስረጃ ማቅረብ"],
+    ["3", "ለህፃናትና ወጣቶች አገልግሎት ድጋፍ ማድረግ", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["3.1", "ህፃናት ማቆያ ማጠናከርና ማስፋፋት", "በስራ ሂደቱ", "ጊዜ: 8 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
+    ["3.2", "ለህፃናት የምገባ ድጋፍ ማድረግ", "በስራ ሂደቱ", "ጊዜ: 1 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
+    ["4", "ለአረጋዊያንና አካል ጉዳተኞች ድጋፍ መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["4.1", "የቀጥታ ድጋፍ ማድረግ", "በስራ ሂደቱ", "ጊዜ: 1 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
+    ["4.2", "የነፃ ህክምና አገልግሎት ተጠቃሚ ማድረግ", "በስራ ሂደቱ", "ጊዜ: 2 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በተገልጋይ ጥያቄ"],
+    ["5", "የማህበረሰብ አቀፍ የጤና መድህን አገልግሎት መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["5.1", "የማህበረሰብ አቀፍ ጤና መድህን አባል ምዝገባ ማከናወን", "በስራ ሂደቱ", "ጊዜ: 160 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "የታደሰ የቀበሌ መታወቂያ"],
+    ["5.2", "የአባልነት መታወቂያ መስጠት", "በስራ ሂደቱ", "ጊዜ: 0.5 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "የታደሰ የቀበሌ መታወቂያ"],
+    ["6", "ለተጎጂዎች የምክርና የህግ ድጋፍ አገልግሎት መስጠት", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["6.1", "የምክር አገልግሎት መስጠት", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ"],
+    ["6.2", "የህግ ድጋፍ አገልግሎት መስጠት", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ"],
+    ["7", "ለተጎጂዎች ጊዜያዊ መጠለያ አገልግሎት መስጠት", "በስራ ሂደቱ", "ጊዜ: 4 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "ከተገልጋይ በሚቀርብ ጥያቄ"],
+    ["8", "ለቀጥታ ድጋፍ ተጠቃሚዎች የባንክ አገልግሎት ማተሳሰር", "በስራ ሂደቱ", "N/A", "N/A", "N/A"],
+    ["8.1", "ከባንክ ገንዘብ መቀበል የማይችሉ የቀጥታ ድጋፍ ተጠቃሚዎች ውክልና ማመቻት", "በስራ ሂደቱ", "ጊዜ: 8 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "የነዋሪነት መታወቂያ ማስረጃ"],
+    ["8.2", "ቅሬታ ማስተናድ", "በስራ ሂደቱ", "ጊዜ: 8 ስዓት, ጥራት: 100%", "በአካል በመገኘት", "በአካል ከተገልጋይ በሚቀርብ ጥያቄ"]
+  ],
+  "5": [ // Data from አርሶ አደር ከ_ግ_ል_ጽ_ ቤት.txt (Farmers & Rural Development)
+    ["1", "ድጋፍ እና የምክር አገልግሎት", "N/A", "N/A", "N/A", "N/A"],
+    ["1.1", "የስልጠና አገልግሎት ፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 80 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የፍላጎት ጥያቄ ማቅረብ"],
+    ["1.2", "የሙያ ምክር አገልግሎት፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 4 ሰዓት, ጥራት: 100%", "በአካል ወይም በኮሚኒኬሽን ቴክኖሎጂ", "ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"],
+    ["1.3", "የቴክኒክ ምክር አገልግሎት፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 14.25 ሰዓት, ጥራት: 100%", "በአካል ወይም በኮሚኒኬሽን ቴክኖሎጂ", "ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"],
+    ["1.4", "የገበያ መረጃ እና ትስስር አገልግሎት፤", "በወረዳ (አርሶ አደር ል/መ/ማ እና ከተማ ግብርና ቡድን)", "ጊዜ: 70 ሰዓት, ጥራት: 100%", "በአካል ወይም በኮሚኒኬሽን ቴክኖሎጂ", "ድጋፍ የሚፈልጉበትን ለይቶ ማቅረብ"],
+    ["2", "የልማት ተነሺ አርሶ አደሮችን የመደገፍ አገልግሎት", "N/A", "N/A", "N/A", "N/A"],
+    ["2.1", "የማህበራት ምዝገባ እና ህጋዊ ሰውነት ማረጋገጫ አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የመተዳደሪያ ደንብ፣ የመመስረቻ ቃለ ጉባኤ፣ የአባላት ዝርዝር፣ መታወቂያ፣ የልማት ተነሺነት ማረጋገጫ"],
+    ["2.2", "የቦታ ካሳ ክፍያ አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 80 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የይዞታ ማረጋገጫ ካርታ፣ የባንክ ደብተር፣ የልማት ተነሺነት ማረጋገጫ፣ የቀበሌ መታወቂያ፣ የውክልና ማሰረጃ"],
+    ["2.3", "የመኖሪያ ቤት አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 176 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የልማት ተነሺ አርሶ አደር ስለመሆን፣መታወቂያ፤የውክልና ማሰረጃ"],
+    ["2.4", "ለአርሶ አደርሮች የሥራ ዕድል ማመቻቸትና በማህበር የማደራጀት አገልግሎት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 40 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የንግድ ሥራ ዕቅድ፣ ስልጠና ወስደው በሥራ ዕድል መደራጀት፣ ልማት ተነሺ አርሶ አደር ስለመሆን፣ መታወቂያ"],
+    ["2.5", "የፋይናንስ፣ የማሽነሪ እና ቁሳቁስ ግብዓቶች ድጋፍ እንዲያገኙ በማድረግ ወደ ስራ ማስገባት", "በወረዳ (አርሶ አደር ል/መ/ማ ቡድን)", "ጊዜ: 192 ሰዓት, ጥራት: 100%", "በአካል በመገኘት", "የንግድ ሥራ ዕቅድ፣ ስልጠና ወስደው በሥራ ዕድል መደራጀት፣ ልማት ተነሺ አርሶ አደር ስለመሆን፣ መታወቂያ"]
+  ],
+  "6": [ // Data from ቤቶች.txt (Housing)
+    ["1", "የመንግስት ቤቶችን የኪራይ ውል ማዋዋል", "በወረዳ", "መጠን: 1, ጊዜ: 0.5 ሰዓት, ጥራት: 100%", "N/A", "• ቤት እንዲሰጣቸው የተወሰነበት ደብዳቤ\n• ኢትዮጲያዊ ዜግነት ያለው እና የታደሰ መታወቂያ ያለው\n• በስማቸው ወይም በትዳር አጋራቸው ስም በከተማው አስተዳደር ስር የመንግስት ወይንም የግል ቤት መስሪያ ቦታ መሆኑን ከ6ወር ወር በኃላየተሰጠ ህጋዊ ማስረጃ"],
+    ["2", "የመንግስት ቤቶች ኪራይ ውል ማደስ", "በወረዳ", "መጠን: 1, ጊዜ: 0.5 ሰዓት, ጥራት: 100%", "N/A", "• ቀደም ሲል የነበረ ውል\n• ወቅታዊ ኪራይ የተከፈለበት ደረሰኝ\n• የታደሰ ህጋዊ የነዋሪነት መታወቂያ"],
+    ["3", "የኪራይ ዋጋ መተመን", "በወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "N/A", "• ቤቱ የኪራይ ተመን ያልወጣለት መሆኑን ማረጋገጥ\n• ቤቱ የሚገኝበት የአጎራባች የግራና ቀኝ የኪራይ ተመን"],
+    ["4", "የተለየ ጥገና ፈቃድ መስጠት", "በወረዳ", "መጠን: 1, ጊዜ: 1 ሰዓት, ጥራት: 100%", "N/A", "• የጥገና አይነት የተገለጸበት ማመልከቻ\n• ቀደም ሲል የነበረ ውል\n• ወቅታዊ ኪራይ የተከፈለበት ደረሰኝ\n• የቅርጽ እና የይዘት ለውጥ ለውጥ የገባበት ፎርም\n• የጥገና ስራዎ በራሱ ወጪ የሚገነባ እና ወጭውን የማይጠይቅ መሆኑ"],
+    ["5", "ህገወጦች ራሳቸው ቤቱን እንዲለቁ የጽሁፍ ማስጠንቀቂያ ደብዳቤ መስጠት", "በወረዳ", "መጠን: 1, ጊዜ: 0.5 ሰዓት, ጥራት: 100%", "N/A", "• በህገወጦች የተያዙ ቤቶች ዝርዝር መረጃ"],
+    ["6", "በህገወጥ የተያዙ የመንግስት ቤቶችን ማስለቀቅ", "በወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "N/A", "• በህገወጥ የተያዙ ቤቶች ዝርዝር መረጃ ማደራጀት\n• ቤቱን እንዲለቅ የተሰጠ የጽሁፍ ማስጠንቀቂያ\n• ቤቱ ውስጥያለውን ንብረት በራሱ እንዲያወጣ በፅሁፍ የተገለጸበት አስፈላጊ መረጃ\n• የሚመለከታቸው የህግ አካላት ያሉበት ቡድን ማደራጀት"],
+    ["7", "የመንግስት መኖሪያ እና ንግድ ቤቶችን አስመልክቶ መረጃ ለሚጠይቁ አካላት መረጃ መስጠት", "በወረዳ", "መጠን: 1, ጊዜ: 0.33 ሰዓት, ጥራት: 100%", "N/A", "• የቅሬታቸው ጭብጥ በፅሁፍ ቅሬታቸውን ሊያስረዳ የሚችል ተጨማሪ ሰነዶች"],
+    ["8", "ለመንግስት ቤት ካርታ ስራ የሚያስፈልጉ መረጃዎችን በማደራጀት ለክፍለ ከተማ መላክ", "በወረዳ", "መጠን: 1, ጊዜ: 2 ሰዓት, ጥራት: 100%", "N/A", "• የቤቱ ሙሉ መረጃ"]
+  ],
+  "7": [ // Data from የሰው ኃይል.txt (Human Resources)
+    ["1", "የሰው ሃይል መረጃ ማደራጀት ፣ ማሰራጨትና አገልግሎት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በሰነድ/ደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["2", "የሰው ሃይል የማሟላት አገልግሎት", "N/A", "N/A", "N/A", "N/A"],
+    ["2.1", "በቅጥር", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 15 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["2.2", "በደረጃ እድገት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["2.3", "በውስጥ ዝውውር", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["2.4", "ከክልል በማዛወር", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 10 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["2.5", "ድልድልና ምደባ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 3 ቀን, ጥራት: 100%", "በደብዳቤ", "የተሟላ መረጃ ማቅረብ"],
+    ["3", "የሰው ሃይል የልማት ስራዎችን ማከናወን", "N/A", "N/A", "N/A", "N/A"],
+    ["3.1", "የስልጠና ፍላጎት መለየት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በแบบફોર્મ", "የተሟላ መረጃ ማቅረብ"],
+    ["3.2", "ስልጠና መስጠት", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 5 ቀን, ጥራት: 100%", "በአካል", "የተሟላ መረጃ ማቅረብ"],
+    ["3.3", "የስልጠና ግምገማ", "በስራ ሂደቱ", "መጠን: 1, ጊዜ: 2 ቀን, ጥራት: 100%", "በቃል/በፅሁፍ", "የተሟላ መረጃ ማቅረብ"]
+  ],
+  "8": [ // Data from ወረዳ 07 ህብረት ስራ ጽ_ቤት.txt (Woreda 07 Cooperative Office)
+    ["1", "የማደራጀት አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 105.5 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የእንደራጅ ጥያቀ በጽሁፍ ማቅረብ"],
+    ["1.1", "ግንዛቤ መፍጠር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 8 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["1.2", "የመደራጀት ጥያቄ መቀበልና አዋጭነት ጥናት ማካሄድ", "በቢሮ", "ጊዜ: 16.5 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["1.3", "ማደራጀት", "በቢሮ", "ጊዜ: 81 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["2", "የማጠናከር አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 328 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የድጋፍ ጥያቄ"],
+    ["2.1", "በማዋሀድ ማጠናከር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 80 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["2.2", "በመክፈል ማጠናከር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 64 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["2.3", "በአደረጃጀት ማጠናከር", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 80 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "N/A"],
+    ["2.4", "የኦዲትና ኢንስፔክሽን አገልግሎት", "ከቢሮ ውጪ", "ጊዜ: 104 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የድጋፍ ጥያቄ"],
+    ["3", "የቁጠባና ብድር አገልግሎት", "በቢሮና ከቢሮ ውጪ", "ጊዜ: 196 ሰዓት, ጥራት: 100%, ዕርካታ: 100%", "N/A", "የቁጠባና ብድር ድጋፍ ጥያቄ"]
+  ],
+}
 
 export default function RequirementsPage() {
-  const primaryButtonClasses = "bg-sky-600 hover:bg-sky-700 text-white rounded-md shadow-sm hover:shadow-lg transition-all duration-300 text-base px-6 py-3";
-  const secondaryButtonClasses = "border-sky-200 hover:bg-sky-50 hover:text-sky-700 rounded-md shadow-sm";
-
   return (
-    <>
-      {/* Page Header */}
-      <div className="bg-gradient-to-r from-sky-700 to-sky-900 -mx-4 px-4 py-10 text-white shadow-lg mb-8">
-        <div className="container mx-auto">
-          <h1 className="text-4xl font-bold mb-2 text-white">Service Requirements</h1>
-          <p className="text-sky-100/90 max-w-3xl">
-            Find out what documents and requirements you need for different services.
-          </p>
-        </div>
-      </div>
+    <div className="container mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-6 text-slate-800">የአገልግሎት ቅድመ ሁኔታዎች</h1>
+      
+      <Tabs defaultValue="1" className="w-full">
+        <TabsList className="grid w-full grid-cols-5 mb-8">
+          <TabsTrigger value="1">የህዝብ አገልግሎት</TabsTrigger>
+          <TabsTrigger value="2">የከተማ ውበትና አረንጓዴ ልማት</TabsTrigger>
+          <TabsTrigger value="3">ባህል፣ኪነ-ጥበብና ቱሪዝም</TabsTrigger>
+          <TabsTrigger value="4">የሴቶችና ልጆች ጉዳይ</TabsTrigger>
+          <TabsTrigger value="5">የሰው ሃብት አስተዳደር</TabsTrigger>
+          <TabsTrigger value="6">የህብረት ስራ ማህበራት</TabsTrigger>
+          <TabsTrigger value="7">የወጣቶችና ስፖርት ጉዳይ</TabsTrigger>
+          <TabsTrigger value="8">የከተማ ንፅህና</TabsTrigger>
+          <TabsTrigger value="9">የንግድ እና ኢንዱስትሪ ጽ/ቤት</TabsTrigger>
+          <TabsTrigger value="10">የግብርና ልማት ጽ/ቤት</TabsTrigger>
+        </TabsList>
 
-      <div className="container mx-auto space-y-8 px-4 pb-12">
-        <Alert className="bg-sky-50 border-sky-200 text-sky-700">
-          <AlertCircle className="h-4 w-4 text-sky-600" />
-          <AlertDescription>
-            Make sure to bring original documents along with photocopies. All documents must be valid and up-to-date.
-          </AlertDescription>
-        </Alert>
-
-        <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="bg-slate-100 p-1 rounded-lg shadow-sm grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 h-auto gap-1">
-            <TabsTrigger 
-              value="personal" 
-              className="data-[state=active]:bg-sky-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md px-4 py-2 text-slate-700"
-            >
-              Personal
-            </TabsTrigger>
-            <TabsTrigger 
-              value="business" 
-              className="data-[state=active]:bg-sky-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md px-4 py-2 text-slate-700"
-            >
-              Business
-            </TabsTrigger>
-            <TabsTrigger 
-              value="construction" 
-              className="data-[state=active]:bg-sky-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md px-4 py-2 text-slate-700"
-            >
-              Construction
-            </TabsTrigger>
-            <TabsTrigger 
-              value="property" 
-              className="data-[state=active]:bg-sky-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md px-4 py-2 text-slate-700"
-            >
-              Property
-            </TabsTrigger>
-            <TabsTrigger 
-              value="transport" 
-              className="data-[state=active]:bg-sky-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md px-4 py-2 text-slate-700"
-            >
-              Transport
-            </TabsTrigger>
-            <TabsTrigger 
-              value="other" 
-              className="data-[state=active]:bg-sky-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md px-4 py-2 text-slate-700"
-            >
-              Other
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="personal" className="mt-6 space-y-6">
-            <Card className="bg-white rounded-xl shadow-md border border-slate-200">
-              <CardHeader className="border-b border-slate-200 pb-4">
-                <CardTitle className="flex items-center text-slate-800">
-                  <FileText className="h-5 w-5 mr-2 text-sky-600" />
-                  ID Card Requirements
-                </CardTitle>
-                <CardDescription className="text-slate-500 pt-1">
-                  Documents needed for ID card issuance or renewal
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="new-id">
-                    <AccordionTrigger className="text-slate-700 hover:text-sky-600">New ID Card</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Required Documents:</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Completed application form</li>
-                          <li>Birth certificate (original and copy)</li>
-                          <li>2 recent passport-sized photographs (3x4cm, white background)</li>
-                          <li>Residence certificate from kebele</li>
-                          <li>Proof of address (utility bill or lease agreement)</li>
-                        </ul>
+        {Object.entries(servicesData).map(([categoryId, services]) => (
+          <TabsContent key={categoryId} value={categoryId}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {services.map((service, index) => (
+                <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-slate-800">
+                      {service[1]} {/* Service Title */}
+                    </CardTitle>
+                    <CardDescription className="text-slate-600">
+                      {service[2]} {/* Department */}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-start space-x-3">
+                        <AlertCircle className="h-5 w-5 text-slate-500 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-slate-700 mb-2">ቅድመ ሁኔታዎች</h4>
+                          <div className="text-sm text-slate-600 space-y-2">
+                            {service[5] ? (
+                              service[5].split('\n').map((requirement, idx) => (
+                                <p key={idx} className="flex items-start">
+                                  <span className="mr-2">•</span>
+                                  {requirement.replace('P', '').replace('Ø', '')}
+                                </p>
+                              ))
+                            ) : (
+                              <p>ቅድመ ሁኔታዎች አልተገለጹም</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start space-x-3">
+                        <FileText className="h-5 w-5 text-slate-500 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-slate-700 mb-2">የማስኬጃ መረጃ</h4>
+                          <p className="text-sm text-slate-600">{service[3]}</p>
+                        </div>
                       </div>
 
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Fees:</h4>
-                        <p className="text-slate-600">100 Birr for standard processing (5 working days)</p>
-                        <p className="text-slate-600">200 Birr for expedited processing (2 working days)</p>
+                      <div className="flex items-start space-x-3">
+                        <ExternalLink className="h-5 w-5 text-slate-500 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-slate-700 mb-2">የአገልግሎት ዘዴ</h4>
+                          <p className="text-sm text-slate-600">{service[4]}</p>
+                        </div>
                       </div>
-
-                      <div className="flex items-center justify-between pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className={secondaryButtonClasses}
-                        >
-                          <Link href="#" className="flex items-center">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Form
-                          </Link>
-                        </Button>
-
-                        <Button size="sm" asChild className={primaryButtonClasses}>
-                          <Link href="/client/services/1" className="flex items-center">
-                            Apply Now
-                            <ExternalLink className="h-4 w-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="renew-id">
-                    <AccordionTrigger className="text-slate-700 hover:text-sky-600">ID Card Renewal</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Required Documents:</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Completed renewal form</li>
-                          <li>Existing ID card (original and copy)</li>
-                          <li>2 recent passport-sized photographs (3x4cm, white background)</li>
-                          <li>Proof of address (utility bill or lease agreement)</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Fees:</h4>
-                        <p className="text-slate-600">50 Birr for standard processing (3 working days)</p>
-                        <p className="text-slate-600">100 Birr for expedited processing (1 working day)</p>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className={secondaryButtonClasses}
-                        >
-                          <Link href="#" className="flex items-center">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Form
-                          </Link>
-                        </Button>
-
-                        <Button size="sm" asChild className={primaryButtonClasses}>
-                          <Link href="/client/services/1" className="flex items-center">
-                            Apply Now
-                            <ExternalLink className="h-4 w-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="lost-id">
-                    <AccordionTrigger className="text-slate-700 hover:text-sky-600">Lost ID Card Replacement</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Required Documents:</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Completed replacement form</li>
-                          <li>Police report for lost ID</li>
-                          <li>2 recent passport-sized photographs (3x4cm, white background)</li>
-                          <li>Proof of address (utility bill or lease agreement)</li>
-                          <li>Affidavit of loss</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Fees:</h4>
-                        <p className="text-slate-600">150 Birr for standard processing (5 working days)</p>
-                        <p className="text-slate-600">250 Birr for expedited processing (2 working days)</p>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className={secondaryButtonClasses}
-                        >
-                          <Link href="#" className="flex items-center">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Form
-                          </Link>
-                        </Button>
-
-                        <Button size="sm" asChild className={primaryButtonClasses}>
-                          <Link href="/client/services/1" className="flex items-center">
-                            Apply Now
-                            <ExternalLink className="h-4 w-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white rounded-xl shadow-md border border-slate-200">
-              <CardHeader className="border-b border-slate-200 pb-4">
-                <CardTitle className="flex items-center text-slate-800">
-                  <FileText className="h-5 w-5 mr-2 text-sky-600" />
-                  Birth Certificate Requirements
-                </CardTitle>
-                <CardDescription className="text-slate-500 pt-1">
-                  Documents needed for birth certificate issuance
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="new-birth">
-                    <AccordionTrigger className="text-slate-700 hover:text-sky-600">New Birth Certificate</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Required Documents:</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Completed application form</li>
-                          <li>Hospital birth record or midwife statement</li>
-                          <li>Parents' ID cards (original and copy)</li>
-                          <li>Marriage certificate of parents (if applicable)</li>
-                          <li>Residence certificate from kebele</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Fees:</h4>
-                        <p className="text-slate-600">50 Birr for standard processing (2 working days)</p>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className={secondaryButtonClasses}
-                        >
-                          <Link href="#" className="flex items-center">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Form
-                          </Link>
-                        </Button>
-
-                        <Button size="sm" asChild className={primaryButtonClasses}>
-                          <Link href="/client/services/7" className="flex items-center">
-                            Apply Now
-                            <ExternalLink className="h-4 w-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="copy-birth">
-                    <AccordionTrigger className="text-slate-700 hover:text-sky-600">Certified Copy of Birth Certificate</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Required Documents:</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Completed application form</li>
-                          <li>ID card of applicant (original and copy)</li>
-                          <li>Proof of relationship to certificate holder (if not self)</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Fees:</h4>
-                        <p className="text-slate-600">30 Birr for standard processing (1 working day)</p>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className={secondaryButtonClasses}
-                        >
-                          <Link href="#" className="flex items-center">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Form
-                          </Link>
-                        </Button>
-
-                        <Button size="sm" asChild className={primaryButtonClasses}>
-                          <Link href="/client/services/7" className="flex items-center">
-                            Apply Now
-                            <ExternalLink className="h-4 w-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </CardContent>
-            </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
-
-          <TabsContent value="construction" className="mt-6 space-y-6">
-            <Card className="bg-white rounded-xl shadow-md border border-slate-200">
-              <CardHeader className="border-b border-slate-200 pb-4">
-                <CardTitle className="flex items-center text-slate-800">
-                  <FileText className="h-5 w-5 mr-2 text-sky-600" />
-                  Building Permit Requirements
-                </CardTitle>
-                <CardDescription className="text-slate-500 pt-1">
-                  Documents needed for building permit applications
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="new-construction">
-                    <AccordionTrigger className="text-slate-700 hover:text-sky-600">New Construction Permit</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Required Documents:</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Completed application form</li>
-                          <li>Land ownership document/title deed (original and copy)</li>
-                          <li>Architectural plans (3 copies) signed by licensed architect</li>
-                          <li>Structural designs (3 copies) signed by licensed engineer</li>
-                          <li>Soil test report</li>
-                          <li>Environmental impact assessment (for buildings over 3 floors)</li>
-                          <li>Tax clearance certificate</li>
-                          <li>ID card of applicant (original and copy)</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Fees:</h4>
-                        <p className="text-slate-600">Based on construction size and type:</p>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Residential: 15 Birr per square meter</li>
-                          <li>Commercial: 25 Birr per square meter</li>
-                          <li>Industrial: 20 Birr per square meter</li>
-                        </ul>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className={secondaryButtonClasses}
-                        >
-                          <Link href="#" className="flex items-center">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Form
-                          </Link>
-                        </Button>
-
-                        <Button size="sm" asChild className={primaryButtonClasses}>
-                          <Link href="/client/licenses" className="flex items-center">
-                            Apply Now
-                            <ExternalLink className="h-4 w-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="renovation">
-                    <AccordionTrigger className="text-slate-700 hover:text-sky-600">Renovation/Modification Permit</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Required Documents:</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Completed application form</li>
-                          <li>Land ownership document/title deed (original and copy)</li>
-                          <li>Original building permit</li>
-                          <li>Architectural plans showing existing and proposed changes (3 copies)</li>
-                          <li>Structural assessment report (for major renovations)</li>
-                          <li>Tax clearance certificate</li>
-                          <li>ID card of applicant (original and copy)</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Fees:</h4>
-                        <p className="text-slate-600">Based on renovation scope:</p>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Minor renovations: 500-1,000 Birr</li>
-                          <li>Major renovations: 10 Birr per square meter affected</li>
-                        </ul>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className={secondaryButtonClasses}
-                        >
-                          <Link href="#" className="flex items-center">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Form
-                          </Link>
-                        </Button>
-
-                        <Button size="sm" asChild className={primaryButtonClasses}>
-                          <Link href="/client/licenses" className="flex items-center">
-                            Apply Now
-                            <ExternalLink className="h-4 w-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="business" className="mt-6 space-y-6">
-            <Card className="bg-white rounded-xl shadow-md border border-slate-200">
-              <CardHeader className="border-b border-slate-200 pb-4">
-                <CardTitle className="flex items-center text-slate-800">
-                  <FileText className="h-5 w-5 mr-2 text-sky-600" />
-                  Business License Requirements
-                </CardTitle>
-                <CardDescription className="text-slate-500 pt-1">
-                  Documents needed for business license applications
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="new-business">
-                    <AccordionTrigger className="text-slate-700 hover:text-sky-600">New Business License</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Required Documents:</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Completed application form</li>
-                          <li>Business registration certificate</li>
-                          <li>TIN certificate</li>
-                          <li>Lease agreement or ownership document for business premises</li>
-                          <li>ID card of business owner/manager (original and copy)</li>
-                          <li>Professional qualification certificates (for specialized businesses)</li>
-                          <li>Bank statement showing minimum capital requirement</li>
-                          <li>Tax clearance certificate</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Fees:</h4>
-                        <p className="text-slate-600">Based on business type and size:</p>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Small businesses: 500-1,000 Birr</li>
-                          <li>Medium businesses: 1,000-1,500 Birr</li>
-                          <li>Large businesses: 1,500-2,000 Birr</li>
-                        </ul>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className={secondaryButtonClasses}
-                        >
-                          <Link href="#" className="flex items-center">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Form
-                          </Link>
-                        </Button>
-
-                        <Button size="sm" asChild className={primaryButtonClasses}>
-                          <Link href="/client/services/3" className="flex items-center">
-                            Apply Now
-                            <ExternalLink className="h-4 w-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="renew-business">
-                    <AccordionTrigger className="text-slate-700 hover:text-sky-600">Business License Renewal</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Required Documents:</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Completed renewal form</li>
-                          <li>Original business license</li>
-                          <li>Tax clearance certificate</li>
-                          <li>Annual financial statement</li>
-                          <li>Proof of payment of all taxes and fees</li>
-                          <li>ID card of business owner/manager (original and copy)</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2 text-slate-700">Fees:</h4>
-                        <p className="text-slate-600">Based on business type and size:</p>
-                        <ul className="list-disc pl-5 space-y-1 text-slate-600">
-                          <li>Small businesses: 300-600 Birr</li>
-                          <li>Medium businesses: 600-900 Birr</li>
-                          <li>Large businesses: 900-1,200 Birr</li>
-                        </ul>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className={secondaryButtonClasses}
-                        >
-                          <Link href="#" className="flex items-center">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Form
-                          </Link>
-                        </Button>
-
-                        <Button size="sm" asChild className={primaryButtonClasses}>
-                          <Link href="/client/services/3" className="flex items-center">
-                            Apply Now
-                            <ExternalLink className="h-4 w-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="property" className="mt-0">
-            {/* Property-related requirements */}
-          </TabsContent>
-
-          <TabsContent value="transport" className="mt-0">
-            {/* Transport-related requirements */}
-          </TabsContent>
-
-          <TabsContent value="other" className="mt-0">
-            {/* Other requirements */}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </>
-  )
+        ))}
+      </Tabs>
+    </div>
+  );
 }
