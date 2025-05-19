@@ -290,13 +290,6 @@ export default function ServicesPage() {
               ))}
             </TabsList>
 
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 shadow-sm border-slate-300 text-slate-700 hover:bg-slate-50 rounded-md"
-            >
-              <Filter className="h-4 w-4" />
-              የላቁ ማጣሪያዎች {/* Translated */}
-            </Button>
           </div>
 
           <TabsContent value={activeTab} className="mt-0">
