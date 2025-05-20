@@ -18,19 +18,20 @@ export default function ServicesPrerequisites() {
       </div>
 
       {/* Changed container class for full width on mobile */}
-      <div className="w-full sm:container sm:mx-auto sm:px-4">
+      <div className="w-full sm:container sm:mx-auto px-3 sm:px-4">
         <Tabs defaultValue="1" className="w-full">
-          <TabsList className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-10 mb-8 bg-gray-800 text-white">
-            <TabsTrigger value="1">ፑብሊክ</TabsTrigger>
-            <TabsTrigger value="2">ከተማ ውበት</TabsTrigger>
-            <TabsTrigger value="3">ባህል</TabsTrigger>
-            <TabsTrigger value="4">ሴ/ህ/ማ/ጉ</TabsTrigger>
-            <TabsTrigger value="5">አርሶ አደር</TabsTrigger>
-            <TabsTrigger value="6">ቤቶች</TabsTrigger>
-            <TabsTrigger value="7">ሰው ኃይል</TabsTrigger>
-            <TabsTrigger value="8">ህብረት ስራ</TabsTrigger>
-            <TabsTrigger value="9">ወጣቶች</TabsTrigger>
-            <TabsTrigger value="10">ሌሎች</TabsTrigger>
+          {/* Combined TabsList for responsive display */}
+          <TabsList className="flex w-full overflow-x-auto mb-8 bg-gray-800 text-white grid grid-cols-3 md:grid-cols-5 lg:grid-cols-10">
+            <TabsTrigger value="1" className="flex-shrink-0">ፑብሊክ</TabsTrigger>
+            <TabsTrigger value="2" className="flex-shrink-0">ከተማ ውበት</TabsTrigger>
+            <TabsTrigger value="3" className="flex-shrink-0">ባህል</TabsTrigger>
+            <TabsTrigger value="4" className="flex-shrink-0">ሴ/ህ/ማ/ጉ</TabsTrigger>
+            <TabsTrigger value="5" className="flex-shrink-0">አርሶ አደር</TabsTrigger>
+            <TabsTrigger value="6" className="flex-shrink-0">ቤቶች</TabsTrigger>
+            <TabsTrigger value="7" className="flex-shrink-0">ሰው ኃይል</TabsTrigger>
+            <TabsTrigger value="8" className="flex-shrink-0">ህብረት ስራ</TabsTrigger>
+            <TabsTrigger value="9" className="flex-shrink-0">ወጣቶች</TabsTrigger>
+            <TabsTrigger value="10" className="flex-shrink-0">ሌሎች</TabsTrigger>
           </TabsList>
 
           {/* Tab 1: Public Services */}
@@ -1159,7 +1160,7 @@ export default function ServicesPrerequisites() {
             </div>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
-    </div>
   )
 }
