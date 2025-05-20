@@ -1,4 +1,3 @@
-
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -158,8 +157,8 @@ export default function ClientHomePage() {
       </section>
 
       {/* Categories */}
-      <section className="bg-slate-50 py-8 sm:py-12 w-full px-3 sm:px-4">
-        <div className="container mx-auto">
+      <section className="bg-slate-50 py-8 sm:py-12 w-full">
+        <div className="w-full sm:container sm:mx-auto px-3 sm:px-4">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold ${headingTextClasses}`}>Service Categories</h2>
             <Link href="/client/services" className={`${linkClasses} flex items-center text-xs sm:text-sm font-medium`}>
@@ -204,7 +203,7 @@ export default function ClientHomePage() {
 
       {/* Two Column Section */}
       <section className="w-full">
-        <div className="container mx-auto">
+        <div className="w-full sm:container sm:mx-auto px-3 sm:px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* News & Announcements */}
             <div className="lg:col-span-2">
@@ -286,8 +285,8 @@ export default function ClientHomePage() {
       </section>
 
       {/* Quick Links */}
-      <section className="bg-slate-800 text-white py-8 sm:py-12 w-full px-3 sm:px-4">
-        <div className="container mx-auto">
+      <section className="bg-slate-800 text-white py-8 sm:py-12 w-full">
+        <div className="w-full sm:container sm:mx-auto px-3 sm:px-4">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 sm:mb-8 text-center">Quick Links</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {[
@@ -312,7 +311,7 @@ export default function ClientHomePage() {
 
       {/* External Links */}
       <section className="pb-6 sm:pb-8 w-full">
-        <div className="container mx-auto">
+        <div className="w-full sm:container sm:mx-auto px-3 sm:px-4">
           <h2 className={`text-xl sm:text-2xl font-bold ${headingTextClasses} mb-4 sm:mb-6`}>
             Related Government Portals
           </h2>
