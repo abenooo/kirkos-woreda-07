@@ -17,7 +17,8 @@ export default function ServicesPrerequisites() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4">
+      {/* Changed container class for full width on mobile */}
+      <div className="w-full sm:container sm:mx-auto sm:px-4">
         <Tabs defaultValue="1" className="w-full">
           <TabsList className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-10 mb-8 bg-gray-800 text-white">
             <TabsTrigger value="1">ፑብሊክ</TabsTrigger>
