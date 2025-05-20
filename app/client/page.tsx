@@ -25,38 +25,6 @@ import {
 } from "lucide-react"
 
 export default function ClientHomePage() {
-  // Featured services
-  const featuredServices = [
-    {
-      id: "1",
-      title: "ID Card Issuance",
-      description: "Apply for a new ID card or renew an existing one",
-      icon: FileText,
-      category: "personal",
-    },
-    {
-      id: "4",
-      title: "Business License",
-      description: "Apply for a new business license or renew an existing one",
-      icon: Briefcase,
-      category: "business",
-    },
-    {
-      id: "5",
-      title: "Building Permit",
-      description: "Apply for a permit to construct or renovate a building",
-      icon: Building2,
-      category: "property",
-    },
-    {
-      id: "7",
-      title: "Vehicle Registration",
-      description: "Register a new vehicle or transfer ownership",
-      icon: Car,
-      category: "transport",
-    },
-  ]
-
   // Updated Service categories with more vibrant and distinct gradients
   const categoryGradients = {
     personal: "from-sky-500 to-sky-600",
