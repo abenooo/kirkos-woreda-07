@@ -185,7 +185,7 @@ export default function ClientLayout({
                   />
                 </div>
                 <div>
-                  <div className="font-bold text-base sm:text-lg text-[#0F2557]">Kirkos Sub City 07</div>
+                  <div className="font-bold text-base sm:text-lg text-[#0F2557]">Kirkos Sub City 07 Administration </div>
                   <div className="text-[10px] sm:text-xs text-gray-600">Wereda 07 Public Service Portal</div>
                 </div>
               </Link>
