@@ -114,7 +114,7 @@ const services = [
   },
   {
     id: "10",
-    title: "Seጽዳት አስተዳደር ጽ/ቤት", // Solid Waste Management
+    title: "ጽዳት አስተዳደር ጽ/ቤት", // Solid Waste Management
     description:
       "ዘመናዊ የደረቅ ቆሻሻ አሰባሰብና አወጋገድ ስርዓት በመዘርጋት የወረዳችንን ንፅህናና የአካባቢ ጤና መጠበቅ።",
     category: "property",
