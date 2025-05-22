@@ -35,7 +35,6 @@ const translations = {
     services: "Services",
     complaints: "Complaints",
     anonymous: "Anonymous Report",
-    misconduct: "Report Misconduct",
     requirements: "Requirements",
     language: "Language",
     english: "English",
@@ -53,7 +52,6 @@ const translations = {
     services: "አገልግሎቶች",
     complaints: "ቅሬታዎች",
     anonymous: "ስም የማይገለጽ ሪፖርት",
-    misconduct: "ስነ-ምግባር ጉድለት ሪፖርት",
     requirements: "መስፈርቶች",
     language: "ቋንቋ",
     english: "እንግሊዘኛ",
@@ -71,7 +69,6 @@ const translations = {
     services: "Tajaajila",
     complaints: "Komii",
     anonymous: "Gabaasa Maqaa Malee",
-    misconduct: "Gabaasa Amala Badaa",
     requirements: "Ulaagaalee",
     language: "Afaan",
     english: "Ingiliffaa",
@@ -122,7 +119,6 @@ export default function ClientLayout({
 
   const secondaryNavItems = [
     { name: t.anonymous, href: "/client/anonymous", icon: MessageSquare },
-    { name: t.misconduct, href: "/client/misconduct", icon: AlertTriangle },
   ]
 
   return (
