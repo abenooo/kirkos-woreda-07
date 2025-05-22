@@ -233,7 +233,7 @@ export default function ServicesPage() {
       {/* Header */}
       <div className="bg-gradient-to-r from-sky-700 to-sky-900 -mx-4 px-4 py-10 text-white shadow-lg">
         <div className="container mx-auto">
-          <h1 className="text-4xl font-bold mb-4">የመንግስት አገልግሎቶች</h1>{" "}
+          <h1 className="text-4xl font-bold mb-4">የምንሰጣቸው አገልግሎቶች</h1>{" "}
           {/* Translated */}
           <p className="max-w-3xl mb-6 text-sky-100/90">
             በቂርቆስ ክፍለ ከተማ የወረዳ 07 አስተዳደር ጽ/ቤት የሚሰጡ አገልግሎቶችን ያስሱ። አገልግሎቶችን በምድብ
