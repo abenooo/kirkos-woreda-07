@@ -119,6 +119,15 @@ export default function ClientLayout({
 
   const secondaryNavItems = [
     { name: t.anonymous, href: "/client/anonymous", icon: MessageSquare },
+    // { name: "More Service 1", href: "/client/services/1", icon: FileText },
+    // { name: "More Service 2", href: "/client/services/2", icon: FileText },
+    // { name: "More Service 3", href: "/client/services/3", icon: FileText },
+    // { name: "More Service 4", href: "/client/services/4", icon: FileText },
+    // { name: "More Service 5", href: "/client/services/5", icon: FileText },
+    // { name: "More Service 6", href: "/client/services/6", icon: FileText },
+    // { name: "More Service 7", href: "/client/services/7", icon: FileText },
+    // { name: "More Service 8", href: "/client/services/8", icon: FileText },
+    // { name: "More Service 9", href: "/client/services/9", icon: FileText },
   ]
 
   return (
@@ -255,15 +264,48 @@ export default function ClientLayout({
                           <ChevronDown className="h-4 w-4 ml-1" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuContent align="end" className="w-56 bg-white">
                         {secondaryNavItems.map((item) => (
                           <DropdownMenuItem key={item.href} asChild>
-                            <Link href={item.href} className="flex items-center">
+                            <Link href={item.href} className="flex items-center text-gray-800">
                               <item.icon className="h-4 w-4 mr-2" />
                               {item.name}
                             </Link>
                           </DropdownMenuItem>
                         ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </li>
+
+                  {/* About Dropdown */}
+                  <li>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-[#0F2557] hover:bg-gray-50">
+                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          About
+                          <ChevronDown className="h-4 w-4 ml-1" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56 bg-white">
+                        <DropdownMenuItem asChild>
+                          <Link href="/client/about/vision" className="flex items-center text-gray-800">
+                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            Vision
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/client/about/mission" className="flex items-center text-gray-800">
+                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            Mission
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/client/about/core-values" className="flex items-center text-gray-800">
+                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            Core Values
+                          </Link>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </li>
@@ -299,7 +341,11 @@ export default function ClientLayout({
               {/* Mobile Menu Items */}
               <nav className="py-2">
                 <ul className="space-y-1">
-                  {[...mainNavItems, ...secondaryNavItems].map((item) => {
+                  {[...mainNavItems, ...secondaryNavItems, 
+                   { name: "Vision", href: "/client/about/vision", icon: AlertTriangle },
+                   { name: "Mission", href: "/client/about/mission", icon: AlertTriangle },
+                   { name: "Core Values", href: "/client/about/core-values", icon: AlertTriangle },
+                  ].map((item) => {
                     const isActive = pathname === item.href
                     return (
                       <li key={item.href}>
