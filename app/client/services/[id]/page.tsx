@@ -202,7 +202,7 @@ const ServiceFullTable = () => { // Renamed from Service11FullTable to be more g
   let officeName = `አገልግሎት ${id}`;
   // You can create a mapping for IDs to Amharic names here if needed:
   const officeNames: Record<string, string> = {
-    "1": "ፑብሊክ አገልግሎቶች", 
+    "1": "ፐብሊክ አገልግሎቶች", 
     "2": "የከተማ ውበትና አረንጓዴ ልማት ጽ/ቤት",
     "3": "ባህል፣ ኪነ-ጥበብና ቱሪዝም ጽ/ቤት",
     "4": "የወረዳ 07 ሴቶች፣ ህፃናትና ማህበራዊ ጉዳይ ጽ/ቤት",
