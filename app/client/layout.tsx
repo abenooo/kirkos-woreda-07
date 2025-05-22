@@ -119,15 +119,6 @@ export default function ClientLayout({
 
   const secondaryNavItems = [
     { name: t.anonymous, href: "/client/anonymous", icon: MessageSquare },
-    // { name: "More Service 1", href: "/client/services/1", icon: FileText },
-    // { name: "More Service 2", href: "/client/services/2", icon: FileText },
-    // { name: "More Service 3", href: "/client/services/3", icon: FileText },
-    // { name: "More Service 4", href: "/client/services/4", icon: FileText },
-    // { name: "More Service 5", href: "/client/services/5", icon: FileText },
-    // { name: "More Service 6", href: "/client/services/6", icon: FileText },
-    // { name: "More Service 7", href: "/client/services/7", icon: FileText },
-    // { name: "More Service 8", href: "/client/services/8", icon: FileText },
-    // { name: "More Service 9", href: "/client/services/9", icon: FileText },
   ]
 
   return (
