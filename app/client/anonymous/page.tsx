@@ -214,7 +214,6 @@ export default function AnonymousComplaintPage() {
                         </FormControl>
                         <SelectContent className="bg-white border-slate-200 shadow-lg rounded-md">
                           <SelectItem value="corruption">Corruption / Bribery</SelectItem>
-                          <SelectItem value="misconduct">Staff Misconduct / Negligence</SelectItem>
                           <SelectItem value="harassment">Harassment (Any Form)</SelectItem>
                           <SelectItem value="discrimination">Discrimination (Any Form)</SelectItem>
                           <SelectItem value="fraud">Fraud / Financial Mismanagement</SelectItem>

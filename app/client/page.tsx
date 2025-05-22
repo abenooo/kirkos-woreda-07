@@ -291,7 +291,6 @@ export default function ClientHomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {[
               { href: "/client/anonymous", icon: MessageSquare, label: "Anonymous Report" },
-              { href: "/client/misconduct", icon: AlertTriangle, label: "Report Misconduct" },
               { href: "/client/requirements", icon: FileQuestion, label: "Requirements Guide" },
             ].map((link) => (
               <Link
