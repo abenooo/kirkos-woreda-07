@@ -1,3 +1,6 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -22,8 +25,57 @@ import {
   Bell,
   ExternalLink,
 } from "lucide-react"
+import { createClient } from "@supabase/supabase-js"
+
+// Create Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+// News item interface
+interface NewsItem {
+  id: number
+  title: string
+  summary: string
+  content: string
+  status: string
+  publish_date: string
+  created_at: string
+  updated_at: string
+}
 
 export default function ClientHomePage() {
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Fetch news items from Supabase
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('news')
+          .select('*')
+          .eq('status', 'published')
+          .order('publish_date', { ascending: false })
+          .limit(3)
+
+        if (error) {
+          console.error('Error fetching news:', error)
+          return
+        }
+
+        setNewsItems(data || [])
+      } catch (error) {
+        console.error('Error:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNews()
+  }, [])
+
   // Updated Service categories with more vibrant and distinct gradients
   const categoryGradients = {
     personal: "from-sky-500 to-sky-600",
@@ -76,24 +128,6 @@ export default function ClientHomePage() {
       icon: Search,
       category: "all",
       href: "/client/services",
-    },
-  ]
-
-  const newsItems = [
-    {
-      title: "New Online Service Available",
-      date: "May 7, 2025", // Updated date
-      summary: "You can now apply for business licenses completely online.",
-    },
-    {
-      title: "Office Hours Update", // Updated title
-      date: "April 28, 2025", // Updated date
-      summary: "Our office hours have been updated. We are now open on Saturdays from 9:00 AM to 2:00 PM.", // Updated summary
-    },
-    {
-      title: "System Maintenance Notice",
-      date: "April 22, 2025", // Updated date
-      summary: "The eServices portal will be undergoing maintenance on April 25th from 10 PM to 2 AM.", // Updated summary
     },
   ]
 
@@ -216,25 +250,61 @@ export default function ClientHomePage() {
               </div>
 
               <div className="space-y-3 sm:space-y-4">
-                {newsItems.map((item, index) => (
-                  <Card
-                    key={index}
-                    className="hover:shadow-lg transition-all duration-300 border border-slate-200 rounded-lg bg-white"
-                  >
+                {loading ? (
+                  <Card className="hover:shadow-lg transition-all duration-300 border border-slate-200 rounded-lg bg-white">
+                    <CardContent className="p-3 sm:p-5">
+                      <div className="flex items-start">
+                        <div className="bg-sky-100 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                          <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600 animate-pulse" />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="h-4 bg-slate-200 rounded w-3/4 animate-pulse"></div>
+                          <div className="h-3 bg-slate-200 rounded w-1/4 animate-pulse"></div>
+                          <div className="h-3 bg-slate-200 rounded w-2/3 animate-pulse"></div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : newsItems.length === 0 ? (
+                  <Card className="hover:shadow-lg transition-all duration-300 border border-slate-200 rounded-lg bg-white">
                     <CardContent className="p-3 sm:p-5">
                       <div className="flex items-start">
                         <div className="bg-sky-100 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
                           <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600" />
                         </div>
                         <div>
-                          <h3 className={`font-semibold text-slate-700 text-sm sm:text-base`}>{item.title}</h3>
-                          <p className="text-xs sm:text-sm text-slate-500 mb-1">{item.date}</p>
-                          <p className={`text-xs sm:text-sm ${bodyTextClasses}`}>{item.summary}</p>
+                          <p className="text-slate-500">No news items available at the moment.</p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                ) : (
+                  newsItems.map((item) => (
+                    <Card
+                      key={item.id}
+                      className="hover:shadow-lg transition-all duration-300 border border-slate-200 rounded-lg bg-white"
+                    >
+                      <CardContent className="p-3 sm:p-5">
+                        <div className="flex items-start">
+                          <div className="bg-sky-100 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                            <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600" />
+                          </div>
+                          <div>
+                            <h3 className={`font-semibold text-slate-700 text-sm sm:text-base`}>{item.title}</h3>
+                            <p className="text-xs sm:text-sm text-slate-500 mb-1">
+                              {new Date(item.publish_date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </p>
+                            <p className={`text-xs sm:text-sm ${bodyTextClasses}`}>{item.summary}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </div>
 
