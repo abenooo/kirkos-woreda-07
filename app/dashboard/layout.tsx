@@ -21,6 +21,7 @@ import {
   ExternalLink,
   Menu,
   Shield,
+  Newspaper,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -130,6 +131,11 @@ export default function DashboardLayout({
       name: "Users",
       href: "/dashboard/users",
       icon: Users,
+    },
+    {
+      name: "News",
+      href: "/dashboard/news",
+      icon: Newspaper,
     },
     {
       name: "Reports",
