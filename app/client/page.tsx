@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import logo from "../../public/image.png"
+import logo1 from "../../public/image1.png"
+import logo3 from "../../public/logo3.png"
 import {
   Building2,
   FileText,
@@ -48,6 +50,22 @@ interface NewsItem {
 export default function ClientHomePage() {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  const images = [
+    { src: logo, alt: "Kirkos Sub City Administration building" },
+    { src: logo1, alt: "Kirkos Sub City Administration building - View 2" },
+    { src: logo3, alt: "Kirkos Sub City Administration building - View 3" }
+  ]
+
+  // Auto-rotate images every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   // Fetch news items from Supabase
   useEffect(() => {
@@ -140,14 +158,56 @@ export default function ClientHomePage() {
     <div className="space-y-8 sm:space-y-10 w-full overflow-hidden">
       {/* Hero Section */}
       <section className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] overflow-hidden">
-        <Image
-          src={logo || "/placeholder.svg"}
-          alt="Kirkos Sub City Administration building"
-          width={1600}
-          height={800}
-          className="object-cover w-full h-full rounded-lg"
-          priority
-        />
+        <div className="relative w-full h-full">
+          {images.map((image, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-500 ${
+                index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                width={1600}
+                height={800}
+                className="object-top w-full h-full rounded-lg"
+                priority
+              />
+            </div>
+          ))}
+        </div>
+        
+        {/* Navigation Dots */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentImageIndex ? 'bg-white w-4' : 'bg-white/50'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Previous/Next Buttons */}
+        <button
+          onClick={() => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)}
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-all"
+          aria-label="Previous image"
+        >
+          <ChevronRight className="h-6 w-6 rotate-180" />
+        </button>
+        <button
+          onClick={() => setCurrentImageIndex((prev) => (prev + 1) % images.length)}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-all"
+          aria-label="Next image"
+        >
+          <ChevronRight className="h-6 w-6" />
+        </button>
+
         <div className="absolute inset-0 flex flex-col justify-center px-3 sm:px-8">
           <div className="w-full max-w-5xl mx-auto">
             <div className="max-w-full sm:max-w-2xl">
