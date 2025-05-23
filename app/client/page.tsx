@@ -67,7 +67,7 @@ export default function ClientHomePage() {
     return () => clearInterval(interval)
   }, [])
 
-  // Fetch news items from Supabase
+  // Fetch news items from Supabas
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -166,20 +166,22 @@ export default function ClientHomePage() {
                 index === currentImageIndex ? 'opacity-100' : 'opacity-0'
               }`}
             >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                width={1600}
-                height={800}
-                className="object-top w-full h-full rounded-lg"
-                priority
-              />
+              <div className="relative w-full h-full">
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                  priority
+                />
+              </div>
             </div>
           ))}
         </div>
         
         {/* Navigation Dots */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
           {images.map((_, index) => (
             <button
               key={index}
@@ -195,14 +197,14 @@ export default function ClientHomePage() {
         {/* Previous/Next Buttons */}
         <button
           onClick={() => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-all"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-all z-10"
           aria-label="Previous image"
         >
           <ChevronRight className="h-6 w-6 rotate-180" />
         </button>
         <button
           onClick={() => setCurrentImageIndex((prev) => (prev + 1) % images.length)}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-all"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-all z-10"
           aria-label="Next image"
         >
           <ChevronRight className="h-6 w-6" />
@@ -254,7 +256,7 @@ export default function ClientHomePage() {
       <section className="bg-slate-50 py-8 sm:py-12 w-full">
         <div className="w-full sm:container sm:mx-auto px-3 sm:px-4">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold ${headingTextClasses}`}>Service Categories</h2>
+            <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold ${headingTextClasses}`}>Service Categories </h2>
             <Link href="/client/services" className={`${linkClasses} flex items-center text-xs sm:text-sm font-medium`}>
               View All Services
               <ChevronRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
