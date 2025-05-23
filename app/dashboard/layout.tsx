@@ -51,6 +51,7 @@ export default function DashboardLayout({
   const [isLoading, setIsLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const supabase = createClientComponentClient()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -172,8 +173,11 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <div className="hidden w-64 border-r bg-muted/40 lg:block">
+      {/* Sidebar - Conditionally show/hide on mobile */}
+      <div className={cn(
+        "w-64 border-r bg-muted/40 lg:block",
+        isMobileMenuOpen ? "block absolute inset-y-0 left-0 z-50" : "hidden"
+      )}>
         <div className="flex h-full flex-col gap-2">
           <div className="flex h-[60px] items-center border-b px-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
@@ -191,6 +195,9 @@ export default function DashboardLayout({
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground",
                     pathname === item.href && "bg-muted text-foreground"
                   )}
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                  }}
                 >
                   <item.icon className="h-4 w-4" />
                   {item.name}
@@ -214,11 +221,12 @@ export default function DashboardLayout({
       {/* Main content */}
       <div className="flex flex-1 flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+          {/* Mobile menu button */}
           <Button
             variant="outline"
             size="icon"
             className="lg:hidden"
-            onClick={() => {/* Add mobile menu handler */}}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <Menu className="h-6 w-6" />
             <span className="sr-only">Toggle menu</span>
@@ -241,6 +249,13 @@ export default function DashboardLayout({
           <Suspense fallback={<>Loading...</>}>{children}</Suspense>
         </main>
       </div>
+      {/* Optional: Add an overlay when mobile menu is open */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
     </div>
   )
 }
