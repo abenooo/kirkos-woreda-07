@@ -97,7 +97,7 @@ export default function NewsPage() {
             <Input
               type="search"
               placeholder="Search news..."
-              className="pl-10 bg-white border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+              className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
