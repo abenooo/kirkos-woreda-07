@@ -282,7 +282,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              System Overview 123
+              System Overview
             </h1>
             <p className="text-slate-400 mt-2">Real-time monitoring and analytics</p>
           </div>
