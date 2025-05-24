@@ -1,6 +1,6 @@
 // app/sitemap.xml/route.ts
 export async function GET() {
-    const BASE_URL = 'https://yourdomain.com'; // Replace with your domain
+    const BASE_URL = "https://www.kirkosw07pubservice.org/sitemap.xml"
   
     const staticPages = [
       '',
