@@ -33,6 +33,8 @@ export default function ComplaintsForm() {
   const [feedbackFile, setFeedbackFile] = useState<File | null>(null)
   const [departments, setDepartments] = useState<Department[]>([])
   const [isLoadingDepartments, setIsLoadingDepartments] = useState(true)
+  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null)
+  const [selectedFeedbackDepartment, setSelectedFeedbackDepartment] = useState<Department | null>(null)
 
   const complaintFileRef = useRef<HTMLInputElement>(null)
   const feedbackFileRef = useRef<HTMLInputElement>(null)
@@ -67,10 +69,18 @@ export default function ComplaintsForm() {
       const form = e.target as HTMLFormElement
       const formData = new FormData(form)
 
+      // Ensure department_id is properly set
+      if (selectedDepartment) {
+        formData.set("department_id", selectedDepartment.id.toString())
+        formData.set("service", selectedDepartment.name) // Keep service name for display
+      }
+
       // Add file if selected
       if (complaintFile) {
         formData.append("file", complaintFile)
       }
+
+      console.log("Submitting complaint with department_id:", selectedDepartment?.id)
 
       const response = await submitComplaint(formData)
 
@@ -79,6 +89,7 @@ export default function ComplaintsForm() {
         setResponseMessage(response.message)
         form.reset()
         setComplaintFile(null)
+        setSelectedDepartment(null)
 
         setTimeout(() => {
           setSubmittedForm(null)
@@ -111,10 +122,18 @@ export default function ComplaintsForm() {
       // Add rating to form data
       formData.append("rating", rating.toString())
 
+      // Ensure department_id is properly set for feedback
+      if (selectedFeedbackDepartment) {
+        formData.set("department_id", selectedFeedbackDepartment.id.toString())
+        formData.set("feedback_service", selectedFeedbackDepartment.name) // Keep service name for display
+      }
+
       // Add file if selected
       if (feedbackFile) {
         formData.append("file", feedbackFile)
       }
+
+      console.log("Submitting feedback with department_id:", selectedFeedbackDepartment?.id)
 
       const response = await submitFeedback(formData)
 
@@ -124,6 +143,7 @@ export default function ComplaintsForm() {
         form.reset()
         setRating(0)
         setFeedbackFile(null)
+        setSelectedFeedbackDepartment(null)
 
         setTimeout(() => {
           setSubmittedForm(null)
@@ -155,6 +175,16 @@ export default function ComplaintsForm() {
     if (e.target.files && e.target.files[0]) {
       setFeedbackFile(e.target.files[0])
     }
+  }
+
+  const handleDepartmentChange = (departmentId: string) => {
+    const dept = departments.find((d) => d.id.toString() === departmentId)
+    setSelectedDepartment(dept || null)
+  }
+
+  const handleFeedbackDepartmentChange = (departmentId: string) => {
+    const dept = departments.find((d) => d.id.toString() === departmentId)
+    setSelectedFeedbackDepartment(dept || null)
   }
 
   const primaryButtonClasses =
@@ -220,28 +250,30 @@ export default function ComplaintsForm() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="service" className={labelClasses}>
-                    Department Related To
+                  <Label htmlFor="department" className={labelClasses}>
+                    Department Related To *
                   </Label>
-                  <Select name="service" required>
-                    <SelectTrigger id="service" className={inputClasses}>
+                  <Select onValueChange={handleDepartmentChange} required>
+                    <SelectTrigger id="department" className={inputClasses}>
                       <SelectValue
                         placeholder={isLoadingDepartments ? "Loading departments..." : "Select department"}
                       />
                     </SelectTrigger>
                     <SelectContent>
                       {departments.map((dept) => (
-                        <SelectItem key={dept.id} value={dept.code}>
+                        <SelectItem key={dept.id} value={dept.id.toString()}>
                           {dept.name}
                         </SelectItem>
                       ))}
-                      {departments.length === 0 && !isLoadingDepartments && (
-                        <SelectItem value="other">Other</SelectItem>
-                      )}
+                      {departments.length === 0 && !isLoadingDepartments && <SelectItem value="1">Other</SelectItem>}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+
+              {/* Hidden fields to store department information */}
+              <input type="hidden" name="department_id" value={selectedDepartment?.id || ""} />
+              <input type="hidden" name="service" value={selectedDepartment?.name || ""} />
 
               <div className="space-y-3">
                 <Label className={labelClasses}>Complaint Type</Label>
@@ -310,7 +342,11 @@ export default function ComplaintsForm() {
                 <p className="text-xs text-slate-500 mt-1">Accepted formats: PDF, JPG, PNG (max 5MB)</p>
               </div>
 
-              <Button type="submit" className={`w-full md:w-auto ${primaryButtonClasses}`} disabled={isSubmitting}>
+              <Button
+                type="submit"
+                className={`w-full md:w-auto ${primaryButtonClasses}`}
+                disabled={isSubmitting || !selectedDepartment}
+              >
                 {isSubmitting ? (
                   <>Processing...</>
                 ) : (
@@ -382,23 +418,27 @@ export default function ComplaintsForm() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="feedback-service" className={labelClasses}>
-                  Department
+                <Label htmlFor="feedback-department" className={labelClasses}>
+                  Department *
                 </Label>
-                <Select name="feedback_service" required>
-                  <SelectTrigger id="feedback-service" className={inputClasses}>
+                <Select onValueChange={handleFeedbackDepartmentChange} required>
+                  <SelectTrigger id="feedback-department" className={inputClasses}>
                     <SelectValue placeholder={isLoadingDepartments ? "Loading departments..." : "Select department"} />
                   </SelectTrigger>
                   <SelectContent>
                     {departments.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.code}>
+                      <SelectItem key={dept.id} value={dept.id.toString()}>
                         {dept.name}
                       </SelectItem>
                     ))}
-                    {departments.length === 0 && !isLoadingDepartments && <SelectItem value="other">Other</SelectItem>}
+                    {departments.length === 0 && !isLoadingDepartments && <SelectItem value="1">Other</SelectItem>}
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Hidden fields to store department information for feedback */}
+              <input type="hidden" name="department_id" value={selectedFeedbackDepartment?.id || ""} />
+              <input type="hidden" name="feedback_service" value={selectedFeedbackDepartment?.name || ""} />
 
               <div className="space-y-2">
                 <Label className={`${labelClasses} mb-1 block`}>Rate Your Experience</Label>
@@ -472,7 +512,7 @@ export default function ComplaintsForm() {
               <Button
                 type="submit"
                 className={`w-full md:w-auto ${primaryButtonClasses}`}
-                disabled={isSubmitting || rating === 0}
+                disabled={isSubmitting || rating === 0 || !selectedFeedbackDepartment}
               >
                 {isSubmitting ? (
                   <>Processing...</>
