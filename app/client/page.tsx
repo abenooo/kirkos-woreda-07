@@ -10,11 +10,11 @@ import logo from "../../public/image.png"
 import logo1 from "../../public/image1.png"
 import logo3 from "../../public/logo3.png"
 import {
-  Building2,
   FileText,
   MessageSquare,
   AlertTriangle,
   FileQuestion,
+  Building2,
   ArrowRight,
   MapPin,
   Clock,
@@ -419,11 +419,12 @@ export default function ClientHomePage() {
       {/* Quick Links */}
       <section className="bg-slate-800 text-white py-8 sm:py-12 w-full">
         <div className="w-full sm:container sm:mx-auto px-3 sm:px-4">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 sm:mb-8 text-center">Quick Links</h2>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 sm:mb-8 text-center">Quick Links </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {[
               { href: "/client/anonymous", icon: MessageSquare, label: "Anonymous Report" },
               { href: "/client/requirements", icon: FileQuestion, label: "Requirements Guide" },
+              { href: "/client/services", icon: Building2, label: "List of Services" },
             ].map((link) => (
               <Link
                 key={link.href}
