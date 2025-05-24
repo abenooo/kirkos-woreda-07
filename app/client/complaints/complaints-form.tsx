@@ -214,7 +214,7 @@ export default function ComplaintsForm() {
 
       {/* Complaint Form Tab */}
       <TabsContent value="complaint" className="mt-6">
-        <Card className="bg-white rounded-xl shadow-xl border border-slate-200">
+        <Card className="bg-white text-black rounded-xl shadow-xl border border-slate-200">
           <CardHeader className="border-b border-slate-200 pb-4">
             <CardTitle className="text-2xl text-slate-800">Submit a Complaint</CardTitle>
             <CardDescription className="text-slate-500 pt-1">
