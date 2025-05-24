@@ -180,15 +180,42 @@ export default function DashboardPage() {
   const [anonymousComplaints, setAnonymousComplaints] = useState<AnonymousComplaint[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
   const [users, setUsers] = useState<User[]>([])
+  const [user, setUser] = useState<any>(null)
   const [timeframe, setTimeframe] = useState("7d")
   const [activeTab, setActiveTab] = useState("overview")
   const [loading, setLoading] = useState(true)
 
+  const supabase = createClientComponentClient()
+
   useEffect(() => {
-    const supabase = createClientComponentClient()
-    
     const fetchData = async () => {
+      setLoading(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      const loggedInUser = session?.user
+      setUser(loggedInUser)
+
+      if (!loggedInUser) {
+        setLoading(false)
+        return
+      }
+
+      const userRole = loggedInUser.user_metadata?.role
+      const userDepartmentId = loggedInUser.user_metadata?.department_id
+
       try {
+        let complaintsQuery = supabase.from('complaints').select('*')
+        let feedbackQuery = supabase.from('feedback').select('*')
+        let anonymousDataQuery = supabase.from('anonymous_complaints').select('*')
+        let usersDataQuery = supabase.from('users').select('*')
+        let departmentsDataQuery = supabase.from('departments').select('*')
+
+        if (userRole !== 'administrator' && userDepartmentId) {
+          complaintsQuery = complaintsQuery.eq('department_id', userDepartmentId)
+          feedbackQuery = feedbackQuery.eq('department_id', userDepartmentId)
+          anonymousDataQuery = anonymousDataQuery.eq('department_id', userDepartmentId)
+          usersDataQuery = usersDataQuery.eq('department_id', userDepartmentId)
+        }
+
         const [
           { data: complaintsData },
           { data: feedbackData },
@@ -196,11 +223,11 @@ export default function DashboardPage() {
           { data: departmentsData },
           { data: usersData }
         ] = await Promise.all([
-          supabase.from('complaints').select('*'),
-          supabase.from('feedback').select('*'),
-          supabase.from('anonymous_complaints').select('*'),
-          supabase.from('departments').select('*'),
-          supabase.from('users').select('*')
+          complaintsQuery,
+          feedbackQuery,
+          anonymousDataQuery,
+          departmentsDataQuery,
+          usersDataQuery
         ])
 
         setComplaints((complaintsData as Complaint[]) || [])
@@ -216,7 +243,7 @@ export default function DashboardPage() {
     }
 
     fetchData()
-  }, [])
+  }, [supabase])
 
   const stats = {
     totalComplaints: complaints.length,
@@ -318,7 +345,7 @@ export default function DashboardPage() {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {users.slice(0, 8).map((user) => (
+            {latestUsers.map((user) => (
               <div key={user.id} className="p-4 bg-slate-800/30 rounded-lg border border-slate-700/50 hover:border-cyan-500/30 transition-all group">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
