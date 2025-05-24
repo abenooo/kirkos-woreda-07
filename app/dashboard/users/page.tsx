@@ -1,7 +1,19 @@
 "use client"
+
 import { useEffect, useState } from "react"
-import { Edit, Key, MoreHorizontal, Plus, Search, Trash2 } from "lucide-react"
-import { createClient } from "@supabase/supabase-js"
+import {
+  Edit,
+  Key,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Trash2,
+  Mail,
+  CheckCircle2,
+  AlertTriangle,
+  Shield,
+} from "lucide-react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import {
   Dialog,
   DialogContent,
@@ -9,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import {
@@ -20,232 +31,343 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { useToast } from "@/components/ui/use-toast"
+import { useRouter } from "next/navigation"
+import { getAuthenticatedUsers, updateUserMetadata, deleteAuthUser } from "../../actions/user-actions"
 
 const PAGE_SIZE = 10
 
+interface AuthUser {
+  id: string
+  name: string
+  email: string
+  role: string
+  department_id: number
+  status: string
+  created_at: string
+  email_confirmed_at?: string
+  last_sign_in_at?: string
+}
+
+interface Department {
+  id: number
+  name: string
+  code: string
+}
+
 export default function UsersPage() {
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<AuthUser[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [currentUser, setCurrentUser] = useState<any>(null)
-  const [newUser, setNewUser] = useState({
-    name: "",
-    email: "",
-    role: "",
-    department_id: "",
-    password: "",
-    confirmPassword: "",
-    status: "active"
-  })
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
+  const [currentLoggedUser, setCurrentLoggedUser] = useState<any>(null)
+  const [userRole, setUserRole] = useState<string>("")
   const [page, setPage] = useState(1)
+  const [debugInfo, setDebugInfo] = useState<string>("")
+
+  const supabase = createClientComponentClient()
+  const { toast } = useToast()
+  const router = useRouter()
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session?.user) {
+        router.push("/dashboard/login")
+        return
+      }
+
+      const role = session.user.user_metadata?.role || "staff"
+      setCurrentLoggedUser(session.user)
+      setUserRole(role)
+
+      // Only administrators can access this page
+      if (role !== "administrator") {
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: "Only administrators can manage users.",
+        })
+        router.push("/dashboard")
+        return
+      }
+    }
+
+    checkAuth()
+  }, [supabase, router, toast])
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from("users")
-        .select("id, name, email, role, department_id, created_at, updated_at")
-        .order("created_at", { ascending: false })
-      setUsers(data || [])
-      setLoading(false)
+    if (userRole === "administrator") {
+      fetchUsers()
+      fetchDepartments()
     }
-    fetchUsers()
-  }, [])
+  }, [userRole])
 
-  // Filter users based on search query
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  // Paginate users
-  const paginatedUsers = filteredUsers.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE
-  )
-
-  const handleAddUser = async () => {
+  const fetchDepartments = async () => {
     try {
-      setLoading(true)
-      // Add your user creation logic here
-      setIsAddDialogOpen(false)
-      setNewUser({
-        name: "",
-        email: "",
-        role: "",
-        department_id: "",
-        password: "",
-        confirmPassword: "",
-        status: "active"
+      const { data, error } = await supabase.from("departments").select("*").order("name")
+      if (error) throw error
+      setDepartments(data || [])
+    } catch (error) {
+      console.error("Error fetching departments:", error)
+    }
+  }
+
+  const fetchUsers = async () => {
+    setLoading(true)
+    try {
+      console.log("Fetching users via server action...")
+
+      const result = await getAuthenticatedUsers()
+
+      if (!result.success) {
+        console.error("Server action error:", result.error)
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error || "Failed to fetch users",
+        })
+        return
+      }
+
+      console.log("Users fetched successfully:", result.users.length)
+      setUsers(result.users)
+
+      toast({
+        title: "Users Loaded",
+        description: `Loaded ${result.users.length} authenticated users.`,
       })
     } catch (error) {
-      console.error("Error adding user:", error)
+      console.error("Exception fetching users:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch users. Check console for details.",
+      })
     } finally {
       setLoading(false)
     }
   }
 
+  const getDepartmentName = (departmentId: number) => {
+    const dept = departments.find((d) => d.id === departmentId)
+    return dept ? dept.name : "Unknown"
+  }
+
+  // Filter users based on search query
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      getDepartmentName(user.department_id).toLowerCase().includes(searchQuery.toLowerCase()),
+  )
+
+  // Paginate users
+  const paginatedUsers = filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
   const handleEditUser = async () => {
+    if (!currentUser) return
+
     try {
       setLoading(true)
-      // Add your user update logic here
-      setIsEditDialogOpen(false)
+
+      const result = await updateUserMetadata(currentUser.id, {
+        name: currentUser.name,
+        role: currentUser.role,
+        department_id: currentUser.department_id,
+        status: currentUser.status,
+      })
+
+      if (!result.success) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error || "Failed to update user.",
+        })
+      } else {
+        toast({
+          title: "User Updated",
+          description: `${currentUser.name} has been updated successfully.`,
+        })
+        fetchUsers() // Refresh the users list
+        setIsEditDialogOpen(false)
+        setCurrentUser(null)
+      }
     } catch (error) {
       console.error("Error updating user:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred while updating the user.",
+      })
     } finally {
       setLoading(false)
     }
   }
 
   const handleDeleteUser = async () => {
+    if (!currentUser) return
+
     try {
       setLoading(true)
-      // Add your user deletion logic here
-      setIsDeleteDialogOpen(false)
+
+      const result = await deleteAuthUser(currentUser.id)
+
+      if (!result.success) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error || "Failed to delete user.",
+        })
+      } else {
+        toast({
+          title: "User Deleted",
+          description: `${currentUser.name} has been deleted successfully.`,
+        })
+        fetchUsers() // Refresh the users list
+        setIsDeleteDialogOpen(false)
+        setCurrentUser(null)
+      }
     } catch (error) {
       console.error("Error deleting user:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred while deleting the user.",
+      })
     } finally {
       setLoading(false)
     }
   }
 
+  const resendConfirmationEmail = async (email: string, userName: string) => {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard/login`,
+        },
+      })
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Failed to Resend Email",
+          description: error.message,
+        })
+      } else {
+        toast({
+          title: "Confirmation Email Sent",
+          description: `A new confirmation email has been sent to ${email}`,
+        })
+      }
+    } catch (error) {
+      console.error("Error resending confirmation email:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to resend confirmation email.",
+      })
+    }
+  }
+
+  const resetUserPassword = async (userId: string, email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/dashboard/login`,
+      })
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Failed to Send Reset Email",
+          description: error.message,
+        })
+      } else {
+        toast({
+          title: "Password Reset Email Sent",
+          description: `A password reset email has been sent to ${email}`,
+        })
+      }
+    } catch (error) {
+      console.error("Error sending password reset:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to send password reset email.",
+      })
+    }
+  }
+
+  useEffect(() => {
+    const checkUserCapabilities = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (session?.user) {
+        const debugData = {
+          userId: session.user.id,
+          email: session.user.email,
+          role: session.user.user_metadata?.role,
+          isAdmin: session.user.user_metadata?.role === "administrator",
+          hasServiceRole: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        }
+        setDebugInfo(JSON.stringify(debugData, null, 2))
+        console.log("User capabilities:", debugData)
+      }
+    }
+
+    if (userRole === "administrator") {
+      checkUserCapabilities()
+    }
+  }, [userRole, supabase])
+
+  if (userRole !== "administrator") {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Shield className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+          <p className="text-muted-foreground">Only administrators can access user management.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add User
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add New User</DialogTitle>
-              <DialogDescription>Create a new user account with appropriate role and permissions.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  value={newUser.name}
-                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
-                    <SelectTrigger id="role">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="administrator">Administrator</SelectItem>
-                      <SelectItem value="department_head">Department Head</SelectItem>
-                      <SelectItem value="staff">Staff</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="department">Department</Label>
-                  <Select
-                    value={newUser.department_id}
-                    onValueChange={(value) => setNewUser({ ...newUser, department_id: value })}
-                  >
-                    <SelectTrigger id="department">
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Administration">Administration</SelectItem>
-                      <SelectItem value="Water & Sewage">Water & Sewage</SelectItem>
-                      <SelectItem value="Roads & Infrastructure">Roads & Infrastructure</SelectItem>
-                      <SelectItem value="Waste Management">Waste Management</SelectItem>
-                      <SelectItem value="Public Safety">Public Safety</SelectItem>
-                      <SelectItem value="Housing">Housing</SelectItem>
-                      <SelectItem value="Health Services">Health Services</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={newUser.confirmPassword}
-                  onChange={(e) => setNewUser({ ...newUser, confirmPassword: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={newUser.status} onValueChange={(value) => setNewUser({ ...newUser, status: value })}>
-                  <SelectTrigger id="status">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddUser}>Add User</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
+          <p className="text-muted-foreground">Manage authenticated users and their permissions</p>
+        </div>
+        <Button onClick={() => router.push("/dashboard/register")}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add New User
+        </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Users</CardTitle>
-          <CardDescription>Manage user accounts and their permissions</CardDescription>
+          <CardTitle>All Authenticated Users</CardTitle>
+          <CardDescription>
+            Manage user accounts, roles, and permissions. These are users registered through the authentication system.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
@@ -260,39 +382,94 @@ export default function UsersPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
+              <Button variant="outline" onClick={fetchUsers} disabled={loading}>
+                {loading ? "Refreshing..." : "Refresh"}
+              </Button>
             </div>
 
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Email Status</TableHead>
                     <TableHead>Role</TableHead>
-                    <TableHead>Department ID</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead>Updated At</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Registered</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={7}>Loading...</TableCell>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        Loading users...
+                      </TableCell>
                     </TableRow>
                   ) : paginatedUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7}>No users found.</TableCell>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        No users found.
+                      </TableCell>
                     </TableRow>
                   ) : (
                     paginatedUsers.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell>{user.name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.role}</TableCell>
-                        <TableCell>{user.department_id}</TableCell>
-                        <TableCell>{user.created_at ? new Date(user.created_at).toLocaleDateString() : ""}</TableCell>
-                        <TableCell>{user.updated_at ? new Date(user.updated_at).toLocaleDateString() : ""}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-3">
+                            <Avatar>
+                              <AvatarImage src="/placeholder.svg?height=32&width=32" alt={user.name} />
+                              <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">{user.name}</div>
+                              <div className="text-sm text-muted-foreground">{user.email}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {user.email_confirmed_at ? (
+                            <div className="flex items-center space-x-2">
+                              <CheckCircle2 className="h-4 w-4 text-green-500" />
+                              <span className="text-green-700 text-sm">Confirmed</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                              <span className="text-yellow-700 text-sm">Pending</span>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                            {user.role}
+                          </span>
+                        </TableCell>
+                        <TableCell>{getDepartmentName(user.department_id)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            {user.status === "active" ? (
+                              <>
+                                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                <div className="flex flex-col">
+                                  <span className="text-green-700 text-sm">Active</span>
+                                  {user.last_sign_in_at && (
+                                    <span className="text-xs text-muted-foreground">
+                                      Last login: {new Date(user.last_sign_in_at).toLocaleDateString()}
+                                    </span>
+                                  )}
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                                <span className="text-yellow-700 text-sm">Pending</span>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -305,23 +482,33 @@ export default function UsersPage() {
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuItem
                                 onClick={() => {
-                                  setCurrentUser(user);
-                                  setIsEditDialogOpen(true);
+                                  setCurrentUser(user)
+                                  setIsEditDialogOpen(true)
                                 }}
                               >
                                 <Edit className="mr-2 h-4 w-4" />
-                                Edit
+                                Edit User
                               </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => resetUserPassword(user.id, user.email)}>
+                                <Key className="mr-2 h-4 w-4" />
+                                Reset Password
+                              </DropdownMenuItem>
+                              {!user.email_confirmed_at && (
+                                <DropdownMenuItem onClick={() => resendConfirmationEmail(user.email, user.name)}>
+                                  <Mail className="mr-2 h-4 w-4" />
+                                  Resend Confirmation
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() => {
-                                  setCurrentUser(user);
-                                  setIsDeleteDialogOpen(true);
+                                  setCurrentUser(user)
+                                  setIsDeleteDialogOpen(true)
                                 }}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
+                                Delete User
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -358,6 +545,8 @@ export default function UsersPage() {
         </CardContent>
       </Card>
 
+      
+
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
@@ -376,13 +565,9 @@ export default function UsersPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="edit-email">Email</Label>
-                <Input
-                  id="edit-email"
-                  type="email"
-                  value={currentUser.email}
-                  onChange={(e) => setCurrentUser({ ...currentUser, email: e.target.value })}
-                />
+                <Label htmlFor="edit-email">Email (Read Only)</Label>
+                <Input id="edit-email" type="email" value={currentUser.email} disabled />
+                <p className="text-xs text-muted-foreground">Email cannot be changed after registration</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
@@ -404,20 +589,18 @@ export default function UsersPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="edit-department">Department</Label>
                   <Select
-                    value={currentUser.department_id}
-                    onValueChange={(value) => setCurrentUser({ ...currentUser, department_id: value })}
+                    value={currentUser.department_id.toString()}
+                    onValueChange={(value) => setCurrentUser({ ...currentUser, department_id: Number.parseInt(value) })}
                   >
                     <SelectTrigger id="edit-department">
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Administration">Administration</SelectItem>
-                      <SelectItem value="Water & Sewage">Water & Sewage</SelectItem>
-                      <SelectItem value="Roads & Infrastructure">Roads & Infrastructure</SelectItem>
-                      <SelectItem value="Waste Management">Waste Management</SelectItem>
-                      <SelectItem value="Public Safety">Public Safety</SelectItem>
-                      <SelectItem value="Housing">Housing</SelectItem>
-                      <SelectItem value="Health Services">Health Services</SelectItem>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id.toString()}>
+                          {dept.name} ({dept.code})
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -443,7 +626,9 @@ export default function UsersPage() {
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleEditUser}>Save Changes</Button>
+            <Button onClick={handleEditUser} disabled={loading}>
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -454,12 +639,13 @@ export default function UsersPage() {
           <DialogHeader>
             <DialogTitle>Delete User</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this user? This action cannot be undone.
+              Are you sure you want to delete this user? This action cannot be undone and will permanently remove the
+              user from the authentication system.
             </DialogDescription>
           </DialogHeader>
           {currentUser && (
             <div className="py-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 p-4 border rounded-lg bg-destructive/5">
                 <Avatar>
                   <AvatarImage src="/placeholder.svg?height=40&width=40" alt={currentUser.name} />
                   <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
@@ -467,6 +653,7 @@ export default function UsersPage() {
                 <div>
                   <div className="font-medium">{currentUser.name}</div>
                   <div className="text-sm text-muted-foreground">{currentUser.email}</div>
+                  <div className="text-sm text-muted-foreground">Role: {currentUser.role}</div>
                 </div>
               </div>
             </div>
@@ -475,8 +662,8 @@ export default function UsersPage() {
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteUser}>
-              Delete
+            <Button variant="destructive" onClick={handleDeleteUser} disabled={loading}>
+              {loading ? "Deleting..." : "Delete User"}
             </Button>
           </DialogFooter>
         </DialogContent>
