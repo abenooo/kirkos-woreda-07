@@ -421,7 +421,7 @@ export default function ClientLayout({
               <div>
                 <h3 className="text-lg font-semibold mb-4">Connect With Us</h3>
                 <div className="flex space-x-4">
-                  <a href="#" className="bg-white/10 hover:bg-white/20 p-2 rounded-full">
+                  <a href="https://web.facebook.com/kirkosworedasevencom?mibextid=ZbWKwL&_rdc=1&_rdr#" className="bg-white/10 hover:bg-white/20 p-2 rounded-full">
                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path
                         fillRule="evenodd"
