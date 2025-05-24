@@ -12,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/components/ui/use-toast"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { UserPlus, Users, CheckCircle2, AlertTriangle, Mail } from "lucide-react"
+import { UserPlus, Users, CheckCircle2, AlertTriangle, Mail, RefreshCw } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { getAuthenticatedUsers } from "@/app/actions/user-actions"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -58,6 +59,7 @@ export default function RegisterPage() {
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [userRole, setUserRole] = useState<string>("")
   const [loading, setLoading] = useState(true)
+  const [fetchingUsers, setFetchingUsers] = useState(false)
 
   const supabase = createClientComponentClient()
   const { toast } = useToast()
@@ -131,44 +133,33 @@ export default function RegisterPage() {
   }
 
   const fetchUsers = async () => {
+    setFetchingUsers(true)
     try {
-      // Fetch users from Supabase Auth using the admin API
-      const {
-        data: { users },
-        error,
-      } = await supabase.auth.admin.listUsers()
+      console.log("Fetching users via server action...")
 
-      if (error) {
-        console.error("Error fetching authenticated users:", error)
+      const result = await getAuthenticatedUsers()
+
+      if (!result.success) {
+        console.error("Server action error:", result.error)
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to fetch users. Make sure you have admin privileges.",
+          description: result.error || "Failed to fetch users",
         })
         return
       }
 
-      // Transform the auth users data to match our interface
-      const transformedUsers = users.map((user) => ({
-        id: user.id,
-        name: user.user_metadata?.name || user.email?.split("@")[0] || "Unknown",
-        email: user.email || "No email",
-        role: user.user_metadata?.role || "staff",
-        department_id: user.user_metadata?.department_id || 1,
-        status: user.email_confirmed_at ? "active" : "pending",
-        created_at: user.created_at,
-        email_confirmed_at: user.email_confirmed_at,
-        last_sign_in_at: user.last_sign_in_at,
-      }))
-
-      setUsers(transformedUsers)
+      console.log("Users fetched successfully:", result.users.length)
+      setUsers(result.users)
     } catch (error) {
-      console.error("Exception fetching authenticated users:", error)
+      console.error("Exception fetching users:", error)
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch authenticated users.",
+        description: "Failed to fetch users. Check console for details.",
       })
+    } finally {
+      setFetchingUsers(false)
     }
   }
 
@@ -297,6 +288,11 @@ export default function RegisterPage() {
       </div>
     )
   }
+
+  // Get the 5 most recent users, sorted by creation date
+  const recentUsers = users
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5)
 
   return (
     <div className="space-y-8">
@@ -455,32 +451,55 @@ export default function RegisterPage() {
         {/* Recent Users */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Users className="h-5 w-5 mr-2" />
-              Recent Users
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Users className="h-5 w-5 mr-2" />
+                Recent Users
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchUsers}
+                disabled={fetchingUsers}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${fetchingUsers ? "animate-spin" : ""}`} />
+                {fetchingUsers ? "Loading..." : "Refresh"}
+              </Button>
             </CardTitle>
-            <CardDescription>Recently registered users in the system.</CardDescription>
+            <CardDescription>5 most recently registered users in the system.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {users.length === 0 ? (
+              {fetchingUsers ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+                  <p>Loading recent users...</p>
+                </div>
+              ) : recentUsers.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No users found.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {users.slice(0, 5).map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  {recentUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-semibold">
-                          {user.name?.charAt(0)?.toUpperCase()}
+                          {user.name?.charAt(0)?.toUpperCase() || "U"}
                         </div>
                         <div>
                           <p className="font-medium">{user.name}</p>
                           <p className="text-sm text-muted-foreground">{user.email}</p>
                           {!user.email_confirmed_at && (
-                            <p className="text-xs text-yellow-600">Pending email confirmation</p>
+                            <p className="text-xs text-yellow-600 flex items-center">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Pending email confirmation
+                            </p>
                           )}
                         </div>
                       </div>
@@ -497,6 +516,9 @@ export default function RegisterPage() {
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground">{getDepartmentName(user.department_id)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(user.created_at).toLocaleDateString()}
+                          </p>
                         </div>
                         {!user.email_confirmed_at && (
                           <Button
@@ -518,7 +540,7 @@ export default function RegisterPage() {
               {users.length > 5 && (
                 <div className="text-center pt-4">
                   <Button variant="outline" size="sm" onClick={() => router.push("/dashboard/users")}>
-                    View All Users
+                    View All {users.length} Users
                   </Button>
                 </div>
               )}
@@ -527,7 +549,7 @@ export default function RegisterPage() {
         </Card>
       </div>
 
-      {/* Users Table */}
+      {/* All Registered Users Table */}
       <Card>
         <CardHeader>
           <CardTitle>All Registered Users</CardTitle>
@@ -547,7 +569,16 @@ export default function RegisterPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.length === 0 ? (
+                {fetchingUsers ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin mr-2"></div>
+                        Loading users...
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : users.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8">
                       No users found.
