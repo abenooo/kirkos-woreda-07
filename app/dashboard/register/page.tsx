@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/components/ui/use-toast"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { UserPlus, Users, CheckCircle2, AlertTriangle } from "lucide-react"
+import { UserPlus, Users, CheckCircle2, AlertTriangle, Mail } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 const formSchema = z.object({
@@ -47,6 +47,8 @@ interface User {
   department_id: number
   status: string
   created_at: string
+  email_confirmed_at?: string
+  last_sign_in_at?: string
 }
 
 export default function RegisterPage() {
@@ -130,11 +132,43 @@ export default function RegisterPage() {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false })
-      if (error) throw error
-      setUsers(data || [])
+      // Fetch users from Supabase Auth using the admin API
+      const {
+        data: { users },
+        error,
+      } = await supabase.auth.admin.listUsers()
+
+      if (error) {
+        console.error("Error fetching authenticated users:", error)
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch users. Make sure you have admin privileges.",
+        })
+        return
+      }
+
+      // Transform the auth users data to match our interface
+      const transformedUsers = users.map((user) => ({
+        id: user.id,
+        name: user.user_metadata?.name || user.email?.split("@")[0] || "Unknown",
+        email: user.email || "No email",
+        role: user.user_metadata?.role || "staff",
+        department_id: user.user_metadata?.department_id || 1,
+        status: user.email_confirmed_at ? "active" : "pending",
+        created_at: user.created_at,
+        email_confirmed_at: user.email_confirmed_at,
+        last_sign_in_at: user.last_sign_in_at,
+      }))
+
+      setUsers(transformedUsers)
     } catch (error) {
-      console.error("Error fetching users:", error)
+      console.error("Exception fetching authenticated users:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch authenticated users.",
+      })
     }
   }
 
@@ -154,7 +188,7 @@ export default function RegisterPage() {
         status: "active",
       })
 
-      // Sign up the user
+      // Sign up the user with proper email confirmation
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -165,6 +199,7 @@ export default function RegisterPage() {
             department_id: Number.parseInt(values.department_id),
             status: "active",
           },
+          emailRedirectTo: `${window.location.origin}/dashboard/login`,
         },
       })
 
@@ -177,10 +212,30 @@ export default function RegisterPage() {
         })
       } else {
         console.log("Signup successful:", data)
-        toast({
-          title: "User Registered Successfully",
-          description: `${values.name} has been registered and will receive a confirmation email.`,
-        })
+
+        // Check if user was created but needs email confirmation
+        if (data.user && !data.user.email_confirmed_at) {
+          toast({
+            title: "User Registered Successfully",
+            description: (
+              <div className="flex items-start space-x-2">
+                <Mail className="h-4 w-4 mt-0.5 text-blue-500" />
+                <div>
+                  <p className="font-medium">{values.name} has been registered!</p>
+                  <p className="text-sm text-muted-foreground">
+                    A confirmation email has been sent to {values.email}. They must confirm their email before logging
+                    in.
+                  </p>
+                </div>
+              </div>
+            ),
+          })
+        } else {
+          toast({
+            title: "User Registered Successfully",
+            description: `${values.name} has been registered and can now log in.`,
+          })
+        }
 
         // Reset form
         form.reset()
@@ -197,6 +252,38 @@ export default function RegisterPage() {
       })
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const resendConfirmationEmail = async (email: string, userName: string) => {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard/login`,
+        },
+      })
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Failed to Resend Email",
+          description: error.message,
+        })
+      } else {
+        toast({
+          title: "Confirmation Email Sent",
+          description: `A new confirmation email has been sent to ${email}`,
+        })
+      }
+    } catch (error) {
+      console.error("Error resending confirmation email:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to resend confirmation email.",
+      })
     }
   }
 
@@ -221,10 +308,26 @@ export default function RegisterPage() {
             User Registration
           </h1>
           <p className="text-muted-foreground mt-2">
-            Register new users and manage user accounts. Only administrators can access this feature.
+            Register new users and manage user accounts. Users will receive email confirmation.
           </p>
         </div>
       </div>
+
+      {/* Email Configuration Notice */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="flex items-start space-x-3">
+            <Mail className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-blue-900">Email Confirmation Required</h3>
+              <p className="text-sm text-blue-700 mt-1">
+                New users will receive a confirmation email and must verify their email address before they can log in.
+                Make sure your Supabase email settings are properly configured.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Registration Form */}
@@ -234,7 +337,9 @@ export default function RegisterPage() {
               <UserPlus className="h-5 w-5 mr-2" />
               Register New User
             </CardTitle>
-            <CardDescription>Create a new user account. The user will receive an email confirmation.</CardDescription>
+            <CardDescription>
+              Create a new user account. The user will receive an email confirmation link.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -374,20 +479,36 @@ export default function RegisterPage() {
                         <div>
                           <p className="font-medium">{user.name}</p>
                           <p className="text-sm text-muted-foreground">{user.email}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex items-center space-x-2">
-                          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                            {user.role}
-                          </span>
-                          {user.status === "active" ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                          {!user.email_confirmed_at && (
+                            <p className="text-xs text-yellow-600">Pending email confirmation</p>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">{getDepartmentName(user.department_id)}</p>
+                      </div>
+                      <div className="text-right flex items-center space-x-2">
+                        <div>
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                              {user.role}
+                            </span>
+                            {user.email_confirmed_at ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{getDepartmentName(user.department_id)}</p>
+                        </div>
+                        {!user.email_confirmed_at && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => resendConfirmationEmail(user.email, user.name)}
+                            className="text-xs"
+                          >
+                            <Mail className="h-3 w-3 mr-1" />
+                            Resend
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -436,7 +557,22 @@ export default function RegisterPage() {
                   users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span>{user.email}</span>
+                          {user.email_confirmed_at ? (
+                            <span className="text-xs text-green-600 flex items-center">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Email confirmed
+                            </span>
+                          ) : (
+                            <span className="text-xs text-yellow-600 flex items-center">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Pending confirmation
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
                           {user.role}
@@ -445,15 +581,22 @@ export default function RegisterPage() {
                       <TableCell>{getDepartmentName(user.department_id)}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          {user.status === "active" ? (
+                          {user.email_confirmed_at ? (
                             <>
                               <CheckCircle2 className="h-4 w-4 text-green-500" />
-                              <span className="text-green-700">Active</span>
+                              <div className="flex flex-col">
+                                <span className="text-green-700 text-sm">Active</span>
+                                {user.last_sign_in_at && (
+                                  <span className="text-xs text-muted-foreground">
+                                    Last login: {new Date(user.last_sign_in_at).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
                             </>
                           ) : (
                             <>
                               <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                              <span className="text-yellow-700">Pending</span>
+                              <span className="text-yellow-700">Pending Email Confirmation</span>
                             </>
                           )}
                         </div>
