@@ -1,56 +1,47 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Hexagon } from "lucide-react"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { createClient } from "@supabase/supabase-js"
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import { signUp } from "@/lib/supabase/auth"
 
-const registerSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
-  confirmPassword: z.string(),
-  role: z.string().optional(),
-  department_id: z.string().optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-})
+const registerSchema = z
+  .object({
+    name: z.string().min(2, {
+      message: "Name must be at least 2 characters.",
+    }),
+    email: z.string().email({
+      message: "Please enter a valid email address.",
+    }),
+    password: z.string().min(6, {
+      message: "Password must be at least 6 characters.",
+    }),
+    confirmPassword: z.string(),
+    role: z.string().optional(),
+    department_id: z.string().optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  })
 
 export default function RegisterPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
-  
+  const [departments, setDepartments] = useState<any[]>([])
+
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -59,32 +50,46 @@ export default function RegisterPage() {
       password: "",
       confirmPassword: "",
       role: "staff",
-      department_id: "Administration",
+      department_id: "",
     },
   })
 
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      )
+
+      try {
+        const { data } = await supabase.from("departments").select("*")
+        setDepartments(data || [])
+      } catch (error) {
+        console.error("Error fetching departments:", error)
+      }
+    }
+
+    fetchDepartments()
+  }, [])
+
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     setIsLoading(true)
-    
+
     try {
-      const { data, error } = await signUp(
-        values.email,
-        values.password,
-        {
-          name: values.name,
-          role: values.role || "staff",
-          department_id: values.department_id || "Administration",
-          status: "active",
-        }
-      )
-      
+      const { data, error } = await signUp(values.email, values.password, {
+        name: values.name,
+        role: values.role || "staff",
+        department_id: values.department_id || "Administration",
+        status: "active",
+      })
+
       if (error) throw error
-      
+
       toast({
         title: "Registration successful",
         description: "Your account has been created. You can now log in.",
       })
-      
+
       router.push("/auth/login")
     } catch (error: any) {
       toast({
@@ -138,7 +143,7 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="email"
@@ -157,7 +162,7 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -165,10 +170,7 @@ export default function RegisterPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-300">Role</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-slate-800/50 border-slate-700 text-slate-100 focus:ring-cyan-500">
                             <SelectValue placeholder="Select role" />
@@ -184,30 +186,29 @@ export default function RegisterPage() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="department_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-300">Department</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-slate-800/50 border-slate-700 text-slate-100 focus:ring-cyan-500">
                             <SelectValue placeholder="Select department" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-slate-800 border-slate-700 text-slate-100">
-                          <SelectItem value="Administration">Administration</SelectItem>
-                          <SelectItem value="Water & Sewage">Water & Sewage</SelectItem>
-                          <SelectItem value="Roads & Infrastructure">Roads & Infrastructure</SelectItem>
-                          <SelectItem value="Waste Management">Waste Management</SelectItem>
-                          <SelectItem value="Public Safety">Public Safety</SelectItem>
-                          <SelectItem value="Housing">Housing</SelectItem>
-                          <SelectItem value="Health Services">Health Services</SelectItem>
+                          {departments.length > 0 ? (
+                            departments.map((dept) => (
+                              <SelectItem key={dept.id} value={dept.id.toString()}>
+                                {dept.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="loading">Loading departments...</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -215,7 +216,7 @@ export default function RegisterPage() {
                   )}
                 />
               </div>
-              
+
               <FormField
                 control={form.control}
                 name="password"
@@ -233,7 +234,7 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="confirmPassword"
@@ -269,7 +270,11 @@ export default function RegisterPage() {
               </Button>
               <div className="text-center text-sm text-slate-400">
                 Already have an account?{" "}
-                <Button variant="link" className="h-auto p-0 text-sm text-cyan-400 hover:text-cyan-300" onClick={() => router.push('/auth/login')}>
+                <Button
+                  variant="link"
+                  className="h-auto p-0 text-sm text-cyan-400 hover:text-cyan-300"
+                  onClick={() => router.push("/auth/login")}
+                >
                   Sign in
                 </Button>
               </div>
