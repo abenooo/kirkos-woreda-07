@@ -1,26 +1,40 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
-export const signIn = async (email: string, password: string) => {
+export async function signUp(email: string, password: string, metadata: any) {
   const supabase = createClientComponentClient()
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-  return { data, error }
-}
 
-// add signup
-export const signUp = async (email: string, password: string, options?: { [key: string]: any }) => {
-  const supabase = createClientComponentClient();
+  console.log("SignUp called with metadata:", metadata)
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: options // Pass additional profile data in the options object
-    }
-  });
-  return { data, error };
-};
+      data: {
+        name: metadata.name,
+        role: metadata.role,
+        department_id: Number.parseInt(metadata.department_id?.toString() || "1"),
+        status: metadata.status,
+      },
+    },
+  })
+
+  console.log("SignUp result:", { data, error })
+
+  return { data, error }
+}
+
+export async function signIn(email: string, password: string) {
+  const supabase = createClientComponentClient()
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+
+  console.log("SignIn result:", { data, error })
+
+  return { data, error }
+}
 
 export const signOut = async () => {
   const supabase = createClientComponentClient()
