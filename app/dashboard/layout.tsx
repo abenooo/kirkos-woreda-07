@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Settings,
   Users,
+  UserPlus,
   Shield,
   Newspaper,
 } from "lucide-react"
@@ -132,6 +133,11 @@ export default function DashboardLayout({
     ]
 
     const adminItems = [
+      {
+        name: "Register",
+        href: "/dashboard/register",
+        icon: UserPlus,
+      },
       {
         name: "Departments",
         href: "/dashboard/departments",
