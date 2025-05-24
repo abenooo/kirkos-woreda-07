@@ -383,7 +383,7 @@ export default function ComplaintsForm() {
 
       {/* Feedback Form Tab */}
       <TabsContent value="feedback" className="mt-6">
-        <Card className="bg-white rounded-xl shadow-xl border border-slate-200">
+        <Card className="bg-white text-black rounded-xl shadow-xl border border-slate-200">
           <CardHeader className="border-b border-slate-200 pb-4">
             <CardTitle className="text-2xl text-slate-800">Service Feedback</CardTitle>
             <CardDescription className="text-slate-500 pt-1">
