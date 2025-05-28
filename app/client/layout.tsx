@@ -130,17 +130,23 @@ export default function ClientLayout({
           <div className="container mx-auto flex flex-wrap justify-between items-center">
             <div className="flex items-center space-x-2 sm:space-x-4">
               <Link href="/client/contact" className="text-[10px] sm:text-xs flex items-center hover:underline">
-                <Phone className="h-3 w-3 mr-1" />
+                <div className="bg-myBlue p-1 rounded-full mr-1">
+                  <Phone className="h-3 w-3 text-white" />
+                </div>
                 <span className="truncate">+251 11 234 5678</span>
               </Link>
               <Link href="/client/contact" className="text-[10px] sm:text-xs flex items-center hover:underline">
-                <Mail className="h-3 w-3 mr-1" />
+                <div className="bg-myBlue p-1 rounded-full mr-1">
+                  <Mail className="h-3 w-3 text-white" />
+                </div>
                 <span className="truncate">info@kirkoswereda07.gov.et</span>
               </Link>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 text-[10px] sm:text-xs">
               <Link href="/dashboard/login" className="flex items-center hover:underline">
-                <LogIn className="h-3 w-3 mr-1" />
+                <div className="bg-myBlue p-1 rounded-full mr-1">
+                  <LogIn className="h-3 w-3 text-white" />
+                </div>
                 {t.help}
               </Link>
 
@@ -152,7 +158,7 @@ export default function ClientLayout({
                     size="sm"
                     className="h-6 text-[10px] sm:text-xs flex items-center text-white hover:bg-[#1a3672]"
                   >
-                    <Languages className="h-3 w-3 mr-1" />
+                    <Languages className="h-3 w-3 mr-1 text-white" />
                     <span>{t.language}</span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -239,7 +245,9 @@ export default function ClientLayout({
                               : "text-gray-700 hover:text-[#0F2557] hover:bg-gray-50"
                           }`}
                         >
-                          <item.icon className="h-4 w-4 mr-2" />
+                          <div className="bg-myBlue p-1 rounded-full mr-2">
+                            <item.icon className="h-4 w-4 text-white" />
+                          </div>
                           {item.name}
                         </Link>
                       </li>
@@ -251,7 +259,9 @@ export default function ClientLayout({
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-[#0F2557] hover:bg-gray-50">
-                          <FileText className="h-4 w-4 mr-2" />
+                          <div className="bg-myBlue p-1 rounded-full mr-2">
+                            <FileText className="h-4 w-4 text-white" />
+                          </div>
                           More Services
                           <ChevronDown className="h-4 w-4 ml-1" />
                         </button>
@@ -260,7 +270,9 @@ export default function ClientLayout({
                         {secondaryNavItems.map((item) => (
                           <DropdownMenuItem key={item.href} asChild>
                             <Link href={item.href} className="flex items-center text-gray-800">
-                              <item.icon className="h-4 w-4 mr-2" />
+                              <div className="bg-myBlue p-1 rounded-full mr-2">
+                                <item.icon className="h-4 w-4 text-white" />
+                              </div>
                               {item.name}
                             </Link>
                           </DropdownMenuItem>
@@ -274,7 +286,9 @@ export default function ClientLayout({
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-[#0F2557] hover:bg-gray-50">
-                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          <div className="bg-myBlue p-1 rounded-full mr-2">
+                            <AlertTriangle className="h-4 w-4 text-white" />
+                          </div>
                           About
                           <ChevronDown className="h-4 w-4 ml-1" />
                         </button>
@@ -282,19 +296,25 @@ export default function ClientLayout({
                       <DropdownMenuContent align="end" className="w-56 bg-white">
                         <DropdownMenuItem asChild>
                           <Link href="/client/about/vision" className="flex items-center text-gray-800">
-                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            <div className="bg-myBlue p-1 rounded-full mr-2">
+                              <AlertTriangle className="h-4 w-4 text-white" />
+                            </div>
                             Vision
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href="/client/about/mission" className="flex items-center text-gray-800">
-                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            <div className="bg-myBlue p-1 rounded-full mr-2">
+                              <AlertTriangle className="h-4 w-4 text-white" />
+                            </div>
                             Mission
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href="/client/about/core-values" className="flex items-center text-gray-800">
-                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            <div className="bg-myBlue p-1 rounded-full mr-2">
+                              <AlertTriangle className="h-4 w-4 text-white" />
+                            </div>
                             Core Values
                           </Link>
                         </DropdownMenuItem>
@@ -350,7 +370,9 @@ export default function ClientLayout({
                           }`}
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          <item.icon className="h-5 w-5 mr-3" />
+                          <div className="bg-myBlue p-1 rounded-full mr-3">
+                            <item.icon className="h-5 w-5 text-white" />
+                          </div>
                           {item.name}
                         </Link>
                       </li>
@@ -373,7 +395,9 @@ export default function ClientLayout({
                 <h3 className="text-lg font-semibold mb-4">Kirkos Sub City Wereda 07</h3>
                 <p className="text-sm text-gray-300">Administrative Office</p>
                 <p className="flex items-center mt-2 text-sm text-gray-300">
-                  <MapPin className="h-4 w-4 mr-2" />
+                  <div className="bg-myBlue p-1 rounded-full mr-2">
+                    <MapPin className="h-4 w-4 text-white" />
+                  </div>
                   Addis Ababa, Ethiopia
                 </p>
                 <p className="mt-2 text-sm text-gray-300">GPS: Lat 9.013789 / Lon 38.751536</p>
@@ -409,11 +433,15 @@ export default function ClientLayout({
                 <h3 className="text-lg font-semibold mb-4">{t.contact}</h3>
                 <ul className="space-y-2 text-sm text-gray-300">
                   <li className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2" />
+                    <div className="bg-myBlue p-1 rounded-full mr-2">
+                      <Phone className="h-4 w-4 text-white" />
+                    </div>
                     +251 11 234 5678
                   </li>
                   <li className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2" />
+                    <div className="bg-myBlue p-1 rounded-full mr-2">
+                      <Mail className="h-4 w-4 text-white" />
+                    </div>
                     info@kirkoswereda07.gov.et
                   </li>
                 </ul>
