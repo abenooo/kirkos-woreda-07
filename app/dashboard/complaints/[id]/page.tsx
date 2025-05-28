@@ -316,49 +316,7 @@ export default function ComplaintDetailPage({ params }: { params: { id: string }
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Activity & Comments</CardTitle>
-              <CardDescription>Communication history and updates</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="flex gap-4">
-                    <Avatar>
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt={comment.user.name} />
-                      <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{comment.user.name}</span>
-                        <Badge variant="outline" className="text-xs">
-                          {comment.user.role}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground ml-auto">{formatDate(comment.created_at)}</span>
-                      </div>
-                      <p className="text-sm">{comment.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-            <CardFooter>
-              <form onSubmit={handleCommentSubmit} className="w-full space-y-4">
-                <Textarea
-                  placeholder="Add a comment or update..."
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                />
-                <div className="flex justify-end">
-                  <Button type="submit">
-                    <Send className="mr-2 h-4 w-4" />
-                    Send
-                  </Button>
-                </div>
-              </form>
-            </CardFooter>
-          </Card>
+          
         </div>
 
         <div className="space-y-6">
