@@ -444,7 +444,6 @@ export default function ComplaintsPage() {
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem>Add comment</DropdownMenuItem>
                               {userRole === "administrator" && (
                                 <>
                                   <DropdownMenuSeparator />
