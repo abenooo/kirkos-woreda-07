@@ -8,10 +8,10 @@ export default function ServicesPrerequisites() {
   return (
     <div className="min-h-screen">
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 -mx-4 px-4 py-12 text-white shadow-lg mb-8">
+      <div className="bg-myBlue -mx-4 px-4 py-12 text-white shadow-lg mb-8">
         <div className="container mx-auto">
           <h1 className="text-4xl font-bold mb-3 text-white">የአገልግሎት ቅድመ ሁኔታዎች</h1>
-          <p className="text-emerald-100/90 max-w-3xl text-lg">
+          <p className="text-white/90 max-w-3xl text-lg">
             ከተገልጋይ የሚጠበቅ ቅድመ ሁኔታዎችን ይመልከቱ። እያንዳንዱ አገልግሎት ለማግኘት የሚያስፈልጉትን ሰነዶች እና መረጃዎች ያግኙ።
           </p>
         </div>
@@ -21,7 +21,7 @@ export default function ServicesPrerequisites() {
       <div className="w-full sm:container sm:mx-auto px-3 sm:px-4">
         <Tabs defaultValue="1" className="w-full">
           {/* Combined TabsList for responsive display */}
-          <TabsList className="flex w-full overflow-x-auto mb-8 bg-gray-800 text-white grid grid-cols-3 md:grid-cols-5 lg:grid-cols-10">
+          <TabsList className="flex w-full overflow-x-auto mb-8 bg-myBlue text-white grid grid-cols-3 md:grid-cols-5 lg:grid-cols-10">
             <TabsTrigger value="1" className="flex-shrink-0">ፑብሊክ</TabsTrigger>
             <TabsTrigger value="2" className="flex-shrink-0">ከተማ ውበት</TabsTrigger>
             <TabsTrigger value="3" className="flex-shrink-0">ባህል</TabsTrigger>
