@@ -126,7 +126,7 @@ export default function ClientLayout({
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
       <div className="min-h-screen bg-gray-50 overflow-x-hidden max-w-[100vw]">
         {/* Top Bar */}
-        <div className="bg-[#0F2557] text-white py-1.5 px-4 overflow-hidden">
+        <div className="bg-myBlue text-white py-1.5 px-4 overflow-hidden">
           <div className="container mx-auto flex flex-wrap justify-between items-center">
             <div className="flex items-center space-x-2 sm:space-x-4">
               <Link href="/client/contact" className="text-[10px] sm:text-xs flex items-center hover:underline">
@@ -200,7 +200,7 @@ export default function ClientLayout({
                       onKeyPress={handleKeyPress}
                     />
                     <Button
-                      className="bg-[#0F2557] text-white rounded-l-none rounded-r-md hover:bg-[#0F2557]/90"
+                      className="bg-myBlue text-white rounded-l-none rounded-r-md hover:bg-myBlue/90"
                       onClick={handleSearch}
                     >
                       {t.search}
@@ -214,7 +214,7 @@ export default function ClientLayout({
               <Button
                 variant="ghost"
                 size="sm"
-                className="md:hidden bg-[#0F2557]"
+                className="md:hidden bg-myBlue"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -321,7 +321,7 @@ export default function ClientLayout({
                     onKeyPress={handleKeyPress}
                   />
                   <Button
-                    className="bg-[#0F2557] text-white rounded-l-none rounded-r-md hover:bg-[#0F2557]/90 text-xs whitespace-nowrap"
+                    className="bg-myBlue text-white rounded-l-none rounded-r-md hover:bg-myBlue/90 text-xs whitespace-nowrap"
                     onClick={handleSearch}
                   >
                     {t.search}
@@ -366,7 +366,7 @@ export default function ClientLayout({
         <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 overflow-x-hidden">{children}</main>
 
         {/* Footer */}
-        <footer className="bg-[#0F2557] text-white">
+        <footer className="bg-myBlue text-white">
           <div className="container mx-auto overflow-x-hidden px-4 py-8">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 gap-y-8">
               <div>

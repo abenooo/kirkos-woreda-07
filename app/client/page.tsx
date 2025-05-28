@@ -417,7 +417,7 @@ export default function ClientHomePage() {
       </section>
 
       {/* Quick Links */}
-      <section className="bg-slate-800 text-white py-8 sm:py-12 w-full">
+      <section className="bg-myBlue text-white py-8 sm:py-12 w-full">
         <div className="w-full sm:container sm:mx-auto px-3 sm:px-4">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 sm:mb-8 text-center">Quick Links </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
