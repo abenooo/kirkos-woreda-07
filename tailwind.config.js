@@ -65,6 +65,7 @@ module.exports = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        myBlue: "#0F2557", 
       },
       borderRadius: {
         lg: "var(--radius)",
