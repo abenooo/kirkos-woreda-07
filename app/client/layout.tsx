@@ -21,6 +21,7 @@ import {
   Phone,
   Mail,
   HelpCircle,
+  LogIn,
 } from "lucide-react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -139,7 +140,7 @@ export default function ClientLayout({
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 text-[10px] sm:text-xs">
               <Link href="/dashboard/login" className="flex items-center hover:underline">
-                <HelpCircle className="h-3 w-3 mr-1" />
+                <LogIn className="h-3 w-3 mr-1" />
                 {t.help}
               </Link>
 
