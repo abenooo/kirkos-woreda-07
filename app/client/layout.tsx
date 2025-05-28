@@ -41,7 +41,7 @@ const translations = {
     amharic: "Amharic",
     oromo: "Oromo",
     search: "Search",
-    help: "Help & Support",
+    help: "Login",
     contact: "Contact Us",
     about: "About",
     news: "News & Updates",
@@ -58,7 +58,7 @@ const translations = {
     amharic: "አማርኛ",
     oromo: "ኦሮምኛ",
     search: "ፈልግ",
-    help: "እገዛ እና ድጋፍ",
+    help: "መግባት",
     contact: "አግኙን",
     about: "ስለ እኛ",
     news: "ዜና እና ዝማኔዎች",
@@ -75,7 +75,7 @@ const translations = {
     amharic: "Amaariffaa",
     oromo: "Afaan Oromoo",
     search: "Barbaadi",
-    help: "Gargaarsa fi Deeggarsa",
+    help: "seenuu",
     contact: "Nu Quunnamaa",
     about: "Waa'ee Keenya",
     news: "Oduu fi Haaromsa",
@@ -138,7 +138,7 @@ export default function ClientLayout({
               </Link>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 text-[10px] sm:text-xs">
-              <Link href="/client/help" className="flex items-center hover:underline">
+              <Link href="/dashboard/login" className="flex items-center hover:underline">
                 <HelpCircle className="h-3 w-3 mr-1" />
                 {t.help}
               </Link>
