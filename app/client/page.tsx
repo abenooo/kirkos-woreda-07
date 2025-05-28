@@ -264,15 +264,12 @@ export default function ClientHomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {serviceCategories.map((category, index) => {
-              const categoryGradient =
-                categoryGradients[category.category as keyof typeof categoryGradients] || "from-slate-500 to-slate-600"
-
               return (
                 <Link key={index} href={category.href} className="group block">
                   <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-slate-200 hover:shadow-xl hover:scale-[1.02] transition-all h-full flex flex-col">
                     <div className="flex items-start mb-2 sm:mb-3">
                       <div
-                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br ${categoryGradient} flex items-center justify-center shadow-md`}
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-myBlue flex items-center justify-center shadow-md"
                       >
                         <category.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
@@ -316,8 +313,8 @@ export default function ClientHomePage() {
                   <Card className="hover:shadow-lg transition-all duration-300 border border-slate-200 rounded-lg bg-white">
                     <CardContent className="p-3 sm:p-5">
                       <div className="flex items-start">
-                        <div className="bg-sky-100 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
-                          <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600 animate-pulse" />
+                        <div className="bg-myBlue p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                          <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-white animate-pulse" />
                         </div>
                         <div className="space-y-2">
                           <div className="h-4 bg-slate-200 rounded w-3/4 animate-pulse"></div>
@@ -331,8 +328,8 @@ export default function ClientHomePage() {
                   <Card className="hover:shadow-lg transition-all duration-300 border border-slate-200 rounded-lg bg-white">
                     <CardContent className="p-3 sm:p-5">
                       <div className="flex items-start">
-                        <div className="bg-sky-100 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
-                          <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600" />
+                        <div className="bg-myBlue p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                          <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                         <div>
                           <p className="text-slate-500">No news items available at the moment.</p>
@@ -348,8 +345,8 @@ export default function ClientHomePage() {
                     >
                       <CardContent className="p-3 sm:p-5">
                         <div className="flex items-start">
-                          <div className="bg-sky-100 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
-                            <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600" />
+                          <div className="bg-myBlue p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                            <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                           </div>
                           <div>
                             <h3 className={`font-semibold text-slate-700 text-sm sm:text-base`}>{item.title}</h3>
@@ -377,7 +374,7 @@ export default function ClientHomePage() {
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-4 sm:space-y-5">
                     <div className="flex items-start">
-                      <MapPin className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-sky-600 mt-1" />
+                      <MapPin className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-myBlue mt-1" />
                       <div>
                         <h3 className={`font-semibold text-base sm:text-lg ${headingTextClasses}`}>Location</h3>
                         <p className={`${bodyTextClasses} text-sm`}>Kirkos Sub City Wereda 07</p>
@@ -386,7 +383,7 @@ export default function ClientHomePage() {
                       </div>
                     </div>
                     <div className="flex items-start">
-                      <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-sky-600 mt-1" />
+                      <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-myBlue mt-1" />
                       <div>
                         <h3 className={`font-semibold text-base sm:text-lg ${headingTextClasses}`}>Office Hours</h3>
                         <p className={`${bodyTextClasses} text-sm`}>Monday - Friday: 8:30 AM - 5:30 PM</p>
@@ -395,7 +392,7 @@ export default function ClientHomePage() {
                       </div>
                     </div>
                     <div className="flex items-start">
-                      <Phone className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-sky-600 mt-1" />
+                      <Phone className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-myBlue mt-1" />
                       <div>
                         <h3 className={`font-semibold text-base sm:text-lg ${headingTextClasses}`}>Contact</h3>
                         <p className={`${bodyTextClasses} text-sm`}>Phone: +251 11 234 5678</p>
@@ -458,8 +455,8 @@ export default function ClientHomePage() {
                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200"
               >
                 <CardContent className="p-3 sm:p-5 flex items-center">
-                  <div className="bg-sky-100 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
-                    <ExternalLink className="h-5 w-5 sm:h-6 sm:w-6 text-sky-600" />
+                  <div className="bg-myBlue p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                    <ExternalLink className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
                   <div>
                     <h3 className={`font-semibold ${headingTextClasses} text-sm sm:text-base`}>{portal.title}</h3>
