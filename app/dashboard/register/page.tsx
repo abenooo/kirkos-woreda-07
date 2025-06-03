@@ -172,14 +172,24 @@ export default function RegisterPage() {
     setIsSubmitting(true)
 
     try {
-      console.log("Registering user with metadata:", {
-        name: values.name,
-        role: values.role,
-        department_id: Number.parseInt(values.department_id),
-        status: "active",
-      })
+      // First verify the department exists
+      const { data: department, error: deptError } = await supabase
+        .from('departments')
+        .select('id')
+        .eq('id', Number.parseInt(values.department_id))
+        .single()
 
-      // Sign up the user with proper email confirmation
+      if (deptError || !department) {
+        toast({
+          variant: "destructive",
+          title: "Invalid Department",
+          description: "The selected department does not exist.",
+        })
+        setIsSubmitting(false)
+        return
+      }
+
+      // Sign up the user with metadata matching the working example
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -189,13 +199,21 @@ export default function RegisterPage() {
             role: values.role,
             department_id: Number.parseInt(values.department_id),
             status: "active",
+            email_verified: false,
+            phone_verified: false
           },
           emailRedirectTo: `${window.location.origin}/dashboard/login`,
         },
       })
 
       if (error) {
-        console.error("Signup error:", error)
+        console.error("Signup error details:", {
+          code: error.code,
+          message: error.message,
+          status: error.status,
+          name: error.name
+        })
+        
         toast({
           variant: "destructive",
           title: "Registration Failed",
