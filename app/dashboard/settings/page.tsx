@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Bell, Globe, Lock, Moon, Save, Sun, User } from "lucide-react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,13 +19,14 @@ export default function SettingsPage() {
   const { toast } = useToast()
   const [theme, setTheme] = useState("dark")
   const [isLoading, setIsLoading] = useState(false)
+  const supabase = createClientComponentClient()
 
-  // Profile settings
+  // Profile settings with initial empty state
   const [profileSettings, setProfileSettings] = useState({
-    name: "Admin User",
-    email: "admin@example.com",
-    phone: "+251-111-234567",
-    bio: "Sub-city administrator responsible for overseeing municipal services and operations.",
+    name: "",
+    email: "",
+    phone: "",
+    bio: "",
   })
 
   // System settings
@@ -54,18 +56,78 @@ export default function SettingsPage() {
     loginAttempts: "5",
   })
 
-  // Handle profile update
-  const handleProfileUpdate = () => {
-    setIsLoading(true)
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session?.user) {
+          // Fetch profile data from profiles table
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
 
-    // Simulate API call
-    setTimeout(() => {
+          if (error) throw error
+
+          if (profile) {
+            setProfileSettings({
+              name: profile.name || "",
+              email: session.user.email || "",
+              phone: profile.phone || "",
+              bio: profile.bio || "",
+            })
+          }
+        }
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load profile data.",
+        })
+      }
+    }
+
+    fetchUserProfile()
+  }, [supabase, toast])
+
+  // Handle profile update
+  const handleProfileUpdate = async () => {
+    setIsLoading(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.user) {
+        throw new Error("No user session")
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: profileSettings.name,
+          phone: profileSettings.phone,
+          bio: profileSettings.bio,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', session.user.id)
+
+      if (error) throw error
+
       toast({
         title: "Profile updated",
         description: "Your profile information has been updated successfully.",
       })
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+      })
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   // Handle system settings update
