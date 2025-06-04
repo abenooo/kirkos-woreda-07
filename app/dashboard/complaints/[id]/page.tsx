@@ -44,7 +44,13 @@ interface Comment {
   }
 }
 
-export default function ComplaintDetailPage({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: {
+    id: string
+  }
+}
+
+export default function ComplaintDetailPage({ params }: PageProps) {
   const router = useRouter()
   const [comment, setComment] = useState("")
   const [complaint, setComplaint] = useState<Complaint | null>(null)
