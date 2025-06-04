@@ -2,51 +2,62 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import Link from "next/link"
-import { MoreHorizontal, Search } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { ArrowLeft, Calendar, Clock, MapPin, Send, User } from "lucide-react"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  DialogFooter,
-  Dialog,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogContent,
-} from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
 
-const PAGE_SIZE = 10
+interface Complaint {
+  id: string
+  name: string
+  email: string
+  phone: string
+  service: string
+  complaint_type: string
+  complaint_details: string
+  department_id: string | null
+  status: "pending" | "in_progress" | "resolved" | "rejected"
+  created_at: string
+  updated_at: string
+}
 
-export default function ComplaintsPage() {
-  const [complaints, setComplaints] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [departmentFilter, setDepartmentFilter] = useState("all")
-  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc")
-  const [page, setPage] = useState(1)
-  const [total, setTotal] = useState(0)
-  const [departments, setDepartments] = useState<any[]>([])
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false)
-  const [selectedComplaint, setSelectedComplaint] = useState<any>(null)
+interface Department {
+  id: string
+  name: string
+  description: string
+  code: string
+}
+
+interface Comment {
+  id: string
+  complaint_id: string
+  user_id: string
+  content: string
+  created_at: string
+  user: {
+    name: string
+    role: string
+  }
+}
+
+interface ComplaintDetailProps {
+  id: string
+}
+
+export default function ComplaintDetail({ id }: ComplaintDetailProps) {
+  const router = useRouter()
+  const [comment, setComment] = useState("")
+  const [complaint, setComplaint] = useState<Complaint | null>(null)
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [comments, setComments] = useState<Comment[]>([])
+  const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [userRole, setUserRole] = useState<string>("")
   const [userDepartmentId, setUserDepartmentId] = useState<string>("")
-  const [showAssignDialog, setShowAssignDialog] = useState(false)
-  const [assignDepartmentId, setAssignDepartmentId] = useState<string>("")
 
   const supabase = createClientComponentClient()
   const { toast } = useToast()
@@ -66,9 +77,42 @@ export default function ComplaintsPage() {
     getCurrentUser()
   }, [supabase])
 
-  // Fetch departments for filter dropdown
+  // Fetch complaint details
   useEffect(() => {
-    async function fetchDepartments() {
+    const fetchComplaint = async () => {
+      if (!user) return
+
+      setLoading(true)
+      try {
+        let query = supabase.from("complaints").select("*").eq("id", id)
+
+        // Apply role-based filtering
+        if (userRole !== "administrator" && userDepartmentId) {
+          query = query.eq("department_id", userDepartmentId)
+        }
+
+        const { data, error } = await query.single()
+
+        if (error) throw error
+        setComplaint(data)
+      } catch (error) {
+        console.error("Error fetching complaint:", error)
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch complaint details. Please try again.",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchComplaint()
+  }, [id, user, userRole, userDepartmentId, supabase, toast])
+
+  // Fetch departments
+  useEffect(() => {
+    const fetchDepartments = async () => {
       const { data } = await supabase.from("departments").select("*")
       if (data) {
         setDepartments(data)
@@ -77,64 +121,34 @@ export default function ComplaintsPage() {
     fetchDepartments()
   }, [supabase])
 
-  // Fetch complaints from Supabase with role-based filtering
+  // Fetch comments
   useEffect(() => {
-    async function fetchComplaints() {
-      if (!user) return
+    const fetchComments = async () => {
+      if (!complaint) return
 
-      setLoading(true)
-      try {
-        let query = supabase
-          .from("complaints")
-          .select("*", { count: "exact" })
-          .order("created_at", { ascending: sortOrder === "asc" })
+      const { data, error } = await supabase
+        .from("comments")
+        .select(`
+          *,
+          user:users(name, role)
+        `)
+        .eq("complaint_id", complaint.id)
+        .order("created_at", { ascending: true })
 
-        // Apply role-based filtering
-        if (userRole !== "administrator" && userDepartmentId) {
-          query = query.eq("department_id", userDepartmentId)
-        }
-
-        // Apply additional filters
-        if (statusFilter !== "all") query = query.eq("status", statusFilter)
-        if (departmentFilter !== "all") {
-          if (userRole === "administrator") {
-            query = query.eq("department_id", departmentFilter)
-          }
-        }
-
-        // Apply search filter
-        if (searchQuery) {
-          query = query.or(
-            `name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,complaint_details.ilike.%${searchQuery}%,service.ilike.%${searchQuery}%`,
-          )
-        }
-
-        // Apply pagination
-        query = query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
-
-        const { data, count, error } = await query
-
-        if (error) throw error
-
-        setComplaints(data || [])
-        setTotal(count || 0)
-      } catch (error) {
-        console.error("Error fetching complaints:", error)
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch complaints. Please try again.",
-        })
-      } finally {
-        setLoading(false)
+      if (error) {
+        console.error("Error fetching comments:", error)
+      } else {
+        setComments(data || [])
       }
     }
 
-    fetchComplaints()
-  }, [searchQuery, statusFilter, departmentFilter, sortOrder, page, user, userRole, userDepartmentId, supabase, toast])
+    fetchComments()
+  }, [complaint, supabase])
 
-  // Handle status change with database update
-  const handleStatusChange = async (complaintId: string, newStatus: string) => {
+  // Handle status change
+  const handleStatusChange = async (newStatus: "pending" | "in_progress" | "resolved" | "rejected") => {
+    if (!complaint) return
+
     try {
       const { error } = await supabase
         .from("complaints")
@@ -142,18 +156,11 @@ export default function ComplaintsPage() {
           status: newStatus,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", complaintId)
+        .eq("id", complaint.id)
 
       if (error) throw error
 
-      // Update local state
-      setComplaints((prev) =>
-        prev.map((complaint) =>
-          complaint.id === complaintId
-            ? { ...complaint, status: newStatus, updated_at: new Date().toISOString() }
-            : complaint,
-        ),
-      )
+      setComplaint((prev) => (prev ? { ...prev, status: newStatus, updated_at: new Date().toISOString() } : null))
 
       toast({
         title: "Status Updated",
@@ -170,429 +177,331 @@ export default function ComplaintsPage() {
   }
 
   // Handle department assignment
-  const handleAssignDepartment = async () => {
-    if (!selectedComplaint || !assignDepartmentId) return
+  const handleDepartmentChange = async (departmentId: string) => {
+    if (!complaint) return
 
     try {
       const { error } = await supabase
         .from("complaints")
         .update({
-          department_id: assignDepartmentId,
-          status: "pending", // Reset to pending when reassigned
+          department_id: departmentId,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", selectedComplaint.id)
+        .eq("id", complaint.id)
 
       if (error) throw error
 
-      // Update local state
-      setComplaints((prev) =>
-        prev.map((complaint) =>
-          complaint.id === selectedComplaint.id
-            ? {
-                ...complaint,
-                department_id: assignDepartmentId,
-                status: "pending",
-                updated_at: new Date().toISOString(),
-              }
-            : complaint,
-        ),
+      setComplaint((prev) =>
+        prev ? { ...prev, department_id: departmentId, updated_at: new Date().toISOString() } : null,
       )
 
       toast({
-        title: "Department Assigned",
-        description: `Complaint assigned to ${getDepartmentName(assignDepartmentId)}`,
+        title: "Department Updated",
+        description: "Complaint has been assigned to the selected department.",
       })
-
-      setShowAssignDialog(false)
-      setSelectedComplaint(null)
-      setAssignDepartmentId("")
     } catch (error) {
-      console.error("Error assigning department:", error)
+      console.error("Error updating department:", error)
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to assign department. Please try again.",
+        description: "Failed to update department assignment. Please try again.",
       })
     }
   }
 
-  // Get department name by ID, safely handling null/undefined input
-  const getDepartmentName = (departmentId: string | null | undefined) => {
-    // Return a default string if departmentId is null or undefined
-    if (!departmentId) {
-      return "Not assigned";
+  // Handle comment submission
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!comment.trim() || !complaint) return
+
+    try {
+      const { error } = await supabase.from("comments").insert({
+        complaint_id: complaint.id,
+        user_id: user.id,
+        content: comment,
+        created_at: new Date().toISOString(),
+      })
+
+      if (error) throw error
+
+      // Refresh comments
+      const { data } = await supabase
+        .from("comments")
+        .select(`
+          *,
+          user:users(name, role)
+        `)
+        .eq("complaint_id", complaint.id)
+        .order("created_at", { ascending: true })
+
+      setComments(data || [])
+      setComment("")
+
+      toast({
+        title: "Comment Added",
+        description: "Your comment has been added successfully.",
+      })
+    } catch (error) {
+      console.error("Error adding comment:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add comment. Please try again.",
+      })
     }
-    // Find department, safely accessing d.id
-    const dept = departments.find((d) => d.id?.toString() === departmentId.toString());
-    // Return department name if found, otherwise indicate department not found for the given ID
-    return dept ? dept.name : `Unknown Department (ID: ${departmentId})`;
+  }
+
+  // Get department name by ID
+  const getDepartmentName = (departmentId: string | null) => {
+    if (!departmentId) return "Not assigned"
+    const department = departments.find((d) => d.id === departmentId)
+    return department ? department.name : `Unknown Department (ID: ${departmentId})`
+  }
+
+  // Format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading complaint details...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!complaint) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold">Complaint not found</h2>
+          <p className="text-muted-foreground mt-2">
+            The complaint you're looking for doesn't exist or you don't have permission to view it.
+          </p>
+          <Button onClick={() => router.back()} className="mt-4">
+            Go Back
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Complaints Management</h1>
-          <p className="text-muted-foreground">
-            {userRole === "administrator"
-              ? "Manage all complaints across departments"
-              : `Manage complaints for ${getDepartmentName(userDepartmentId)}`}
-          </p>
-        </div>
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" onClick={() => router.back()}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <h1 className="text-3xl font-bold tracking-tight">Complaint Details</h1>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{userRole === "administrator" ? "All Complaints" : "Department Complaints"}</CardTitle>
-          <CardDescription>
-            {userRole === "administrator"
-              ? "Manage and respond to all citizen complaints and feedback"
-              : "Manage and respond to complaints assigned to your department"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-end">
-              <div className="grid w-full sm:max-w-sm items-center gap-1.5">
-                <Label htmlFor="search">Search</Label>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="search"
-                    type="search"
-                    placeholder="Search by name, email, or details..."
-                    className="pl-8"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setPage(1)
-                      setSearchQuery(e.target.value)
-                    }}
-                  />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-2xl">{complaint.complaint_type}</CardTitle>
+                  <CardDescription>
+                    Complaint #{complaint.id.slice(0, 8)} • Submitted {formatDate(complaint.created_at)}
+                  </CardDescription>
+                </div>
+                <Badge
+                  variant={
+                    complaint.status === "resolved"
+                      ? "default"
+                      : complaint.status === "in_progress"
+                        ? "secondary"
+                        : "outline"
+                  }
+                  className="ml-auto"
+                >
+                  {complaint.status === "in_progress"
+                    ? "In Progress"
+                    : complaint.status === "resolved"
+                      ? "Resolved"
+                      : complaint.status === "rejected"
+                        ? "Rejected"
+                        : "Pending"}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium">Description</h3>
+                  <p className="mt-2 text-muted-foreground">{complaint.complaint_details}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Submitted by: {complaint.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Date: {formatDate(complaint.created_at)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Department: {getDepartmentName(complaint.department_id)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Service: {complaint.service}</span>
+                  </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="flex gap-2">
-                <div className="grid gap-1.5">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={statusFilter}
-                    onValueChange={(v) => {
-                      setPage(1)
-                      setStatusFilter(v)
-                    }}
-                  >
-                    <SelectTrigger id="status" className="w-[180px]">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="resolved">Resolved</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                    </SelectContent>
-                  </Select>
+          {/* Comments Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Comments & Updates</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {comments.length > 0 ? (
+                <div className="space-y-4">
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="border-l-2 border-muted pl-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium">{comment.user.name}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {comment.user.role}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">{formatDate(comment.created_at)}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{comment.content}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-4">No comments yet.</p>
+              )}
+
+              <form onSubmit={handleCommentSubmit} className="space-y-3">
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Add a comment or update..."
+                  className="w-full min-h-[80px] p-3 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <Button type="submit" disabled={!comment.trim()}>
+                  <Send className="h-4 w-4 mr-2" />
+                  Add Comment
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Status Management</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Status</label>
+                <Select value={complaint.status} onValueChange={handleStatusChange}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="resolved">Resolved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Assignment</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Department</label>
+                <Select value={complaint.department_id || ""} onValueChange={handleDepartmentChange}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Email</label>
+                <p className="text-sm">{complaint.email}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                <p className="text-sm">{complaint.phone}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Timeline</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className="h-2 w-2 rounded-full bg-primary"></div>
+                    <div className="h-full w-px bg-border"></div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Complaint Submitted</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(complaint.created_at)}</p>
+                  </div>
                 </div>
 
-                {userRole === "administrator" && (
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="department">Department</Label>
-                    <Select
-                      value={departmentFilter}
-                      onValueChange={(v) => {
-                        setPage(1)
-                        setDepartmentFilter(v)
-                      }}
-                    >
-                      <SelectTrigger id="department" className="w-[180px]">
-                        <SelectValue placeholder="Filter by department" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Departments</SelectItem>
-                        {departments.map((dept) => (
-                          <SelectItem key={dept.id} value={dept.id.toString()}>
-                            {dept.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                {complaint.updated_at && complaint.updated_at !== complaint.created_at && (
+                  <div className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className="h-2 w-2 rounded-full bg-primary"></div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Last Updated</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(complaint.updated_at)}</p>
+                    </div>
                   </div>
                 )}
-
-                <div className="grid gap-1.5">
-                  <Label htmlFor="sort">Sort</Label>
-                  <Select
-                    value={sortOrder}
-                    onValueChange={(v) => {
-                      setPage(1)
-                      setSortOrder(v as "asc" | "desc")
-                    }}
-                  >
-                    <SelectTrigger id="sort" className="w-[120px]">
-                      <SelectValue placeholder="Sort" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="desc">Newest</SelectItem>
-                      <SelectItem value="asc">Oldest</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
-            </div>
-
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Complaint Type</TableHead>
-                    <TableHead>Complaint Details</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={10} className="h-24 text-center">
-                        Loading...
-                      </TableCell>
-                    </TableRow>
-                  ) : complaints.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={10} className="h-24 text-center">
-                        No complaints found.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    complaints.map((complaint) => (
-                      <TableRow key={complaint.id}>
-                        <TableCell className="font-medium">{complaint.name}</TableCell>
-                        <TableCell>{complaint.phone}</TableCell>
-                        <TableCell>{complaint.email}</TableCell>
-                        <TableCell>{complaint.service}</TableCell>
-                        <TableCell>{complaint.complaint_type}</TableCell>
-                        <TableCell>
-                          <div className="text-sm text-muted-foreground">
-                            <div>
-                              {complaint.complaint_details?.slice(0, 50)}
-                              {complaint.complaint_details?.length > 50 ? "..." : ""}
-                            </div>
-                            {complaint.complaint_details?.length > 50 && (
-                              <button
-                                className="text-primary hover:underline text-xs mt-1"
-                                onClick={() => {
-                                  setSelectedComplaint(complaint)
-                                  setShowDetailsDialog(true)
-                                }}
-                              >
-                                See more
-                              </button>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>{getDepartmentName(complaint.department_id)}</TableCell>
-                        <TableCell>
-                          <Select
-                            value={complaint.status}
-                            onValueChange={(value) => handleStatusChange(complaint.id, value)}
-                          >
-                            <SelectTrigger className="h-8 w-[130px]">
-                              <SelectValue placeholder="Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="in_progress">In Progress</SelectItem>
-                              <SelectItem value="resolved">Resolved</SelectItem>
-                              <SelectItem value="rejected">Rejected</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          {complaint.created_at ? new Date(complaint.created_at).toLocaleDateString() : ""}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>
-                                <Link href={`/dashboard/complaints/${complaint.id}`} className="w-full">
-                                  View details
-                                </Link>
-                              </DropdownMenuItem>
-                              {userRole === "administrator" && (
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedComplaint(complaint)
-                                    setAssignDepartmentId(complaint.department_id || "")
-                                    setShowAssignDialog(true)
-                                  }}
-                                >
-                                  Assign to department
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuSeparator />
-                              {userRole === "administrator" && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-destructive">Delete complaint</DropdownMenuItem>
-                                </>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-
-              {/* Details Dialog */}
-              <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Complaint Details</DialogTitle>
-                    <DialogDescription>
-                      Submitted by {selectedComplaint?.name} on{" "}
-                      {selectedComplaint?.created_at ? new Date(selectedComplaint.created_at).toLocaleDateString() : ""}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Complaint Details</h4>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                        {selectedComplaint?.complaint_details}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium mb-2">Contact Information</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Phone: {selectedComplaint?.phone}
-                          <br />
-                          Email: {selectedComplaint?.email}
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium mb-2">Service Information</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Service: {selectedComplaint?.service}
-                          <br />
-                          Type: {selectedComplaint?.complaint_type}
-                          <br />
-                          Department:{" "}
-                          {selectedComplaint?.department_id
-                            ? getDepartmentName(selectedComplaint.department_id)
-                            : "Not assigned"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    {userRole === "administrator" && (
-                      <Button
-                        onClick={() => {
-                          setShowDetailsDialog(false)
-                          setAssignDepartmentId(selectedComplaint?.department_id || "")
-                          setShowAssignDialog(true)
-                        }}
-                        className="mr-auto"
-                      >
-                        Assign to Department
-                      </Button>
-                    )}
-                    <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
-                      Close
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-
-              {/* Assign Department Dialog */}
-              <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Assign to Department</DialogTitle>
-                    <DialogDescription>
-                      Select a department to handle this complaint. The complaint will be reset to pending status.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="department-assign">Department</Label>
-                      <Select value={assignDepartmentId} onValueChange={setAssignDepartmentId}>
-                        <SelectTrigger id="department-assign">
-                          <SelectValue placeholder="Select department" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {departments.map((dept) => (
-                            <SelectItem key={dept.id} value={dept.id.toString()}>
-                              {dept.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setShowAssignDialog(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleAssignDepartment} disabled={!assignDepartmentId}>
-                      Assign Department
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <div className="flex items-center justify-end space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                Previous
-              </Button>
-              <span className="text-sm px-2">
-                Page {page} of {Math.ceil(total / PAGE_SIZE) || 1}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page * PAGE_SIZE >= total}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
-  )
-}
-
-function Label({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
-  return (
-    <label
-      htmlFor={htmlFor}
-      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-    >
-      {children}
-    </label>
   )
 }
