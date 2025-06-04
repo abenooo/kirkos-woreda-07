@@ -1,3 +1,11 @@
+# Allow all crawlers
 User-agent: *
 Allow: /
-Sitemap: https://www.kirkosw07pubservice.org/sitemap.xml
+
+# Sitemap location
+Sitemap: https://kirkoswereda07.gov.et/sitemap.xml
+
+# Disallow admin and dashboard areas
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
