@@ -31,7 +31,7 @@ import {
 const services = [
   {
     id: "1",
-    title: "ህብረተሰብ ተሳትፎና በጎ ፍቃድ  ጽ/ቤት ስራ ስለሆነ ወደዛ ይካተት", // General Woreda Office Services
+    title: "ህብረተሰብ ተሳትፎና በጎ ፍቃድ  ጽ/ቤት", // General Woreda Office Services
     description: "ቀልጣፋና ተደራሽ የሆኑ የህዝብ አገልግሎቶችን በመስጠት የዜጎችን እርካታ ማረጋገጥና የልማት ተሳትፎአቸውን ማሳደግ።",
     category: "personal",
     processingTime: "ይለያያል", // Value kept in English, label translated below
@@ -122,7 +122,7 @@ const services = [
   // Added new services (7 more to make total of 17)
   {
     id: "11",
-    title: "የደንብ መተላለፍ እና ተያያዥ ህገወጥ ተግባራትን መቆጣጠር", // Regulation violations control
+    title: "የደንብ መተላለፍ እና ተያያዥ ህገወጥ ተግባራትን መቆጣጠር ጽ/ቤት", // Regulation violations control
     description: "የመሬት ወረራ፣ ህገወጥ ግንባታ፣ ህገወጥ ንግድ፣ ቆሻሻ አወጋገድ፣ የእንስሳት ዝውውር እና ሌሎች የደንብ መተላለፍ ተግባራትን መቆጣጠር እና እርምጃ መውሰድ።",
     category: "property",
     processingTime: "208 ሰዓት",
@@ -131,7 +131,7 @@ const services = [
   },
   {
     id: "12",
-    title: "መረጃ እና ግንዛቤ መስጠት", // Information and awareness
+    title: "መረጃ እና ግንዛቤ መስጠት ጽ/ቤት", // Information and awareness
     description: "በመድረክ፣ በሚዲያና በህትመት ውጤቶች አማካኝነት የህብረተሰብ ግንዛቤ ማሳደግ እና አስፈላጊ መረጃዎችን ማሰራጨት።",
     category: "education",
     processingTime: "64-222 ሰዓት",
@@ -149,7 +149,7 @@ const services = [
   },
   {
     id: "14",
-    title: "የግንባታ እና ፍቃድ አገልግሎት", // Construction and permits
+    title: "የግንባታ እና ፍቃድ አገልግሎት ጽ/ቤት", // Construction and permits
     description: "የአዲስ ህንፃ ግንባታ፣ ማሻሻያ፣ እድሳት፣ ማፍረሻ እና ሌሎች የግንባታ ተዛማጅ ፍቃዶችን መስጠት እና መቆጣጠር።",
     category: "property",
     processingTime: "8-24 ሰዓት",
@@ -158,7 +158,7 @@ const services = [
   },
   {
     id: "15",
-    title: "የመልካም አስተዳደር አገልግሎት", // Good governance
+    title: "የመልካም አስተዳደር አገልግሎት ጽ/ቤት", // Good governance
     description: "የመልካም አስተዳደር ችግሮችን መለየት፣ መፍታት፣ ቅሬታዎችን መቀበል እና ውሳኔ መስጠት።",
     category: "personal",
     processingTime: "15-164 ሰዓት",
@@ -167,7 +167,7 @@ const services = [
   },
   {
     id: "16",
-    title: "የንግድ ምዝገባ እና ፈቃድ አገልግሎት", // Business registration and licensing
+    title: "የንግድ ምዝገባ እና ፈቃድ አገልግሎት ጽ/ቤት", // Business registration and licensing
     description: "የግለሰብና የንግድ ማህበራት ምዝገባ፣ የንግድ ስራ ፈቃድ፣ የንግድ ስም ምዝገባ እና ሌሎች ተዛማጅ አገልግሎቶችን መስጠት።",
     category: "business",
     processingTime: "1-39 ሰዓት",
@@ -176,7 +176,7 @@ const services = [
   },
   {
     id: "17",
-    title: "የህብረተሰብ ተሳትፎ እና አረንጓዴ ልማት", // Community participation and green development
+    title: "የህብረተሰብ ተሳትፎ እና አረንጓዴ ልማት ጽ/ቤት", // Community participation and green development
     description: "በህብረተሰብ ተሳትፎ የአካባቢን ሰላም መጠበቅ፣ የበጎ ፈቃድ አገልግሎቶችን ማስተባበር፣ እና ማህበራዊ ድጋፍ መስጠት።",
     category: "property",
     processingTime: "26-254 ሰዓት",
