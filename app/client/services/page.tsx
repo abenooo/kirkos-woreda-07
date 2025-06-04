@@ -185,24 +185,6 @@ const services = [
   },
 ]
 
-const categoryGradients = {
-  personal: "from-sky-500 to-sky-600",
-  business: "from-orange-500 to-orange-600",
-  property: "from-green-500 to-green-600",
-  transport: "from-violet-500 to-violet-600",
-  education: "from-pink-500 to-pink-600",
-  default: "from-slate-500 to-slate-600",
-}
-
-const activeTabColors = {
-  all: "data-[state=active]:bg-sky-600",
-  personal: "data-[state=active]:bg-sky-600",
-  business: "data-[state=active]:bg-orange-600",
-  property: "data-[state=active]:bg-green-600",
-  transport: "data-[state=active]:bg-violet-600",
-  education: "data-[state=active]:bg-pink-600",
-}
-
 export default function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("all")
@@ -309,11 +291,8 @@ export default function ServicesPage() {
                 <TabsTrigger
                   key={catKey}
                   value={catKey}
-                  className={`${
-                    activeTabColors[catKey as keyof typeof activeTabColors] || "data-[state=active]:bg-slate-600"
-                  } data-[state=active]:text-white px-3 py-1.5 text-sm`}
+                  className="data-[state=active]:bg-sky-600 data-[state=active]:text-white px-3 py-1.5 text-sm"
                 >
-                  {/* Simple capitalisation for English keys, consider translation if keys were Amharic */}
                   {catKey === "all" ? "ሁሉም" : catKey.charAt(0).toUpperCase() + catKey.slice(1)}
                 </TabsTrigger>
               ))}
@@ -330,15 +309,13 @@ export default function ServicesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredServices.map((service) => {
                   const ServiceIcon = service.icon
-                  const categoryGradient =
-                    categoryGradients[service.category as keyof typeof categoryGradients] || categoryGradients.default
 
                   return (
                     <Card
                       key={service.id}
                       className="bg-white hover:shadow-xl transition-all duration-300 border border-slate-200 overflow-hidden rounded-xl group flex flex-col"
                     >
-                      <div className={`bg-gradient-to-br ${categoryGradient} px-6 py-5 flex items-center text-white`}>
+                      <div className="bg-gradient-to-br from-sky-600 to-sky-700 px-6 py-5 flex items-center text-white">
                         <div className="bg-white/25 p-3 rounded-full mr-4 shadow-md backdrop-blur-sm">
                           <ServiceIcon className="h-6 w-6 text-white" />
                         </div>
@@ -348,7 +325,6 @@ export default function ServicesPage() {
                             variant="outline"
                             className="bg-white/20 text-white border-white/30 mt-1.5 backdrop-blur-sm text-xs px-2 py-0.5"
                           >
-                            {/* Capitalize English category name, consider translation if needed */}
                             {service.category.charAt(0).toUpperCase() + service.category.slice(1)}
                           </Badge>
                         </div>
@@ -356,7 +332,6 @@ export default function ServicesPage() {
                       <CardContent className="pt-5 pb-4 flex-grow">
                         <p className="text-slate-600 mb-4 text-sm min-h-[60px] leading-relaxed">
                           {" "}
-                          {/* Added leading-relaxed for Amharic */}
                           {service.description}
                         </p>
                         <div className="space-y-2 text-sm">
