@@ -31,7 +31,7 @@ import {
 const services = [
   {
     id: "1",
-    title: "ፑብሊክ አገልግሎቶች ጽ/ቤት", // General Woreda Office Services
+    title: "ህብረተሰብ ተሳትፎና በጎ ፍቃድ  ጽ/ቤት ስራ ስለሆነ ወደዛ ይካተት", // General Woreda Office Services
     description: "ቀልጣፋና ተደራሽ የሆኑ የህዝብ አገልግሎቶችን በመስጠት የዜጎችን እርካታ ማረጋገጥና የልማት ተሳትፎአቸውን ማሳደግ።",
     category: "personal",
     processingTime: "ይለያያል", // Value kept in English, label translated below
@@ -85,7 +85,7 @@ const services = [
   },
   {
     id: "7",
-    title: "የሰው ሃብት አስተዳደር ጽ/ቤት", // Human Resource Management
+    title: "ፐብሊክ ሰርቪስና የሰው ሀብት ልማት ጽ/ቤት", // Human Resource Management
     description: "ብቃት ያለውና በውጤታማነት የሚሰራ የመንግስት የሰው ሃይል በማፍራት ቀልጣፋ አገልግሎት እንዲሰጥ ማስቻል።",
     category: "business",
     processingTime: "ይለያያል",
@@ -140,7 +140,7 @@ const services = [
   },
   {
     id: "13",
-    title: "የወሳኝ ኩነት መረጃ እና ማስረጃ አገልግሎት", // Vital events registration
+    title: "ሲቪል ምዝገባና ነዋሪዎች አገልግሎት ጽ/ቤት", // Vital events registration
     description: "የልደት፣ የሞት፣ የጋብቻ፣ የፍቺ እና ሌሎች ወሳኝ ኩነቶችን ምዝገባ እና ማስረጃ መስጠት።",
     category: "personal",
     processingTime: "15 ደቂቃ - 1 ሰዓት",
